@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "haive-games"
+name = "haive-dataflow"
 version = "0.1.0"
 description = "haive-games for Haive framework"
 authors = ["pr1m8 <william.astley@algebraicwealth.com>"]
