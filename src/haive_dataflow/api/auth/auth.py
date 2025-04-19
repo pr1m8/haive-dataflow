@@ -1,10 +1,11 @@
 # src/haive_dataflow/api/auth.py
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from haive_dataflow.supabase.auth import get_auth_manager
+# Use absolute import path
+from haive_dataflow.supabase import get_auth_manager
 
 security = HTTPBearer(auto_error=False)
 
