@@ -15,9 +15,9 @@ from pydantic import Field
 from langchain_core.runnables import RunnableConfig
 
 from haive_core.engine.base import Engine, InvokableEngine, NonInvokableEngine, EngineType
-from haive_core.engine.aug_llm import AugLLMConfig
+from haive_core.engine.aug_llm.base import AugLLMConfig
 from haive_core.engine.retriever import RetrieverConfig, RetrieverType
-from haive_core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
+from haive_core.engine.vectorstore.vectorstore import VectorStoreConfig, VectorStoreProvider
 from haive_core.engine.embeddings import EmbeddingsEngineConfig
 from haive_core.models.embeddings.base import HuggingFaceEmbeddingConfig
 from haive_core.models.llm.base import AzureLLMConfig, OpenAILLMConfig
