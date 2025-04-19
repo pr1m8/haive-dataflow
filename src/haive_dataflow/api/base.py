@@ -1,30 +1,32 @@
+import os
+from typing import Any
+
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional, Dict, Any, Union, List
-from enum import Enum
-from dotenv import load_dotenv
-import os
+from pydantic import BaseModel, ConfigDict, Field
 
 # Load environment variables
-load_dotenv('.env')
+load_dotenv(".env")
 
 # Import necessary LLM configurations
-from haive_core.models.llm.base import (
-    LLMConfig, AzureLLMConfig, OpenAILLMConfig, 
-    AnthropicLLMConfig, GeminiLLMConfig, DeepSeekLLMConfig,
-    MistralLLMConfig
-)
-from haive_core.aug_llm.base import AugLLMConfig
-from haive_core.models.llm.provider_types import LLMProvider
-
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.messages import SystemMessage, HumanMessage
-from langchain_core.tools import BaseTool
+import traceback
 
 import uvicorn
-import traceback
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+from haive_core.engine.aug_llm.base import AugLLMConfig
+from haive_core.models.llm.base import (
+    AnthropicLLMConfig,
+    AzureLLMConfig,
+    DeepSeekLLMConfig,
+    GeminiLLMConfig,
+    MistralLLMConfig,
+    OpenAILLMConfig,
+)
+from haive_core.models.llm.provider_types import LLMProvider
 
 # Create FastAPI app with more detailed metadata
 app = FastAPI(
@@ -138,8 +140,8 @@ AI_MODELS = {
 class ToolConfig(BaseModel):
     """Configuration for a tool to be used with the LLM"""
     name: str = Field(..., description="Name of the tool", example="calculator")
-    description: Optional[str] = Field(None, description="Description of the tool's functionality")
-    result: Optional[str] = Field(None, description="Mock result for the tool (for demonstration)")
+    description: str | None = Field(None, description="Description of the tool's functionality")
+    result: str | None = Field(None, description="Mock result for the tool (for demonstration)")
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -159,38 +161,38 @@ class LLMConfigRequest(BaseModel):
         examples=list(LLMProvider)
     )
     model: str = Field(
-        default="gpt-4o", 
+        default="gpt-4o",
         description="Specific model to use from the selected provider",
         examples=[
             # Default models
-            "gpt-4o", 
-            "claude-3-opus", 
-            "gpt-35-turbo", 
+            "gpt-4o",
+            "claude-3-opus",
+            "gpt-35-turbo",
             "mistral-large-latest",
             # Dynamically add models from AI_MODELS
             *[model for models in AI_MODELS.values() for model in models]
         ]
     )
-    api_key: Optional[str] = Field(
-        default=None, 
+    api_key: str | None = Field(
+        default=None,
         description="Optional API key for the selected provider. If not provided, will use environment variables."
     )
-    temperature: Optional[float] = Field(
-        default=0.7, 
-        ge=0.0, 
-        le=1.0, 
+    temperature: float | None = Field(
+        default=0.7,
+        ge=0.0,
+        le=1.0,
         description="Controls randomness in generation. Lower values make output more focused, higher values more random."
     )
-    system_prompt: Optional[str] = Field(
-        default="You are a helpful AI assistant.", 
+    system_prompt: str | None = Field(
+        default="You are a helpful AI assistant.",
         description="Initial instruction for the LLM to set its behavior"
     )
-    extra_params: Optional[Dict[str, Any]] = Field(
-        default=None, 
+    extra_params: dict[str, Any] | None = Field(
+        default=None,
         description="Additional parameters to pass to the LLM"
     )
-    tools: Optional[List[ToolConfig]] = Field(
-        default=None, 
+    tools: list[ToolConfig] | None = Field(
+        default=None,
         description="Optional tools to be used by the LLM"
     )
 
@@ -227,36 +229,34 @@ class LLMGenerationResponse(BaseModel):
             }
         }
     )
-def get_env_api_key(provider: LLMProvider) -> Optional[str]:
-    """
-    Retrieve API key from environment variables based on provider
+def get_env_api_key(provider: LLMProvider) -> str | None:
+    """Retrieve API key from environment variables based on provider
     """
     env_key_map = {
-        LLMProvider.AZURE.value: 'AZURE_OPENAI_API_KEY',
-        LLMProvider.OPENAI.value: 'OPENAI_API_KEY',
-        LLMProvider.ANTHROPIC.value: 'ANTHROPIC_API_KEY',
-        LLMProvider.GEMINI.value: 'GOOGLE_API_KEY',
-        LLMProvider.DEEPSEEK.value: 'DEEPSEEK_API_KEY',
-        LLMProvider.MISTRALAI.value: 'MISTRAL_API_KEY',
+        LLMProvider.AZURE.value: "AZURE_OPENAI_API_KEY",
+        LLMProvider.OPENAI.value: "OPENAI_API_KEY",
+        LLMProvider.ANTHROPIC.value: "ANTHROPIC_API_KEY",
+        LLMProvider.GEMINI.value: "GOOGLE_API_KEY",
+        LLMProvider.DEEPSEEK.value: "DEEPSEEK_API_KEY",
+        LLMProvider.MISTRALAI.value: "MISTRAL_API_KEY",
     }
-    
+
     # Get the environment variable name for the provider
     env_var = env_key_map.get(provider.value)
-    
+
     # Return the API key if the environment variable exists
     return os.getenv(env_var) if env_var else None
 @app.post(
-    "/generate", 
+    "/generate",
     response_model=LLMGenerationResponse,
     summary="Generate a response using a configurable LLM",
     description="Generate a response by configuring an LLM with various parameters"
 )
 async def generate_response(
-    request: LLMConfigRequest, 
+    request: LLMConfigRequest,
     query: str = Query(..., description="The input query or message to generate a response for")
 ):
-    """
-    Generate a response using dynamically configured LLM
+    """Generate a response using dynamically configured LLM
     
     Args:
         request: LLM configuration details
@@ -265,7 +265,7 @@ async def generate_response(
     try:
         # Select the appropriate LLM configuration based on provider
         extra_params = request.extra_params or {}
-        extra_params['temperature'] = request.temperature
+        extra_params["temperature"] = request.temperature
 
         # Dynamic LLM config selection
         llm_config_map = {
@@ -289,14 +289,14 @@ async def generate_response(
         # Raise error if no API key is found
         if not api_key:
             raise HTTPException(
-                status_code=401, 
+                status_code=401,
                 detail=f"No API key found for provider {request.provider}. "
                        "Please provide an API key or set the corresponding environment variable."
             )
 
         # Create LLM configuration
         llm_config = LLMConfigClass(
-            model=request.model, 
+            model=request.model,
             api_key=api_key,
             parameters=extra_params
         )
@@ -321,8 +321,8 @@ async def generate_response(
             for tool_config in request.tools:
                 tool = Tool(
                     name=tool_config.name,
-                    description=tool_config.description or '',
-                    func=lambda x: tool_config.result or 'Tool execution not implemented'
+                    description=tool_config.description or "",
+                    func=lambda x: tool_config.result or "Tool execution not implemented"
                 )
                 tools.append(tool)
             aug_llm_config.tools = tools
@@ -337,7 +337,7 @@ async def generate_response(
 
         # Return the response content
         return LLMGenerationResponse(
-            response=response.content if hasattr(response, 'content') else str(response),
+            response=response.content if hasattr(response, "content") else str(response),
             model=request.model,
             provider=request.provider
         )
@@ -349,7 +349,7 @@ async def generate_response(
         # Log the full traceback
         print(f"Error in generate_response: {e}")
         print(traceback.format_exc())
-        
+
         # Raise an HTTP exception with more detailed error
         raise HTTPException(status_code=500, detail=str(e))
 
