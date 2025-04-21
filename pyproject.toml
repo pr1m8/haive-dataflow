@@ -13,10 +13,10 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-haive-core = {path = "../packages/haive-core", develop = true}
-haive-agents={path = "../packages/haive-agents", develop = true}
-haive-games={path="../packages/haive-tools",develop=true}
-haive-games={path="../packages/haive-games",develop=true}
+haive-core = {path = "../haive-core", develop = true}
+haive-agents={path = "../haive-agents", develop = true}
+haive-tools={path="../haive-tools",develop=true}
+haive-games={path="../haive-games",develop=true}
 pydantic = "^2.10.6"
 langchain = "^0.3.20"
 langchain-core = "^0.3.44"
@@ -25,9 +25,7 @@ psycopg = "^3.1.18"
 psycopg-pool = "^3.2.1"
 psycopg-binary = "^3.1.18"
 
-[tool.poetry.dependencies.haive-core]
-path = "../haive-core"
-develop = true
+
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
@@ -36,9 +34,6 @@ isort = "^6.0.1"
 mypy = "^1.15.0"
 starlette = "^0.46.2"
 
-[tool.poetry.group.dev.dependencies.haive-core]
-path = "../haive-core"
-develop = true
 
 [tool.poetry.scripts]
 init-db = "haive_dataflow.bin.init_db:init_database"
