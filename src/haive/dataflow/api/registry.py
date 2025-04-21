@@ -9,7 +9,7 @@ import traceback
 from datetime import datetime
 from typing import Any
 
-from haive_core.engine.agent.agent import Agent, AgentConfig
+from haive.core.engine.agent.agent import Agent, AgentConfig
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class AgentRegistryService:
 
         # Try to load persistence types
         try:
-            from haive_core.engine.agent.persistence.types import CheckpointerType
+            from haive.core.engine.agent.persistence.types import CheckpointerType
             self.default_persistence_type = CheckpointerType.postgres
         except ImportError:
             logger.warning("Could not import CheckpointerType, using default persistence type")
@@ -310,7 +310,7 @@ class AgentRegistryService:
             if not hasattr(agent_config, "persistence") or agent_config.persistence is None:
                 # Try to import the persistence module
                 try:
-                    from haive_core.engine.agent.persistence import load_checkpointer_config
+                    from haive.core.engine.agent.persistence import load_checkpointer_config
 
                     # Load the checkpointer config
                     agent_config.persistence = load_checkpointer_config(self.default_persistence_type)

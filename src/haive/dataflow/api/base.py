@@ -17,8 +17,8 @@ import uvicorn
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-from haive_core.engine.aug_llm.base import AugLLMConfig
-from haive_core.models.llm.base import (
+from haive.core.engine.aug_llm.base import AugLLMConfig
+from haive.core.models.llm.base import (
     AnthropicLLMConfig,
     AzureLLMConfig,
     DeepSeekLLMConfig,
@@ -26,7 +26,7 @@ from haive_core.models.llm.base import (
     MistralLLMConfig,
     OpenAILLMConfig,
 )
-from haive_core.models.llm.provider_types import LLMProvider
+from haive.core.models.llm.provider_types import LLMProvider
 
 # Create FastAPI app with more detailed metadata
 app = FastAPI(

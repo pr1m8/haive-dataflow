@@ -15,8 +15,8 @@ from haive.dataflow.db.supabase import get_supabase_client, table
 
 # Import LLM core models for environment variable inspection
 try:
-    from haive_core.models.llm.base import LLMConfig, SecureConfigMixin
-    from haive_core.models.llm.provider_types import LLMProvider
+    from haive.core.models.llm.base import LLMConfig, SecureConfigMixin
+    from haive.core.models.llm.provider_types import LLMProvider
     CORE_LLM_AVAILABLE = True
 except ImportError:
     CORE_LLM_AVAILABLE = False

@@ -8,10 +8,10 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from haive_core.engine.agent.persistence.memory_config import MemoryCheckpointerConfig
+from haive.core.engine.agent.persistence.memory_config import MemoryCheckpointerConfig
 
 # Import persistence components
-from haive_core.engine.agent.persistence.postgres_config import PostgresCheckpointerConfig
+from haive.core.engine.agent.persistence.postgres_config import PostgresCheckpointerConfig
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

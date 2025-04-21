@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 # Import from haive-core if available
 try:
-    from haive_core.engine.agent.persistence.manager import PersistenceManager
+    from haive.core.engine.agent.persistence.manager import PersistenceManager
     PERSISTENCE_AVAILABLE = True
 except ImportError:
     logger.warning("Haive core PersistenceManager not available. Some functionality will be limited.")
