@@ -3,8 +3,8 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.api.registry import agent_registry
-from src.api.api.router import create_agent_router
+from haive.dataflow.api.registry import agent_registry
+from haive.dataflow.api.router import create_agent_router
 from langgraph.prebuilt import T
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,7 +28,7 @@ def create_app() -> FastAPI:
     )
     
     # Discover and register all agents
-    search_paths = ["src.haive.agents", "src.haive.games"]
+    search_paths = ["haive.agents", "haive.games"]
     agent_registry.discover_agents(search_paths)
     logger.info(f"Discovered agents: {agent_registry.list_available_agents()}")
     

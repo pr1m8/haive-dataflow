@@ -12,7 +12,7 @@ class SupabaseServerConfig(BaseModel):
     """Backend-only Supabase server configuration."""
     url: str = Field(default_factory=lambda: os.getenv("SUPABASE_URL", ""))
     service_role_key: SecretStr = Field(
-        default_factory=lambda: SecretStr(os.getenv("SUPABASE_SERVICE_ROLE_KEY", ""))
+        default_factory=lambda: SecretStr(os.getenv("SUPABASE_SERVICE_KEY", ""))
     )
     jwt_secret: SecretStr = Field(default_factory=lambda: SecretStr(os.getenv("SUPABASE_JWT_SECRET", "")))
     postgres_connection: Optional[str] = Field(

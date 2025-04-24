@@ -5,7 +5,7 @@ import logging
 from fastapi import Request, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from haive.dataflow.config import SupabaseClientConfig, SupabaseServerConfig
+from haive.dataflow.config.environment import SupabaseClientConfig, SupabaseServerConfig
 
 logger = logging.getLogger(__name__)
 security = HTTPBearer(auto_error=False)

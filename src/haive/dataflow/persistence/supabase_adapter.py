@@ -18,7 +18,7 @@ class SupabasePersistence:
     def __init__(self):
         """Initialize the persistence adapter."""
         # Get configurations
-        self.postgres_config = PostgresCheckpointerConfig.from_env()
+        self.postgres_config = get_postgres_config()
         self.supabase_config = get_supabase_server_config()
         
     @asynccontextmanager

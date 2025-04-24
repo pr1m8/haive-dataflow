@@ -1,17 +1,48 @@
-from fastapi import FastAPI
-from src.api.api.connect4_api import connect4_api
-from src.api.api.tic_tac_toe_api import tictactoe_api
-# from db.api.chess_api import chess_api  # Add more as needed
+# haive_dataflow/main.py
+import os
+import logging
+import uvicorn
+from dotenv import load_dotenv
+import sys
 
-# Create the master app
-app = FastAPI(title="Agent Games API", version="1.0.0")
+# Load environment variables from .env file
+load_dotenv()
 
-# Mount individual game APIs
-app.include_router(connect4_api.app.router, prefix="/connect4", tags=["Connect4"])
-app.include_router(tictactoe_api.app.router, prefix="/tictactoe", tags=["Tic Tac Toe"])
-# app.include_router(chess_api.app.router, prefix="/chess", tags=["Chess"])  # Optional
+from rich.logging import RichHandler
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
-# Optionally add health check
-@app.get("/", tags=["Root"])
-def read_root():
-    return {"message": "Welcome to Agent Games API!"}
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)  # quiet down access logs
+logging.getLogger("uvicorn.error").setLevel(logging.DEBUG)   
+logging.basicConfig(
+    level=getattr(logging, LOG_LEVEL, logging.INFO),
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[RichHandler(rich_tracebacks=True)]
+)
+
+# Import fastapi app
+from haive.dataflow.api.app import app
+from haive.dataflow.config.settings import get_settings
+
+settings = get_settings()
+
+def main():
+    """Run the application server."""
+    log_level = "info" if not settings.api.debug else "debug"
+    
+    # Log application startup
+    logger = logging.getLogger("haive.dataflow")
+    logger.info(f"Starting Haive Dataflow API in {settings.environment} environment")
+    
+    # Completely disable auto-reloading and run with a single worker
+    uvicorn.run(
+        app,  # Use the imported app directly
+        host=os.getenv("HOST", "0.0.0.0"),
+        port=int(os.getenv("PORT", "8000")),
+        log_level=log_level,
+        reload=False,  # Completely disable reload
+        workers=1
+    )
+
+if __name__ == "__main__":
+    main()

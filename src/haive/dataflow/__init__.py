@@ -6,7 +6,7 @@ enabling discovery, registration, and management of various components like
 agents, tools, engines, and more.
 """
 
-from haive.registry.models import (
+from haive.dataflow.registry.models import (
     EntityType,
     ConfigType,
     DependencyType,
@@ -19,10 +19,10 @@ from haive.registry.models import (
     ImportLogItem
 )
 
-from haive.registry.core import registry_system
+from haive.dataflow.registry.core import registry_system
 
 # Import discovery functions
-from haive.registry.discovery import (
+from haive.dataflow.registry.discovery import (
     discover_all,
     discover_agents,
     discover_tools,
@@ -32,7 +32,7 @@ from haive.registry.discovery import (
 )
 
 # Import serialization utilities
-from haive.registry.serialization import (
+from haive.dataflow.registry.serialization import (
     serialize_object,
     deserialize_object,
     SerializationRegistry

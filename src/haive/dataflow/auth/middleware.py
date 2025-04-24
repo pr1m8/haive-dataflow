@@ -6,7 +6,7 @@ import logging
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from haive.dataflow.auth.supabase import SupabaseAuth
-from haive.dataflow.config import SupabaseServerConfig
+from haive.dataflow.config.environment import SupabaseServerConfig
 
 logger = logging.getLogger(__name__)
 security = HTTPBearer(auto_error=False)
