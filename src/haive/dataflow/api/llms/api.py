@@ -13,7 +13,7 @@ from typing import List, Dict, Any, Optional
 import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
-from src.api.api.llms.models import Provider, Model, ModelCapabilities, Pricing, SearchPricing
+from haive.api.api.llms.models import Provider, Model, ModelCapabilities, Pricing, SearchPricing
 # Load environment variables
 load_dotenv()
 
