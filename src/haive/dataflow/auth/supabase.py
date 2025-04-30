@@ -23,16 +23,33 @@ class SupabaseAuth:
             return None
             
         try:
+            # For debugging only - remove in production!
+            secret = self.config.jwt_secret.get_secret_value()
+            logger.warning(f"JWT Secret (first/last 3 chars): {secret[:3]}...{secret[-3:]}")
+            
+            # Try to parse the token header to check algorithm
+            token_parts = token.split('.')
+            if len(token_parts) >= 1:
+                import base64
+                import json
+                header_bytes = base64.urlsafe_b64decode(token_parts[0] + '=' * (4 - len(token_parts[0]) % 4))
+                header = json.loads(header_bytes)
+                logger.warning(f"Token header: {header}")
+            
             payload = jwt.decode(
                 token,
-                self.config.jwt_secret.get_secret_value(),
-                algorithms=["HS256"]
+                secret,
+                algorithms=["HS256"],
+                audience="authenticated"  # Explicitly set the expected audience
             )
             return payload
         except Exception as e:
             logger.warning(f"Token verification failed: {str(e)}")
+            # For more detailed debugging
+            import traceback
+            logger.warning(f"Traceback: {traceback.format_exc()}")
             return None
-    
+        
     def get_user_id(self, token: str) -> Optional[str]:
         """Extract user ID from token."""
         payload = self.verify_token(token)

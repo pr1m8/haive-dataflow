@@ -14,6 +14,7 @@ class SupabaseServerConfig(BaseModel):
     service_role_key: SecretStr = Field(
         default_factory=lambda: SecretStr(os.getenv("SUPABASE_SERVICE_KEY", ""))
     )
+    audience: str = "authenticated"  # Default value
     jwt_secret: SecretStr = Field(default_factory=lambda: SecretStr(os.getenv("SUPABASE_JWT_SECRET", "")))
     postgres_connection: Optional[str] = Field(
         default_factory=lambda: os.getenv("SUPABASE_POSTGRES_CONNECTION", "")
