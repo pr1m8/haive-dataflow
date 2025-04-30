@@ -9,6 +9,7 @@ from haive.dataflow.api.middleware.rate_limit import RateLimitMiddleware
 from haive.dataflow.api.routes.agent_routes import router as agent_router
 from haive.dataflow.api.routes.conversation_routes import router as conversation_router
 from haive.dataflow.config.settings import get_settings
+from haive.dataflow.api.routes.llm_routes import router as llm_router
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -42,6 +43,8 @@ def create_app() -> FastAPI:
     app.include_router(agent_router, prefix=prefix)
     app.include_router(conversation_router, prefix=prefix)
     
+    # Add the router to your FastAPI app
+    app.include_router(llm_router)
     # Health check endpoint
     @app.get(f"{prefix}/health")
     async def health_check():
@@ -51,3 +54,28 @@ def create_app() -> FastAPI:
     return app
 
 app = create_app()
+
+
+# In your main.py file
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from pydantic import ValidationError
+import logging
+
+logger = logging.getLogger(__name__)
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    # Log the full error details
+    logger.error(f"Validation error in request: {request.url}")
+    for error in exc.errors():
+        logger.error(f"Error: {error}")
+    
+    # Return a more detailed response
+    return JSONResponse(
+        status_code=422,
+        content={
+            "detail": "Validation error in request data",
+            "errors": exc.errors()
+        }
+    )

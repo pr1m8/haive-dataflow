@@ -39,7 +39,7 @@ class AgentRegistryService:
 
     def _setup_database(self):
         """Set up the database connection and schema."""
-        from src.api.api.db import DatabaseManager
+        from haive.api.api.db import DatabaseManager
         
         # Get database parameters from environment or config
         try:

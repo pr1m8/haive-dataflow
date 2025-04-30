@@ -7,7 +7,7 @@ import logging
 import uuid
 import asyncio
 # Import generic API framework
-from src.api.api.game_agent import GenericAgentAPI, AgentResponseBase
+from haive.api.api.game_agent import GenericAgentAPI, AgentResponseBase
 
 # Import Connect4 components
 from haive_games.connect4.agent import Connect4Agent
@@ -193,7 +193,7 @@ class Connect4API(GenericAgentAPI[Connect4Agent, Connect4AgentConfig]):
         async def list_games():
             """List all Connect4 games"""
             try:
-                from src.api.api.game_agent import CheckpointDB  # ensure this is imported
+                from haive.api.api.game_agent import CheckpointDB  # ensure this is imported
 
                 return await CheckpointDB.get_threads()
 

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from src.api.api.connect4_api import connect4_api
-from src.api.api.tic_tac_toe_api import tictactoe_api
+from haive.api.api.connect4_api import connect4_api
+from haive.api.api.tic_tac_toe_api import tictactoe_api
 # from db.api.chess_api import chess_api  # Add more as needed
 
 # Create the master app

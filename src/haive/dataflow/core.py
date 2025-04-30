@@ -530,7 +530,7 @@ class RegistrySystem:
                 
                 # Try to serialize the data
                 try:
-                    from src.utils.serialization import serialize_object
+                    from haive.utils.serialization import serialize_object
                 except ImportError:
                     def serialize_object(obj):
                         """Simple serialization helper."""

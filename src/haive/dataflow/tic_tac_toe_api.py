@@ -7,7 +7,7 @@ import uuid
 import asyncio
 import json
 
-from src.api.api.game_agent import GenericAgentAPI, AgentResponseBase
+from haive.api.api.game_agent import GenericAgentAPI, AgentResponseBase
 from haive_games.tic_tac_toe.agent import TicTacToeAgent
 from haive_games.tic_tac_toe.config import TicTacToeConfig
 from haive_games.tic_tac_toe.state import TicTacToeState

@@ -6,7 +6,7 @@ import uuid
 import json
 import logging
 
-from src.api.api.registry import agent_registry
+from haive.api.api.registry import agent_registry
 
 logger = logging.getLogger(__name__)
 
