@@ -16,7 +16,7 @@ from haive.core.models.llm.base import (
     AnthropicLLMConfig, GeminiLLMConfig, DeepSeekLLMConfig,
     MistralLLMConfig
 )
-from haive.core.aug_llm.base import AugLLMConfig
+from haive.core.aug_llm import AugLLMConfig
 from haive.core.models.llm.provider_types import LLMProvider
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder

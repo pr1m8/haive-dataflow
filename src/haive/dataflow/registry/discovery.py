@@ -576,7 +576,7 @@ def discover_engines(module_paths: Optional[List[str]] = None) -> List[str]:
                                 break
                     
                     # Check for specific engine attributes
-                    if hasattr(obj, "create_runnable") or hasattr(obj, "instantiate_llm"):
+                    if hasattr(obj, "create_runnable") or hasattr(obj, "instantiate"):
                         is_engine = True
                     
                     # Register if it's an engine
