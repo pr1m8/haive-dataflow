@@ -1,14 +1,43 @@
-# src/haive/dataflow/db/supabase.py
-import os
-from supabase import create_client, Client, ClientOptions
-from dotenv import load_dotenv
-from typing import Dict, Any, Optional, Union, Tuple
+"""Supabase database integration for the Haive registry system.
 
+This module provides functionality for connecting to and interacting with a
+Supabase database instance for storing registry data. It handles connection
+management, schema mapping, and query execution.
+
+The module uses environment variables for configuration:
+- SUPABASE_URL: The URL of your Supabase instance
+- SUPABASE_SERVICE_KEY: Service role API key (preferred for admin operations)
+- SUPABASE_ANON_KEY: Anonymous API key (fallback)
+
+Typical usage example:
+
+    >>> from haive.dataflow.db.supabase import get_supabase_client
+    >>>
+    >>> # Get a Supabase client
+    >>> supabase = get_supabase_client()
+    >>>
+    >>> # Query a table
+    >>> result = supabase.table('registry_items').select('*').execute()
+    >>> items = result.data
+    >>> print(f"Found {len(items)} registry items")
+"""
+
+import os
+from typing import Any, Optional, Tuple
+
+from dotenv import load_dotenv
+from supabase import Client, ClientOptions, create_client
+
+# Load environment variables from .env file if present
 load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 # Use SERVICE_KEY primarily, only fall back to ANON_KEY if necessary
-SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY") if os.getenv("SUPABASE_SERVICE_KEY") else os.getenv("SUPABASE_ANON_KEY")
+SUPABASE_KEY = (
+    os.getenv("SUPABASE_SERVICE_KEY")
+    if os.getenv("SUPABASE_SERVICE_KEY")
+    else os.getenv("SUPABASE_ANON_KEY")
+)
 
 # Map of table names to their schemas for common tables
 DEFAULT_SCHEMA_MAP = {
@@ -25,7 +54,6 @@ DEFAULT_SCHEMA_MAP = {
     "retriever_types": "models",
     "retriever_configurations": "models",
     "schemas": "models",
-    
     # Engines schema
     "engine_types": "engines",
     "engines": "engines",
@@ -36,49 +64,63 @@ DEFAULT_SCHEMA_MAP = {
     "node_middlewares": "engines",
     "engine_tools": "engines",
     "engine_schemas": "engines",
-    
     # Agents schema
     "types": "agents",
     "agents": "agents",
     "agent_engines": "agents",
     "agent_tools": "agents",
-    
     # Tools schema
     "categories": "tools",
     "tools": "tools",
     "toolkits": "tools",
     "toolkit_tools": "tools",
-    
     # Config schema
     "component_types": "config",
     "components": "config",
     "environment_variables": "config",
     "component_env_mappings": "config",
     "env_var_detection_patterns": "config",
-    
     # Registry schema (kept for backward compatibility)
     "items": "registry",
     "configurations": "registry",
     "dependencies": "registry",
     "environment_vars": "registry",
-    
     # Audit schema
     "import_logs": "audit",
     "audit_logs": "audit",
     "runtime_logs": "audit",
-    
     # Public schema (default)
     "threads": "public",
     "user_profiles": "public",
     "teams": "public",
     "team_members": "public",
     "api_keys": "public",
-    "vault_secrets": "vault"
+    "vault_secrets": "vault",
 }
 
+
 def get_supabase_client(schema: Optional[str] = None) -> Client:
-    """
-    Get a Supabase client with optional schema configuration.
+    """Get a configured Supabase client instance.
+
+    Creates and returns a Supabase client configured with the specified schema.
+    The client uses environment variables for connection parameters.
+
+    Args:
+        schema: Optional database schema to use. If not specified,
+            defaults to "public" schema.
+
+    Returns:
+        Client: A configured Supabase client instance.
+
+    Raises:
+        EnvironmentError: If required environment variables are not set.
+
+    Example:
+        >>> # Get client with default schema
+        >>> client = get_supabase_client()
+        >>>
+        >>> # Get client with specific schema
+        >>> registry_client = get_supabase_client("registry")
     """
     if not SUPABASE_URL or not SUPABASE_KEY:
         raise EnvironmentError("Supabase URL or KEY not set in environment.")
@@ -87,18 +129,33 @@ def get_supabase_client(schema: Optional[str] = None) -> Client:
         schema=schema or "public",
         headers={"X-Client-Info": "haive-framework"},
     )
-    
+
     return create_client(SUPABASE_URL, SUPABASE_KEY, options=options)
 
+
 def parse_table_reference(table_ref: str) -> Tuple[str, Optional[str]]:
-    """
-    Parse a table reference to get table name and schema.
-    
+    """Parse a table reference to extract table name and schema.
+
+    This function parses table references in various formats and extracts
+    the table name and schema. It handles:
+    - Simple table names: "items" (uses default schema mapping)
+    - Schema-qualified names: "registry.items" (explicit schema)
+
     Args:
-        table_ref: Table reference (e.g., "items", "registry.items", "models.providers")
-        
+        table_ref: Table reference string in one of the supported formats.
+            Examples: "items", "registry.items", "models.providers"
+
     Returns:
-        Tuple of (table_name, schema)
+        Tuple[str, Optional[str]]: A tuple containing (table_name, schema_name),
+            where schema_name may be None if not specified and not in DEFAULT_SCHEMA_MAP.
+
+    Example:
+        >>> parse_table_reference("items")
+        ('items', 'registry')  # Uses default schema mapping
+        >>> parse_table_reference("registry.items")
+        ('items', 'registry')  # Explicit schema
+        >>> parse_table_reference("custom_table")
+        ('custom_table', None)  # No mapping found
     """
     parts = table_ref.split(".")
     if len(parts) == 1:
@@ -113,42 +170,43 @@ def parse_table_reference(table_ref: str) -> Tuple[str, Optional[str]]:
     else:
         raise ValueError(f"Invalid table reference: {table_ref}")
 
-def table(
-    client: Client, 
-    table_ref: str, 
-    schema_override: Optional[str] = None
-) -> Any:
+
+def table(client: Client, table_ref: str, schema_override: Optional[str] = None) -> Any:
     """
     Get a table reference with appropriate schema handling.
-    
+
     Args:
         client: Supabase client
         table_ref: Table reference (can include schema)
         schema_override: Optional schema to override detected schema
-        
+
     Returns:
         Table reference for queries
     """
     # Parse the table reference
     table_name, schema = parse_table_reference(table_ref)
-    
+
     # Use override if provided
     if schema_override:
         schema = schema_override
-    
+
     # If we have a schema that's different from the client's schema,
     # create a new client with the right schema
     if schema and schema != getattr(client, "_schema", None):
         temp_client = get_supabase_client(schema)
         return temp_client.table(table_name)
-    
+
     # Otherwise use the provided client
     return client.table(table_name)
+
+
 def sanitize_sql(sql: str) -> str:
     """
     Remove trailing semicolons and whitespace for safe RPC use.
     """
     return sql.strip().rstrip(";").strip()
+
+
 def fetch_all_schemas_and_tables(client: Client) -> list[dict]:
     """
     Return all non-system tables grouped by schema using raw SQL.
@@ -167,6 +225,8 @@ def fetch_all_schemas_and_tables(client: Client) -> list[dict]:
     """
     sql = sanitize_sql(sql)
     return client.rpc("execute_sql", {"sql": sql}).execute().data
+
+
 def fetch_foreign_key_relations(client: Client) -> list[dict]:
     """
     Return foreign key relationships between tables using raw SQL.
@@ -192,6 +252,8 @@ def fetch_foreign_key_relations(client: Client) -> list[dict]:
     """
     sql = sanitize_sql(sql)
     return client.rpc("execute_sql", {"sql": sql}).execute().data
+
+
 def fetch_table_columns(client: Client) -> list[dict]:
     """
     Get all columns, types, and constraints from information_schema.columns.
