@@ -1,10 +1,7 @@
 #!/usr/bin/env python
-"""
-Simple WebSocket server for streaming chess game state.
-"""
+"""Simple WebSocket server for streaming chess game state."""
 
 import logging
-from typing import Dict, Set
 
 import chess
 import uvicorn
@@ -31,8 +28,8 @@ app.add_middleware(
 )
 
 # Active connections and games
-active_connections: Set[WebSocket] = set()
-active_games: Dict[str, Dict] = {}
+active_connections: set[WebSocket] = set()
+active_games: dict[str, dict] = {}
 
 # HTML CLIENT
 html = """

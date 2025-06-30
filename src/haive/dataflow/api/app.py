@@ -30,9 +30,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from haive.dataflow.api.middleware.logging import RequestLoggingMiddleware
 from haive.dataflow.api.middleware.rate_limit import RateLimitMiddleware
+from haive.dataflow.api.routes.agent_discovery_routes import (
+    router as agent_discovery_router,
+)
 from haive.dataflow.api.routes.agent_routes import router as agent_router
 from haive.dataflow.api.routes.conversation_routes import router as conversation_router
 from haive.dataflow.api.routes.llm_routes import router as llm_router
+from haive.dataflow.api.routes.tools_routes import router as tools_router
 from haive.dataflow.auth.middleware import SupabaseAuthMiddleware
 from haive.dataflow.config.settings import get_settings
 
@@ -86,10 +90,10 @@ def create_app() -> FastAPI:
     # Include routers with prefix
     prefix = settings.api.prefix
     app.include_router(agent_router, prefix=prefix)
+    app.include_router(agent_discovery_router, prefix=prefix)
     app.include_router(conversation_router, prefix=prefix)
-
-    # Add the router to your FastAPI app
-    app.include_router(llm_router)
+    app.include_router(llm_router, prefix=prefix)
+    app.include_router(tools_router, prefix=prefix)
 
     # Health check endpoint
     @app.get(f"{prefix}/health")
@@ -158,7 +162,6 @@ import logging
 # In your main.py file
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
 

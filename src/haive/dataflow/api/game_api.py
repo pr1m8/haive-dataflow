@@ -1,5 +1,4 @@
-"""
-Generic game API with WebSocket support and Supabase integration.
+"""Generic game API with WebSocket support and Supabase integration.
 
 This module provides a FastAPI implementation for any agent-based game
 in the Haive framework, with support for:
@@ -21,7 +20,7 @@ import os
 import sys
 import uuid
 from datetime import datetime
-from typing import Any, Dict, Optional, Type
+from typing import Any, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -46,10 +45,10 @@ logger = logging.getLogger("game-api")
 class GameRequest(BaseModel):
     """Base request model for creating a new game."""
 
-    thread_id: Optional[str] = None
+    thread_id: str | None = None
     persistence_type: str = "supabase"  # "postgres", "supabase", "memory"
-    config_overrides: Optional[Dict[str, Any]] = None
-    user_id: Optional[str] = None  # For Supabase RLS
+    config_overrides: dict[str, Any] | None = None
+    user_id: str | None = None  # For Supabase RLS
 
 
 class GameResponseBase(BaseModel):
@@ -57,12 +56,11 @@ class GameResponseBase(BaseModel):
 
     thread_id: str
     timestamp: datetime = Field(default_factory=datetime.now)
-    state: Dict[str, Any]
+    state: dict[str, Any]
 
 
 class GameAPI:
-    """
-    Generic API for agent-based games with WebSocket support.
+    """Generic API for agent-based games with WebSocket support.
 
     This class provides a complete API implementation for any game
     that follows the Haive agent pattern, with both REST endpoints
@@ -78,15 +76,14 @@ class GameAPI:
     def __init__(
         self,
         app_name: str,
-        agent_class: Type[Agent],
-        state_schema: Type[StateSchema],
-        response_model: Optional[Type[BaseModel]] = None,
-        request_model: Optional[Type[BaseModel]] = None,
+        agent_class: type[Agent],
+        state_schema: type[StateSchema],
+        response_model: type[BaseModel] | None = None,
+        request_model: type[BaseModel] | None = None,
         route_prefix: str = "/api/games",
         ws_route_prefix: str = "/ws/games",
     ):
-        """
-        Initialize the game API.
+        """Initialize the game API.
 
         Args:
             app_name: The name of the game/application
@@ -192,14 +189,14 @@ class GameAPI:
             except Exception as e:
                 logger.error(f"Error creating game: {e}", exc_info=True)
                 raise HTTPException(
-                    status_code=500, detail=f"Error creating game: {str(e)}"
+                    status_code=500, detail=f"Error creating game: {e!s}"
                 )
 
         @app.post(
             f"{self.route_prefix}/{{thread_id}}/move",
             response_model=self.response_model,
         )
-        async def make_move(thread_id: str, move_data: Dict[str, Any]):
+        async def make_move(thread_id: str, move_data: dict[str, Any]):
             """Make a move in a game"""
             try:
                 # Get agent
@@ -220,9 +217,7 @@ class GameAPI:
 
             except Exception as e:
                 logger.error(f"Error making move: {e}", exc_info=True)
-                raise HTTPException(
-                    status_code=500, detail=f"Error making move: {str(e)}"
-                )
+                raise HTTPException(status_code=500, detail=f"Error making move: {e!s}")
 
         @app.get(
             f"{self.route_prefix}/{{thread_id}}/ai-move",
@@ -247,7 +242,7 @@ class GameAPI:
             except Exception as e:
                 logger.error(f"Error making AI move: {e}", exc_info=True)
                 raise HTTPException(
-                    status_code=500, detail=f"Error making AI move: {str(e)}"
+                    status_code=500, detail=f"Error making AI move: {e!s}"
                 )
 
         @app.get(
@@ -272,11 +267,11 @@ class GameAPI:
             except Exception as e:
                 logger.error(f"Error getting game state: {e}", exc_info=True)
                 raise HTTPException(
-                    status_code=500, detail=f"Error getting game: {str(e)}"
+                    status_code=500, detail=f"Error getting game: {e!s}"
                 )
 
         @app.post(f"{self.route_prefix}/{{thread_id}}/register-user")
-        async def register_user(thread_id: str, user_data: Dict[str, Any]):
+        async def register_user(thread_id: str, user_data: dict[str, Any]):
             """Register user ID for Supabase RLS"""
             try:
                 user_id = user_data.get("user_id")
@@ -301,11 +296,10 @@ class GameAPI:
                         persistence_config.register_thread(thread_id)
 
                         return {"status": "success", "message": "User registered"}
-                    else:
-                        return {
-                            "status": "warning",
-                            "message": "Agent is not using Supabase persistence",
-                        }
+                    return {
+                        "status": "warning",
+                        "message": "Agent is not using Supabase persistence",
+                    }
 
                 return {
                     "status": "error",
@@ -315,7 +309,7 @@ class GameAPI:
             except Exception as e:
                 logger.error(f"Error registering user: {e}", exc_info=True)
                 raise HTTPException(
-                    status_code=500, detail=f"Error registering user: {str(e)}"
+                    status_code=500, detail=f"Error registering user: {e!s}"
                 )
 
     def run(self, host: str = "0.0.0.0", port: int = 8000):
@@ -334,8 +328,7 @@ class GameAPI:
 
 
 class GameAPIFactory:
-    """
-    Factory for creating game-specific APIs.
+    """Factory for creating game-specific APIs.
 
     This class creates specialized API instances for different game types,
     with appropriate state schemas and agent classes for each game.
@@ -353,15 +346,14 @@ class GameAPIFactory:
     @staticmethod
     def create_api(
         app_name: str,
-        agent_class: Type[Agent],
-        state_schema: Type[StateSchema],
-        response_model: Optional[Type[BaseModel]] = None,
-        request_model: Optional[Type[BaseModel]] = None,
+        agent_class: type[Agent],
+        state_schema: type[StateSchema],
+        response_model: type[BaseModel] | None = None,
+        request_model: type[BaseModel] | None = None,
         route_prefix: str = "/api/games",
         ws_route_prefix: str = "/ws/games",
     ) -> GameAPI:
-        """
-        Create a game API for any agent and state schema.
+        """Create a game API for any agent and state schema.
 
         Args:
             app_name: The name of the game/application
@@ -387,8 +379,7 @@ class GameAPIFactory:
 
     @staticmethod
     def create_chess_api() -> GameAPI:
-        """
-        Create a chess-specific API.
+        """Create a chess-specific API.
 
         Returns:
             A configured GameAPI instance for chess
@@ -411,7 +402,7 @@ class GameAPIFactory:
             "ChessResponse",
             thread_id=(str, ...),
             timestamp=(datetime, Field(default_factory=datetime.now)),
-            state=(Dict[str, Any], ...),
+            state=(dict[str, Any], ...),
             board_fen=(str, None),
             current_player=(str, None),
             game_status=(str, None),
@@ -430,8 +421,7 @@ class GameAPIFactory:
 
     @staticmethod
     def create_connect4_api() -> GameAPI:
-        """
-        Create a Connect4-specific API.
+        """Create a Connect4-specific API.
 
         Returns:
             A configured GameAPI instance for Connect4
@@ -449,8 +439,7 @@ class GameAPIFactory:
 
     @staticmethod
     def create_tic_tac_toe_api() -> GameAPI:
-        """
-        Create a Tic Tac Toe-specific API.
+        """Create a Tic Tac Toe-specific API.
 
         Returns:
             A configured GameAPI instance for Tic Tac Toe

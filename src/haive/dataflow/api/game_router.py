@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Game API router for Haive games.
+"""Game API router for Haive games.
 
 This module discovers and loads game agents from haive-games package,
 creating routes for each available game. It provides WebSocket endpoints
@@ -14,7 +13,7 @@ import logging
 import os
 import pkgutil
 import sys
-from typing import Any, Dict, Set
+from typing import Any
 
 from fastapi import APIRouter, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,8 +37,8 @@ logging.basicConfig(
 logger = logging.getLogger("game-router")
 
 # Active connections and games
-active_connections: Dict[str, Set[WebSocket]] = {}  # game_type -> {websockets}
-active_games: Dict[str, Dict[str, Any]] = {}  # game_id -> game_state
+active_connections: dict[str, set[WebSocket]] = {}  # game_type -> {websockets}
+active_games: dict[str, dict[str, Any]] = {}  # game_id -> game_state
 
 # Game agent registry
 game_agents = {}
@@ -68,6 +67,12 @@ def discover_game_agents():
                 break
             except ImportError as e:
                 logger.warning(f"Failed to import {import_path}: {e}")
+            except SyntaxError as e:
+                logger.error(f"Syntax error in {import_path}: {e}")
+                continue
+            except Exception as e:
+                logger.error(f"Unexpected error importing {import_path}: {e}")
+                continue
 
         if not base_module:
             # Try direct file path approach
@@ -78,12 +83,18 @@ def discover_game_agents():
                 if games_dir not in sys.path:
                     sys.path.insert(0, games_dir)
 
-                # Try with direct path
-                base_module = importlib.import_module("base")
-                games_pkg = (
-                    ""  # Empty prefix since we're already in the games directory
-                )
-                logger.info("Successfully imported using direct path")
+                try:
+                    # Try with direct path
+                    base_module = importlib.import_module("base")
+                    games_pkg = (
+                        ""  # Empty prefix since we're already in the games directory
+                    )
+                    logger.info("Successfully imported using direct path")
+                except Exception as e:
+                    logger.error(f"Failed to import using direct path: {e}")
+                    raise ImportError(
+                        f"Could not import haive-games even with direct path: {e}"
+                    )
             else:
                 raise ImportError(
                     f"Could not find haive-games path: {haive_games_path}"
@@ -240,8 +251,14 @@ def create_game_router(game_type):
     @router.websocket(f"/ws/{game_type}/{{game_id}}")
     async def game_websocket(websocket: WebSocket, game_id: str):
         """WebSocket endpoint for game state streaming."""
-        await websocket.accept()
-        logger.info(f"WebSocket connection accepted for {game_type} game: {game_id}")
+        try:
+            await websocket.accept()
+            logger.info(
+                f"WebSocket connection accepted for {game_type} game: {game_id}"
+            )
+        except Exception as e:
+            logger.error(f"Failed to accept WebSocket connection: {e}")
+            return
 
         # Register connection
         if game_type not in active_connections:
@@ -250,102 +267,155 @@ def create_game_router(game_type):
 
         try:
             # Get or create game instance
-            game = create_game_instance(game_type, game_id)
-            agent = game["agent"]
+            try:
+                game = create_game_instance(game_type, game_id)
+                agent = game["agent"]
+            except Exception as e:
+                logger.error(f"Failed to create game instance: {e}")
+                await websocket.send_json(
+                    {"type": "error", "message": f"Failed to create game: {e}"}
+                )
+                return
 
             # Send initial state
-            initial_state = {}
-            state = agent.run(initial_state, thread_id=game_id)
+            try:
+                initial_state = {}
+                state = agent.run(initial_state, thread_id=game_id)
 
-            await websocket.send_json(
-                {
-                    "type": "state_update",
-                    "game_type": game_type,
-                    "game_id": game_id,
-                    "state": state,
-                }
-            )
+                await websocket.send_json(
+                    {
+                        "type": "state_update",
+                        "game_type": game_type,
+                        "game_id": game_id,
+                        "state": state,
+                    }
+                )
+            except Exception as e:
+                logger.error(f"Failed to get initial state: {e}")
+                await websocket.send_json(
+                    {"type": "error", "message": f"Failed to get initial state: {e}"}
+                )
 
             # Main WebSocket loop
             while True:
-                # Receive message
-                data = await websocket.receive_json()
-                message_type = data.get("type", "")
-                logger.info(
-                    f"Received message for {game_type}:{game_id}: {message_type}"
-                )
-
-                # Handle message
-                if message_type == "get_state":
-                    # Get current state
-                    state = agent.run({}, thread_id=game_id)
-                    await websocket.send_json(
-                        {
-                            "type": "state_update",
-                            "game_type": game_type,
-                            "game_id": game_id,
-                            "state": state,
-                        }
+                try:
+                    # Receive message
+                    data = await websocket.receive_json()
+                    message_type = data.get("type", "")
+                    logger.info(
+                        f"Received message for {game_type}:{game_id}: {message_type}"
                     )
 
-                elif message_type == "make_move":
-                    # Make a move
-                    move_data = data.get("move", {})
-                    input_data = {"move": move_data}
+                    # Handle message
+                    if message_type == "get_state":
+                        # Get current state
+                        try:
+                            state = agent.run({}, thread_id=game_id)
+                            await websocket.send_json(
+                                {
+                                    "type": "state_update",
+                                    "game_type": game_type,
+                                    "game_id": game_id,
+                                    "state": state,
+                                }
+                            )
+                        except Exception as e:
+                            logger.error(f"Error getting state: {e}")
+                            await websocket.send_json(
+                                {
+                                    "type": "error",
+                                    "message": f"Failed to get state: {e}",
+                                }
+                            )
 
-                    state = agent.run(input_data, thread_id=game_id)
-                    await websocket.send_json(
-                        {
-                            "type": "state_update",
-                            "game_type": game_type,
-                            "game_id": game_id,
-                            "state": state,
-                            "last_action": "player_move",
-                        }
-                    )
+                    elif message_type == "make_move":
+                        # Make a move
+                        try:
+                            move_data = data.get("move", {})
+                            input_data = {"move": move_data}
 
-                elif message_type == "ai_move":
-                    # Request AI move
-                    state = agent.run({}, thread_id=game_id)
-                    await websocket.send_json(
-                        {
-                            "type": "state_update",
-                            "game_type": game_type,
-                            "game_id": game_id,
-                            "state": state,
-                            "last_action": "ai_move",
-                        }
-                    )
+                            state = agent.run(input_data, thread_id=game_id)
+                            await websocket.send_json(
+                                {
+                                    "type": "state_update",
+                                    "game_type": game_type,
+                                    "game_id": game_id,
+                                    "state": state,
+                                    "last_action": "player_move",
+                                }
+                            )
+                        except Exception as e:
+                            logger.error(f"Error making move: {e}")
+                            await websocket.send_json(
+                                {
+                                    "type": "error",
+                                    "message": f"Failed to make move: {e}",
+                                }
+                            )
 
-                else:
-                    # Unknown message type
-                    await websocket.send_json(
-                        {
-                            "type": "error",
-                            "message": f"Unknown message type: {message_type}",
-                        }
-                    )
+                    elif message_type == "ai_move":
+                        # Request AI move
+                        try:
+                            state = agent.run({}, thread_id=game_id)
+                            await websocket.send_json(
+                                {
+                                    "type": "state_update",
+                                    "game_type": game_type,
+                                    "game_id": game_id,
+                                    "state": state,
+                                    "last_action": "ai_move",
+                                }
+                            )
+                        except Exception as e:
+                            logger.error(f"Error making AI move: {e}")
+                            await websocket.send_json(
+                                {
+                                    "type": "error",
+                                    "message": f"Failed to make AI move: {e}",
+                                }
+                            )
+
+                    else:
+                        # Unknown message type
+                        await websocket.send_json(
+                            {
+                                "type": "error",
+                                "message": f"Unknown message type: {message_type}",
+                            }
+                        )
+                except Exception as e:
+                    logger.error(f"Error processing WebSocket message: {e}")
+                    try:
+                        await websocket.send_json(
+                            {
+                                "type": "error",
+                                "message": f"Error processing message: {e}",
+                            }
+                        )
+                    except:
+                        # Connection might be closed
+                        break
 
         except WebSocketDisconnect:
             # Handle disconnection
             logger.info(f"WebSocket disconnected for {game_type} game: {game_id}")
-            if game_type in active_connections:
-                active_connections[game_type].discard(websocket)
-
         except Exception as e:
             # Handle other errors
             logger.error(
                 f"WebSocket error for {game_type}:{game_id}: {e}", exc_info=True
             )
-            if game_type in active_connections:
-                active_connections[game_type].discard(websocket)
-
             try:
                 await websocket.send_json(
-                    {"type": "error", "message": f"Server error: {str(e)}"}
+                    {"type": "error", "message": f"Server error: {e!s}"}
                 )
             except:
+                # Connection might be closed, ignore send error
                 pass
+        finally:
+            # Always clean up connection
+            if game_type in active_connections:
+                active_connections[game_type].discard(websocket)
+            logger.info(f"Cleaned up WebSocket connection for {game_type}:{game_id}")
 
     # Register REST endpoint to create a new game
     @router.post(f"/{game_type}/games", tags=[f"{game_type}"])
@@ -633,8 +703,8 @@ def get_router():
     # Discover game agents
     discover_game_agents()
 
-    # Create main router
-    router = APIRouter(prefix="/games", tags=["Games"])
+    # Create main router (no prefix since it's added in app.py)
+    router = APIRouter(tags=["Games"])
 
     # Add index route
     @router.get("/", response_class=HTMLResponse)

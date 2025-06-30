@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Chess API demonstration script.
+"""Chess API demonstration script.
 
 This script launches a standalone API server for the chess game
 with WebSocket support and Supabase integration.

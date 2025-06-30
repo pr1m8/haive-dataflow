@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Simple standalone script to run the Haive Game API.
+"""Simple standalone script to run the Haive Game API.
 
 This script runs the game router directly without depending on other Haive modules.
 It's designed for testing the game router functionality in isolation.

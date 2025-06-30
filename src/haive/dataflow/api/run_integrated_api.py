@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Run the integrated Haive API with game support.
+"""Run the integrated Haive API with game support.
 
 This script runs the main Haive API with the integrated game routes.
 It sets up proper import paths and runs the app with uvicorn.

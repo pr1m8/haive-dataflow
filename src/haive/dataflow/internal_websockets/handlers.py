@@ -1,10 +1,9 @@
 # haive_dataflow/api/websockets/handlers.py
-import asyncio
 import json
 import logging
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
@@ -190,11 +189,10 @@ async def stream_agent_response(websocket: WebSocket, thread_id: str):
         connection_manager.disconnect(thread_id, connection_id)
 
 
-def format_chunk_for_client(chunk: Any) -> Dict[str, Any]:
+def format_chunk_for_client(chunk: Any) -> dict[str, Any]:
     """Format a streaming chunk for client consumption."""
     if isinstance(chunk, dict):
         # For structured data
         return {"type": "chunk", "data": chunk}
-    else:
-        # For text chunks
-        return {"type": "chunk", "data": {"text": str(chunk)}}
+    # For text chunks
+    return {"type": "chunk", "data": {"text": str(chunk)}}

@@ -7,9 +7,7 @@ upgrades as needed.
 
 import logging
 import os
-import time
 from pathlib import Path
-from typing import Optional, List, Dict, Any, Tuple
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -24,6 +22,7 @@ os.makedirs(SCHEMA_DIR, exist_ok=True)
 # Try to import Supabase client
 try:
     from haive.dataflow.db.supabase import get_supabase_client
+
     SUPABASE_AVAILABLE = True
 except ImportError:
     SUPABASE_AVAILABLE = False
@@ -31,9 +30,8 @@ except ImportError:
 
 
 def create_schema_sql() -> str:
-    """
-    Generate the SQL schema definition for the registry system.
-    
+    """Generate the SQL schema definition for the registry system.
+
     Returns:
         SQL schema definition as a string
     """
@@ -201,39 +199,38 @@ CREATE INDEX IF NOT EXISTS idx_env_vars_registry_id ON registry.environment_vars
 CREATE INDEX IF NOT EXISTS idx_embedding_models_provider ON components.embedding_models(provider);
 CREATE INDEX IF NOT EXISTS idx_llm_models_provider ON components.llm_models(provider);
 """
-    
+
     # Write the schema to a file for reference
-    with open(SCHEMA_SQL_PATH, 'w') as f:
+    with open(SCHEMA_SQL_PATH, "w") as f:
         f.write(schema_sql)
-    
+
     return schema_sql
 
 
-def execute_schema_sql(client=None, schema_sql: Optional[str] = None) -> bool:
-    """
-    Execute the schema SQL to set up the database.
-    
+def execute_schema_sql(client=None, schema_sql: str | None = None) -> bool:
+    """Execute the schema SQL to set up the database.
+
     Args:
         client: Optional Supabase client
         schema_sql: Optional schema SQL to execute
-        
+
     Returns:
         True if successful, False otherwise
     """
     if not SUPABASE_AVAILABLE and client is None:
         logger.error("Supabase client not available and no client provided.")
         return False
-    
+
     try:
         # Get or use provided client
         supabase = client or get_supabase_client()
-        
+
         # Get schema SQL
         sql = schema_sql or create_schema_sql()
-        
+
         # Split into individual statements
-        statements = sql.split(';')
-        
+        statements = sql.split(";")
+
         # Execute each statement
         for stmt in statements:
             if stmt.strip():
@@ -242,19 +239,18 @@ def execute_schema_sql(client=None, schema_sql: Optional[str] = None) -> bool:
                     # This requires a corresponding PostgreSQL function to be set up
                     # that can execute arbitrary SQL
                     result = supabase.rpc(
-                        'execute_sql', 
-                        {'sql_statement': stmt}
+                        "execute_sql", {"sql_statement": stmt}
                     ).execute()
-                    
+
                     # Check for errors
-                    if hasattr(result, 'error') and result.error:
+                    if hasattr(result, "error") and result.error:
                         logger.error(f"Error executing SQL: {result.error}")
                         return False
                 except Exception as e:
                     logger.error(f"Error executing SQL statement: {e}")
                     logger.debug(f"Statement: {stmt}")
                     return False
-        
+
         logger.info("Schema created successfully")
         return True
     except Exception as e:
@@ -263,33 +259,34 @@ def execute_schema_sql(client=None, schema_sql: Optional[str] = None) -> bool:
 
 
 def check_schema_exists(client=None) -> bool:
-    """
-    Check if the registry schema exists.
-    
+    """Check if the registry schema exists.
+
     Args:
         client: Optional Supabase client
-        
+
     Returns:
         True if the schema exists, False otherwise
     """
     if not SUPABASE_AVAILABLE and client is None:
         logger.error("Supabase client not available and no client provided.")
         return False
-    
+
     try:
         # Get or use provided client
         supabase = client or get_supabase_client()
-        
+
         # Check if the registry schema exists by querying the information_schema
         result = supabase.rpc(
-            'execute_sql',
-            {'sql_statement': "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'registry'"}
+            "execute_sql",
+            {
+                "sql_statement": "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'registry'"
+            },
         ).execute()
-        
+
         # Check if we got any results
-        if hasattr(result, 'data') and result.data and len(result.data) > 0:
+        if hasattr(result, "data") and result.data and len(result.data) > 0:
             return True
-        
+
         return False
     except Exception as e:
         logger.error(f"Error checking if schema exists: {e}")
@@ -297,35 +294,36 @@ def check_schema_exists(client=None) -> bool:
 
 
 def check_table_exists(table_name: str, schema: str = "registry", client=None) -> bool:
-    """
-    Check if a specific table exists.
-    
+    """Check if a specific table exists.
+
     Args:
         table_name: Name of the table to check
         schema: Schema name
         client: Optional Supabase client
-        
+
     Returns:
         True if the table exists, False otherwise
     """
     if not SUPABASE_AVAILABLE and client is None:
         logger.error("Supabase client not available and no client provided.")
         return False
-    
+
     try:
         # Get or use provided client
         supabase = client or get_supabase_client()
-        
+
         # Check if the table exists by querying the information_schema
         result = supabase.rpc(
-            'execute_sql',
-            {'sql_statement': f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{schema}' AND table_name = '{table_name}'"}
+            "execute_sql",
+            {
+                "sql_statement": f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{schema}' AND table_name = '{table_name}'"
+            },
         ).execute()
-        
+
         # Check if we got any results
-        if hasattr(result, 'data') and result.data and len(result.data) > 0:
+        if hasattr(result, "data") and result.data and len(result.data) > 0:
             return True
-        
+
         return False
     except Exception as e:
         logger.error(f"Error checking if table {schema}.{table_name} exists: {e}")
@@ -333,48 +331,60 @@ def check_table_exists(table_name: str, schema: str = "registry", client=None) -
 
 
 def setup_schema(client=None) -> bool:
-    """
-    Set up the database schema for the registry system.
-    
+    """Set up the database schema for the registry system.
+
     Args:
         client: Optional Supabase client
-        
+
     Returns:
         True if successful, False otherwise
     """
     if not SUPABASE_AVAILABLE and client is None:
         logger.error("Supabase client not available and no client provided.")
         return False
-    
+
     try:
         # Get or use provided client
         supabase = client or get_supabase_client()
-        
+
         # Check if schema already exists
         if check_schema_exists(supabase):
             logger.info("Registry schema already exists")
-            
+
             # Check if all required tables exist
             required_tables = {
-                "registry": ["items", "configurations", "graphs", "dependencies", "environment_vars", "import_logs"],
-                "components": ["embedding_models", "llm_models", "engine_templates", "state_templates", "tools", "toolkits"]
+                "registry": [
+                    "items",
+                    "configurations",
+                    "graphs",
+                    "dependencies",
+                    "environment_vars",
+                    "import_logs",
+                ],
+                "components": [
+                    "embedding_models",
+                    "llm_models",
+                    "engine_templates",
+                    "state_templates",
+                    "tools",
+                    "toolkits",
+                ],
             }
-            
+
             all_tables_exist = True
             for schema, tables in required_tables.items():
                 for table in tables:
                     if not check_table_exists(table, schema, supabase):
                         logger.warning(f"Table {schema}.{table} does not exist")
                         all_tables_exist = False
-            
+
             if all_tables_exist:
                 logger.info("All required tables exist")
                 return True
-            else:
-                logger.info("Some tables are missing, creating schema")
+            logger.info("Some tables are missing, creating schema")
         else:
             logger.info("Registry schema does not exist, creating it")
-        
+
         # Create the schema
         return execute_schema_sql(supabase)
     except Exception as e:
@@ -383,24 +393,23 @@ def setup_schema(client=None) -> bool:
 
 
 def setup_execute_sql_function(client=None) -> bool:
-    """
-    Set up the execute_sql function in the database.
+    """Set up the execute_sql function in the database.
     This function is needed to execute arbitrary SQL statements.
-    
+
     Args:
         client: Optional Supabase client
-        
+
     Returns:
         True if successful, False otherwise
     """
     if not SUPABASE_AVAILABLE and client is None:
         logger.error("Supabase client not available and no client provided.")
         return False
-    
+
     try:
         # Get or use provided client
         supabase = client or get_supabase_client()
-        
+
         # SQL to create the execute_sql function
         sql = """
         CREATE OR REPLACE FUNCTION execute_sql(sql_statement TEXT)
@@ -427,37 +436,44 @@ def setup_execute_sql_function(client=None) -> bool:
         -- Grant execute permission to authenticated users
         GRANT EXECUTE ON FUNCTION execute_sql TO authenticated;
         """
-        
+
         # Execute the SQL
         try:
             # First check if the function already exists
             check_result = supabase.rpc(
-                'execute_sql',
-                {'sql_statement': "SELECT 1 FROM pg_proc WHERE proname = 'execute_sql'"}
+                "execute_sql",
+                {
+                    "sql_statement": "SELECT 1 FROM pg_proc WHERE proname = 'execute_sql'"
+                },
             ).execute()
-            
-            if hasattr(check_result, 'data') and check_result.data and len(check_result.data) > 0:
+
+            if (
+                hasattr(check_result, "data")
+                and check_result.data
+                and len(check_result.data) > 0
+            ):
                 logger.info("execute_sql function already exists")
                 return True
-            
+
             # If not, create it
-            result = supabase.rpc(
-                'execute_sql',
-                {'sql_statement': sql}
-            ).execute()
-            
-            if hasattr(result, 'error') and result.error:
+            result = supabase.rpc("execute_sql", {"sql_statement": sql}).execute()
+
+            if hasattr(result, "error") and result.error:
                 # If we got an error that the function doesn't exist, we need to create it
                 # using a different approach - this would require direct PostgreSQL access
                 logger.error(f"Error creating execute_sql function: {result.error}")
-                logger.warning("Unable to create execute_sql function. This may require direct database access.")
+                logger.warning(
+                    "Unable to create execute_sql function. This may require direct database access."
+                )
                 return False
-            
+
             logger.info("execute_sql function created successfully")
             return True
         except Exception as e:
             logger.error(f"Error creating execute_sql function: {e}")
-            logger.warning("Unable to create execute_sql function. This may require direct database access.")
+            logger.warning(
+                "Unable to create execute_sql function. This may require direct database access."
+            )
             return False
     except Exception as e:
         logger.error(f"Error setting up execute_sql function: {e}")
@@ -465,27 +481,28 @@ def setup_execute_sql_function(client=None) -> bool:
 
 
 def initialize_database(client=None) -> bool:
-    """
-    Initialize the database for the registry system.
-    
+    """Initialize the database for the registry system.
+
     Args:
         client: Optional Supabase client
-        
+
     Returns:
         True if successful, False otherwise
     """
     if not SUPABASE_AVAILABLE and client is None:
         logger.error("Supabase client not available and no client provided.")
         return False
-    
+
     try:
         # Get or use provided client
         supabase = client or get_supabase_client()
-        
+
         # Set up execute_sql function
         if not setup_execute_sql_function(supabase):
-            logger.warning("Failed to set up execute_sql function. Database operations may be limited.")
-        
+            logger.warning(
+                "Failed to set up execute_sql function. Database operations may be limited."
+            )
+
         # Set up schema
         return setup_schema(supabase)
     except Exception as e:

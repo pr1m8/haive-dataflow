@@ -1,7 +1,6 @@
 # haive_dataflow/main.py
 import logging
 import os
-import sys
 
 import uvicorn
 from dotenv import load_dotenv

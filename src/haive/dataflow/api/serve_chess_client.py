@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Simple HTTP server to serve the chess client HTML/JS interface.
+"""Simple HTTP server to serve the chess client HTML/JS interface.
 
 This script starts a simple HTTP server to serve the chess client
 interface that connects to the WebSocket API.

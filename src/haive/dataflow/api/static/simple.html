@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple WebSocket Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      #log {
+        height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-top: 10px;
+      }
+
+      .entry {
+        margin-bottom: 5px;
+      }
+
+      .error {
+        color: red;
+      }
+
+      .sent {
+        color: blue;
+      }
+
+      .received {
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Simple WebSocket Test</h1>
+
+    <div>
+      <label for="wsUrl">WebSocket URL:</label>
+      <input
+        type="text"
+        id="wsUrl"
+        value="ws://localhost:8000/ws/chess/test123"
+        style="width: 300px"
+      />
+      <button id="connectBtn">Connect</button>
+      <button id="disconnectBtn" disabled>Disconnect</button>
+    </div>
+
+    <div style="margin-top: 10px">
+      <button id="getStateBtn" disabled>Get State</button>
+      <button id="aiMoveBtn" disabled>AI Move</button>
+    </div>
+
+    <h3>WebSocket Log</h3>
+    <div id="log"></div>
+
+    <script>
+      // DOM elements
+      const wsUrlInput = document.getElementById("wsUrl");
+      const connectBtn = document.getElementById("connectBtn");
+      const disconnectBtn = document.getElementById("disconnectBtn");
+      const getStateBtn = document.getElementById("getStateBtn");
+      const aiMoveBtn = document.getElementById("aiMoveBtn");
+      const logContainer = document.getElementById("log");
+
+      // WebSocket connection
+      let socket = null;
+
+      // Log a message
+      function log(message, type = "info") {
+        const entry = document.createElement("div");
+        entry.className = `entry ${type}`;
+        entry.textContent = message;
+        logContainer.appendChild(entry);
+        logContainer.scrollTop = logContainer.scrollHeight;
+      }
+
+      // Connect to WebSocket
+      function connect() {
+        const url = wsUrlInput.value;
+
+        if (socket) {
+          socket.close();
+          socket = null;
+        }
+
+        log(`Connecting to ${url}...`);
+
+        try {
+          socket = new WebSocket(url);
+
+          socket.addEventListener("open", (event) => {
+            log("Connection established", "received");
+            connectBtn.disabled = true;
+            disconnectBtn.disabled = false;
+            getStateBtn.disabled = false;
+            aiMoveBtn.disabled = false;
+          });
+
+          socket.addEventListener("message", (event) => {
+            log(`Received: ${event.data}`, "received");
+            try {
+              const data = JSON.parse(event.data);
+              console.log("Parsed message:", data);
+            } catch (e) {
+              console.error("Error parsing message:", e);
+            }
+          });
+
+          socket.addEventListener("close", (event) => {
+            log("Connection closed", "error");
+            connectBtn.disabled = false;
+            disconnectBtn.disabled = true;
+            getStateBtn.disabled = true;
+            aiMoveBtn.disabled = true;
+          });
+
+          socket.addEventListener("error", (event) => {
+            log("WebSocket error", "error");
+            console.error("WebSocket error:", event);
+          });
+        } catch (e) {
+          log(`Error creating WebSocket: ${e.message}`, "error");
+          console.error("Error creating WebSocket:", e);
+        }
+      }
+
+      // Disconnect from WebSocket
+      function disconnect() {
+        if (socket) {
+          log("Disconnecting...", "sent");
+          socket.close();
+          socket = null;
+        }
+      }
+
+      // Send a message to get state
+      function getState() {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          const message = {
+            type: "get_state",
+          };
+          socket.send(JSON.stringify(message));
+          log(`Sent: ${JSON.stringify(message)}`, "sent");
+        } else {
+          log("WebSocket not connected", "error");
+        }
+      }
+
+      // Send a message to request AI move
+      function requestAiMove() {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          const message = {
+            type: "ai_move",
+          };
+          socket.send(JSON.stringify(message));
+          log(`Sent: ${JSON.stringify(message)}`, "sent");
+        } else {
+          log("WebSocket not connected", "error");
+        }
+      }
+
+      // Event listeners
+      connectBtn.addEventListener("click", connect);
+      disconnectBtn.addEventListener("click", disconnect);
+      getStateBtn.addEventListener("click", getState);
+      aiMoveBtn.addEventListener("click", requestAiMove);
+    </script>
+  </body>
+</html>

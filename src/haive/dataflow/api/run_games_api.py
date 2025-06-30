@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Run the Haive Games API with dynamic game discovery.
+"""Run the Haive Games API with dynamic game discovery.
 
 This script runs a standalone API for game agents with dynamic discovery
 from the haive-games package. It creates WebSocket endpoints for each
@@ -131,7 +130,7 @@ def create_app():
                 </head>
                 <body>
                     <h1>Haive Games API</h1>
-                    <p>Error: {str(e)}</p>
+                    <p>Error: {e!s}</p>
                 </body>
             </html>
             """

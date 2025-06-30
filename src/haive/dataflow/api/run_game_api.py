@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Run the Haive Game API with the dynamically discovered game agents.
+"""Run the Haive Game API with the dynamically discovered game agents.
 
 This script creates a FastAPI application that includes both the main API
 and the game routes for all discovered game agents. It runs the server

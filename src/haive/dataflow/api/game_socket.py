@@ -1,5 +1,4 @@
-"""
-WebSocket server for game state streaming with Supabase integration.
+"""WebSocket server for game state streaming with Supabase integration.
 
 This module provides a general-purpose WebSocket server that can stream game state
 for any agent-based game in the Haive framework. It supports:
@@ -22,7 +21,7 @@ import os
 # Fix imports for local development
 import sys
 from datetime import datetime
-from typing import Any, Dict, Optional, Set, Type
+from typing import Any
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
@@ -40,8 +39,7 @@ logger = logging.getLogger("game-socket")
 
 
 class GameSocketServer:
-    """
-    General-purpose WebSocket server for game state streaming.
+    """General-purpose WebSocket server for game state streaming.
 
     This class provides a WebSocket server that can be integrated with
     any game agent implementation to stream game state updates in real-time.
@@ -59,12 +57,11 @@ class GameSocketServer:
     def __init__(
         self,
         app: FastAPI,
-        agent_class: Type[Agent],
-        state_schema: Type[StateSchema],
+        agent_class: type[Agent],
+        state_schema: type[StateSchema],
         route_prefix: str = "/ws/games",
     ):
-        """
-        Initialize the game socket server.
+        """Initialize the game socket server.
 
         Args:
             app: The FastAPI application to add routes to
@@ -76,9 +73,9 @@ class GameSocketServer:
         self.agent_class = agent_class
         self.state_schema = state_schema
         self.route_prefix = route_prefix
-        self.active_connections: Set[WebSocket] = set()
-        self.connection_thread_map: Dict[WebSocket, str] = {}
-        self.agents: Dict[str, Agent] = {}
+        self.active_connections: set[WebSocket] = set()
+        self.connection_thread_map: dict[WebSocket, str] = {}
+        self.agents: dict[str, Agent] = {}
 
         # Register WebSocket route
         self._register_routes()
@@ -157,7 +154,7 @@ class GameSocketServer:
                     pass
 
     async def _handle_make_move(
-        self, websocket: WebSocket, thread_id: str, message: Dict[str, Any]
+        self, websocket: WebSocket, thread_id: str, message: dict[str, Any]
     ):
         """Handle a make_move message."""
         agent = self.get_or_create_agent(thread_id)
@@ -222,7 +219,7 @@ class GameSocketServer:
         )
 
     async def _handle_register_user(
-        self, websocket: WebSocket, thread_id: str, message: Dict[str, Any]
+        self, websocket: WebSocket, thread_id: str, message: dict[str, Any]
     ):
         """Handle a register_user message for Supabase integration."""
         user_id = message.get("user_id")
@@ -264,7 +261,7 @@ class GameSocketServer:
                     await websocket.send_json(
                         {
                             "type": "error",
-                            "message": f"Error registering thread: {str(e)}",
+                            "message": f"Error registering thread: {e!s}",
                             "timestamp": datetime.now().isoformat(),
                         }
                     )
@@ -278,7 +275,7 @@ class GameSocketServer:
                 )
 
     async def _handle_custom_message(
-        self, websocket: WebSocket, thread_id: str, message: Dict[str, Any]
+        self, websocket: WebSocket, thread_id: str, message: dict[str, Any]
     ):
         """Handle custom message types specific to different games."""
         # Default implementation just echoes the message type
@@ -290,9 +287,8 @@ class GameSocketServer:
             }
         )
 
-    def _is_game_ongoing(self, state: Dict[str, Any]) -> bool:
-        """
-        Check if the game is still ongoing based on state.
+    def _is_game_ongoing(self, state: dict[str, Any]) -> bool:
+        """Check if the game is still ongoing based on state.
 
         This is a generic implementation that works with most game state schemas.
         Games with different state structures can override this method.
@@ -322,7 +318,7 @@ class GameSocketServer:
             del self.connection_thread_map[websocket]
 
     def get_or_create_agent(
-        self, thread_id: str, config_overrides: Optional[Dict[str, Any]] = None
+        self, thread_id: str, config_overrides: dict[str, Any] | None = None
     ) -> Agent:
         """Get or create an agent for a thread ID."""
         if thread_id in self.agents:
@@ -352,7 +348,7 @@ class GameSocketServer:
 
         return agent
 
-    async def broadcast_to_thread(self, thread_id: str, message: Dict[str, Any]):
+    async def broadcast_to_thread(self, thread_id: str, message: dict[str, Any]):
         """Broadcast a message to all connections for a thread."""
         for websocket, tid in self.connection_thread_map.items():
             if tid == thread_id:
@@ -361,7 +357,7 @@ class GameSocketServer:
                 except Exception as e:
                     logger.error(f"Error broadcasting to {thread_id}: {e}")
 
-    def cleanup(self, thread_id: Optional[str] = None):
+    def cleanup(self, thread_id: str | None = None):
         """Clean up resources."""
         if thread_id:
             # Clean up specific thread
@@ -389,8 +385,7 @@ class GameSocketServer:
 
 
 class GameSocketFactory:
-    """
-    Factory for creating game-specific socket servers.
+    """Factory for creating game-specific socket servers.
 
     This class creates specialized socket servers for different game types,
     with appropriate message handling and state management for each game.
@@ -416,12 +411,11 @@ class GameSocketFactory:
     @staticmethod
     def create_socket(
         app: FastAPI,
-        agent_class: Type[Agent],
-        state_schema: Type[StateSchema],
+        agent_class: type[Agent],
+        state_schema: type[StateSchema],
         route_prefix: str = "/ws/games",
     ) -> GameSocketServer:
-        """
-        Create a game socket server for any agent and state schema.
+        """Create a game socket server for any agent and state schema.
 
         Args:
             app: The FastAPI application
@@ -441,8 +435,7 @@ class GameSocketFactory:
 
     @staticmethod
     def create_chess_socket(app: FastAPI) -> GameSocketServer:
-        """
-        Create a chess-specific socket server.
+        """Create a chess-specific socket server.
 
         Args:
             app: The FastAPI application
@@ -472,8 +465,7 @@ class GameSocketFactory:
 
     @staticmethod
     def create_connect4_socket(app: FastAPI) -> GameSocketServer:
-        """
-        Create a Connect4-specific socket server.
+        """Create a Connect4-specific socket server.
 
         Args:
             app: The FastAPI application
@@ -494,8 +486,7 @@ class GameSocketFactory:
 
     @staticmethod
     def create_tic_tac_toe_socket(app: FastAPI) -> GameSocketServer:
-        """
-        Create a Tic Tac Toe-specific socket server.
+        """Create a Tic Tac Toe-specific socket server.
 
         Args:
             app: The FastAPI application

@@ -1,10 +1,11 @@
 from haive.dataflow.db.supabase import (
-    get_supabase_client,
     fetch_all_schemas_and_tables,
     fetch_foreign_key_relations,
+    fetch_primary_keys,
     fetch_table_columns,
-    fetch_primary_keys
+    get_supabase_client,
 )
+
 
 def main():
     client = get_supabase_client()
@@ -31,6 +32,7 @@ def main():
             f"({col['data_type']}, {'NULLABLE' if col['is_nullable'] == 'YES' else 'NOT NULL'}) "
             f"default={col['column_default']}"
         )
+
 
 if __name__ == "__main__":
     main()

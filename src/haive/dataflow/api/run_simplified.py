@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Simplified demo to launch a WebSocket server for chess games.
+"""Simplified demo to launch a WebSocket server for chess games.
 
 This is a minimal implementation that focuses on getting the WebSocket
 functionality working without the full API infrastructure.
@@ -9,7 +8,6 @@ functionality working without the full API infrastructure.
 import logging
 import os
 import traceback
-from typing import Dict, Set
 
 import chess
 import uvicorn
@@ -36,9 +34,9 @@ app.add_middleware(
 )
 
 # Game state storage
-active_games: Dict[str, Dict] = {}
-active_connections: Set[WebSocket] = set()
-connection_game_map: Dict[WebSocket, str] = {}
+active_games: dict[str, dict] = {}
+active_connections: set[WebSocket] = set()
+connection_game_map: dict[WebSocket, str] = {}
 
 
 # Chess helpers
@@ -63,8 +61,7 @@ def make_move(board, move_uci):
         if move in board.legal_moves:
             board.push(move)
             return True, "Move successful"
-        else:
-            return False, "Illegal move"
+        return False, "Illegal move"
     except ValueError:
         return False, "Invalid move format"
 
@@ -73,14 +70,13 @@ def get_game_status(board):
     """Get the current game status."""
     if board.is_checkmate():
         return "checkmate"
-    elif board.is_stalemate():
+    if board.is_stalemate():
         return "stalemate"
-    elif board.is_check():
+    if board.is_check():
         return "check"
-    elif board.is_insufficient_material():
+    if board.is_insufficient_material():
         return "draw"
-    else:
-        return "ongoing"
+    return "ongoing"
 
 
 def get_current_player(board):
@@ -215,26 +211,24 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
             f"WebSocket disconnected for game: {game_id}, code: {disconnect_code}"
         )
         active_connections.discard(websocket)
-        if websocket in connection_game_map:
-            del connection_game_map[websocket]
+        connection_game_map.pop(websocket, None)
         logger.info(
             f"Connection unregistered, remaining connections: {len(active_connections)}"
         )
 
     except Exception as e:
-        error_msg = f"WebSocket error for game {game_id}: {str(e)}"
+        error_msg = f"WebSocket error for game {game_id}: {e!s}"
         logger.error(error_msg)
         logger.error(traceback.format_exc())  # Full traceback
         try:
             await websocket.send_json(
-                {"type": "error", "message": f"Server error: {str(e)}"}
+                {"type": "error", "message": f"Server error: {e!s}"}
             )
         except Exception as send_error:
-            logger.error(f"Failed to send error message to client: {str(send_error)}")
+            logger.error(f"Failed to send error message to client: {send_error!s}")
 
         active_connections.discard(websocket)
-        if websocket in connection_game_map:
-            del connection_game_map[websocket]
+        connection_game_map.pop(websocket, None)
         logger.info(
             f"Connection terminated due to error, remaining connections: {len(active_connections)}"
         )

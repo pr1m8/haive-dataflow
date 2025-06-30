@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Integration module for adding game routes to the main Haive API.
+"""Integration module for adding game routes to the main Haive API.
 
 This module provides functions to add game WebSocket endpoints and routes
 to an existing FastAPI application. It integrates with the game_router module

@@ -1,5 +1,4 @@
-"""
-Discovery mechanisms for the Haive Registry System.
+"""Discovery mechanisms for the Haive Registry System.
 
 This module provides functionality for discovering and registering
 various components in the Haive ecosystem, such as agents, tools,
@@ -11,19 +10,16 @@ import inspect
 import logging
 import os
 import pkgutil
-import sys
 import traceback
 import uuid
 from datetime import datetime
-from importlib import import_module
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Any
 
 from haive.dataflow.core import registry_system  # Import the singleton instance
 
 # Import registry models and utilities
-from haive.dataflow.models import ConfigType, DependencyType, EntityType, ImportStatus
-from haive.dataflow.serialization import serialize_object
+from haive.dataflow.models import ConfigType, EntityType, ImportStatus
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -39,9 +35,8 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 
-def discover_modules(base_path: str) -> List[str]:
-    """
-    Discover all modules under a base path.
+def discover_modules(base_path: str) -> list[str]:
+    """Discover all modules under a base path.
 
     Args:
         base_path: Base module path
@@ -84,8 +79,7 @@ def discover_modules(base_path: str) -> List[str]:
 
 
 def is_pydantic_model(obj: Any) -> bool:
-    """
-    Check if an object is a Pydantic model.
+    """Check if an object is a Pydantic model.
 
     Args:
         obj: Object to check
@@ -101,9 +95,8 @@ def is_pydantic_model(obj: Any) -> bool:
         return False
 
 
-def discover_agents(module_paths: Optional[List[str]] = None) -> List[str]:
-    """
-    Discover and register agents.
+def discover_agents(module_paths: list[str] | None = None) -> list[str]:
+    """Discover and register agents.
 
     Args:
         module_paths: Optional list of module paths to search
@@ -258,9 +251,8 @@ def discover_agents(module_paths: Optional[List[str]] = None) -> List[str]:
     return registered_ids
 
 
-def discover_tools(module_paths: Optional[List[str]] = None) -> List[str]:
-    """
-    Discover and register tools.
+def discover_tools(module_paths: list[str] | None = None) -> list[str]:
+    """Discover and register tools.
 
     Args:
         module_paths: Optional list of module paths to search
@@ -421,9 +413,8 @@ def discover_tools(module_paths: Optional[List[str]] = None) -> List[str]:
     return registered_ids
 
 
-def discover_toolkits(module_paths: Optional[List[str]] = None) -> List[str]:
-    """
-    Discover and register toolkits.
+def discover_toolkits(module_paths: list[str] | None = None) -> list[str]:
+    """Discover and register toolkits.
 
     Args:
         module_paths: Optional list of module paths to search
@@ -578,9 +569,8 @@ def discover_toolkits(module_paths: Optional[List[str]] = None) -> List[str]:
     return registered_ids
 
 
-def discover_engines(module_paths: Optional[List[str]] = None) -> List[str]:
-    """
-    Discover and register engines.
+def discover_engines(module_paths: list[str] | None = None) -> list[str]:
+    """Discover and register engines.
 
     Args:
         module_paths: Optional list of module paths to search
@@ -702,7 +692,7 @@ def discover_engines(module_paths: Optional[List[str]] = None) -> List[str]:
                                 # Look for API key pattern
                                 if hasattr(instance, "api_key"):
                                     # Check if it's a reference to an environment variable
-                                    api_key = getattr(instance, "api_key")
+                                    api_key = instance.api_key
                                     if not api_key or (
                                         isinstance(api_key, str) and "${" in api_key
                                     ):
@@ -758,9 +748,8 @@ def discover_engines(module_paths: Optional[List[str]] = None) -> List[str]:
     return registered_ids
 
 
-def discover_games(module_paths: Optional[List[str]] = None) -> List[str]:
-    """
-    Discover and register games.
+def discover_games(module_paths: list[str] | None = None) -> list[str]:
+    """Discover and register games.
 
     Args:
         module_paths: Optional list of module paths to search
@@ -858,9 +847,8 @@ def discover_games(module_paths: Optional[List[str]] = None) -> List[str]:
     return registered_ids
 
 
-def discover_all() -> Dict[EntityType, List[str]]:
-    """
-    Discover and register all entity types.
+def discover_all() -> dict[EntityType, list[str]]:
+    """Discover and register all entity types.
 
     Returns:
         Dictionary mapping entity types to lists of registered IDs

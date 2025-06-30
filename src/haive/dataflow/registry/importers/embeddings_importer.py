@@ -10,11 +10,16 @@ import os
 import traceback
 import uuid
 from datetime import datetime
-from typing import Dict, Any, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 # Import registry models and utilities
-from ..core import registry_system, EntityType, ImportStatus, DependencyType
-from ..serialization import serialize_object
+from haive.dataflow.registry.core import (
+    DependencyType,
+    EntityType,
+    ImportStatus,
+    registry_system,
+)
+from haive.dataflow.registry.serialization import serialize_object
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -296,7 +301,8 @@ def import_embedding_models() -> bool:
                 # Store in Supabase directly if available
                 if registry_system._supabase is not None:
                     try:
-                        from ..db.supabase import table
+from haive.dataflow.registry.db.supabase import table
+
                         # Add or update provider with environment variable
                         provider_data = {
                             "name": provider,
@@ -354,8 +360,8 @@ def import_embedding_models() -> bool:
         # Check if Supabase is available for direct DB access
         if registry_system._supabase is not None:
             # Register models via Supabase
-            from ..db.supabase import table
-            
+from haive.dataflow.registry.db.supabase import table
+
             for model_info in EMBEDDING_MODELS:
                 try:
                     model_id = model_info["model_id"]
