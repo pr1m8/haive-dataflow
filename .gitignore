@@ -144,5 +144,16 @@ poetry.lock
 # === 📦 Extra files ===
 .history/
 
+# === 🗄️ Large data files ===
+data/exports/
+scripts/migration/data_dump.sql
+*.sql
+data/
+exports/
+
+# === 🤖 ML model cache and embeddings ===
+resources/embeddings_cache/
+.langchain_cache.db
+models--*/
 
 **/.claude/settings.local.json
