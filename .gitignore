@@ -10,7 +10,7 @@ summary_agent/
 test_simple_agent/
 output_file.json
 retrievers_output.json
-
+scripts/migration/data_dump.sql
 # === 🔬 Cache / experiment outputs ===
 .cache/
 .lc_cache/
