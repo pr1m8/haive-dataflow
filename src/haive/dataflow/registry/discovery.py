@@ -915,4 +915,81 @@ def discover_all() -> dict[EntityType, list[str]]:
     # Discover games
     results[EntityType.GAME] = discover_games()
 
+    # Discover MCP servers
+    results[EntityType.MCP_SERVER] = discover_mcp_servers()
+
     return results
+
+
+def discover_mcp_servers() -> list[str]:
+    """Discover and register MCP (Model Context Protocol) servers.
+
+    This function discovers MCP servers from various sources including:
+    - npm packages (@modelcontextprotocol/*)
+    - PyPI packages (mcp-*)
+    - Local configurations
+    - Existing haive-mcp downloaded servers
+
+    Returns:
+        List of registry IDs for registered MCP servers
+
+    Example:
+        >>> mcp_servers = discover_mcp_servers()
+        >>> print(f"Discovered {len(mcp_servers)} MCP servers")
+    """
+    logger.info("Starting MCP server discovery")
+
+    try:
+        # Import MCP discovery (lazy import to avoid circular dependencies)
+        # Discover MCP servers and register them
+        import asyncio
+
+        from haive.dataflow.mcp.discovery import discover_mcp_servers as mcp_discover
+
+        async def async_discover():
+            registry_items = await mcp_discover(registry_system)
+            registered_ids = []
+
+            for item in registry_items:
+                try:
+                    # Register the item
+                    entity_id = registry_system.register_entity(
+                        name=item.name,
+                        type=item.type,
+                        description=item.description,
+                        module_path=item.module_path,
+                        class_name=item.class_name,
+                        config=item.config,
+                        tags=item.tags,
+                    )
+                    registered_ids.append(entity_id)
+                    logger.info(f"Registered MCP server: {item.name} -> {entity_id}")
+
+                except Exception as e:
+                    logger.error(f"Failed to register MCP server {item.name}: {e}")
+
+            return registered_ids
+
+        # Run async discovery
+        try:
+            # Try to get existing event loop
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If loop is running, create a task
+                task = asyncio.create_task(async_discover())
+                # For now, return empty list and let it run in background
+                logger.info("MCP discovery running in background")
+                return []
+            else:
+                # If no loop running, run directly
+                return asyncio.run(async_discover())
+        except RuntimeError:
+            # No event loop, run directly
+            return asyncio.run(async_discover())
+
+    except ImportError as e:
+        logger.warning(f"MCP discovery not available: {e}")
+        return []
+    except Exception as e:
+        logger.error(f"Failed to discover MCP servers: {e}")
+        return []

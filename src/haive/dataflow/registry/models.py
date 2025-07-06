@@ -59,6 +59,12 @@ class EntityType(str, Enum):
     GAME = "game"
     LLM_MODEL = "llm_model"
     LLM_PROVIDER = "llm_provider"
+    # MCP (Model Context Protocol) entity types
+    MCP_SERVER = "mcp_server"
+    MCP_CLIENT = "mcp_client"
+    MCP_TOOL = "mcp_tool"
+    MCP_RESOURCE = "mcp_resource"
+    MCP_PROMPT = "mcp_prompt"
 
 
 class ConfigType(str, Enum):
@@ -338,3 +344,203 @@ class ImportLogItem(BaseModel):
     message: str | None = None
     traceback: str | None = None
     created_at: datetime | None = None
+
+
+# MCP (Model Context Protocol) Specific Models
+
+
+class MCPTransport(str, Enum):
+    """Transport types for MCP servers."""
+
+    STDIO = "stdio"
+    SSE = "sse"
+    HTTP = "http"
+
+
+class MCPServerConfig(BaseModel):
+    """Configuration for an MCP server.
+
+    This model represents the configuration needed to connect to and interact
+    with an MCP (Model Context Protocol) server, including connection details,
+    authentication, and capabilities.
+
+    Attributes:
+        name (str): Unique name for the MCP server
+        transport (MCPTransport): Communication transport type
+        command (str, optional): Command to run the server (for stdio transport)
+        args (list[str]): Arguments for the server command
+        env (dict[str, str]): Environment variables for the server
+        url (str, optional): URL for HTTP/SSE transports
+        capabilities (list[str]): List of server capabilities
+        auth_config (dict[str, Any], optional): Authentication configuration
+        health_check_interval (int): Seconds between health checks
+        timeout (int): Connection timeout in seconds
+        max_retries (int): Maximum connection retry attempts
+
+    Example:
+        >>> config = MCPServerConfig(
+        ...     name="filesystem",
+        ...     transport=MCPTransport.STDIO,
+        ...     command="npx",
+        ...     args=["-y", "@modelcontextprotocol/server-filesystem"],
+        ...     capabilities=["file_read", "file_write", "directory_list"]
+        ... )
+    """
+
+    name: str
+    transport: MCPTransport
+    command: str | None = None
+    args: list[str] = Field(default_factory=list)
+    env: dict[str, str] = Field(default_factory=dict)
+    url: str | None = None
+    capabilities: list[str] = Field(default_factory=list)
+    auth_config: dict[str, Any] | None = None
+    health_check_interval: int = 30
+    timeout: int = 10
+    max_retries: int = 3
+
+
+class MCPToolDefinition(BaseModel):
+    """Definition of an MCP tool.
+
+    This model represents a tool provided by an MCP server, including its
+    name, description, schema, and metadata needed for execution.
+
+    Attributes:
+        name (str): Tool name
+        description (str): Tool description
+        server_name (str): Name of the MCP server providing this tool
+        schema (dict[str, Any]): JSON schema for tool parameters
+        input_schema (dict[str, Any], optional): Input validation schema
+        output_schema (dict[str, Any], optional): Output validation schema
+        tags (list[str]): Tags for categorization
+        version (str): Tool version
+
+    Example:
+        >>> tool = MCPToolDefinition(
+        ...     name="read_file",
+        ...     description="Read contents of a file",
+        ...     server_name="filesystem",
+        ...     schema={"type": "object", "properties": {"path": {"type": "string"}}},
+        ...     tags=["filesystem", "read"]
+        ... )
+    """
+
+    name: str
+    description: str
+    server_name: str
+    tool_schema: dict[str, Any] = Field(..., alias="schema")
+    input_schema: dict[str, Any] | None = None
+    output_schema: dict[str, Any] | None = None
+    tags: list[str] = Field(default_factory=list)
+    version: str = "1.0.0"
+
+
+class MCPResourceDefinition(BaseModel):
+    """Definition of an MCP resource.
+
+    This model represents a resource provided by an MCP server, such as
+    files, datasets, or other data sources that can be accessed by LLMs.
+
+    Attributes:
+        name (str): Resource name
+        uri (str): Resource URI
+        server_name (str): Name of the MCP server providing this resource
+        mime_type (str, optional): MIME type of the resource
+        description (str, optional): Resource description
+        annotations (dict[str, Any]): Additional metadata
+        size (int, optional): Resource size in bytes
+        last_modified (datetime, optional): Last modification timestamp
+
+    Example:
+        >>> resource = MCPResourceDefinition(
+        ...     name="project_docs",
+        ...     uri="file:///project/docs/",
+        ...     server_name="filesystem",
+        ...     mime_type="text/markdown",
+        ...     description="Project documentation files"
+        ... )
+    """
+
+    name: str
+    uri: str
+    server_name: str
+    mime_type: str | None = None
+    description: str | None = None
+    annotations: dict[str, Any] = Field(default_factory=dict)
+    size: int | None = None
+    last_modified: datetime | None = None
+
+
+class MCPPromptDefinition(BaseModel):
+    """Definition of an MCP prompt template.
+
+    This model represents a prompt template provided by an MCP server,
+    including variables, instructions, and metadata for prompt execution.
+
+    Attributes:
+        name (str): Prompt name
+        description (str): Prompt description
+        server_name (str): Name of the MCP server providing this prompt
+        template (str): Prompt template string
+        variables (list[dict[str, Any]]): Template variable definitions
+        instructions (str, optional): Usage instructions
+        examples (list[dict[str, Any]]): Example inputs/outputs
+        tags (list[str]): Tags for categorization
+
+    Example:
+        >>> prompt = MCPPromptDefinition(
+        ...     name="code_review",
+        ...     description="Review code for best practices",
+        ...     server_name="github",
+        ...     template="Review this code: {code}",
+        ...     variables=[{"name": "code", "type": "string", "required": True}],
+        ...     tags=["code", "review"]
+        ... )
+    """
+
+    name: str
+    description: str
+    server_name: str
+    template: str
+    variables: list[dict[str, Any]] = Field(default_factory=list)
+    instructions: str | None = None
+    examples: list[dict[str, Any]] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
+
+
+class MCPServerHealth(BaseModel):
+    """Health status of an MCP server.
+
+    This model tracks the health and performance metrics of an MCP server,
+    including connection status, response times, and error rates.
+
+    Attributes:
+        server_name (str): Name of the MCP server
+        is_healthy (bool): Whether the server is healthy
+        last_check (datetime): Last health check timestamp
+        response_time_ms (float, optional): Average response time in milliseconds
+        error_count (int): Number of recent errors
+        uptime_seconds (float, optional): Server uptime in seconds
+        capabilities_available (list[str]): Currently available capabilities
+        error_details (str, optional): Details of recent errors
+
+    Example:
+        >>> health = MCPServerHealth(
+        ...     server_name="filesystem",
+        ...     is_healthy=True,
+        ...     last_check=datetime.now(),
+        ...     response_time_ms=50.0,
+        ...     error_count=0,
+        ...     capabilities_available=["file_read", "file_write"]
+        ... )
+    """
+
+    server_name: str
+    is_healthy: bool
+    last_check: datetime
+    response_time_ms: float | None = None
+    error_count: int = 0
+    uptime_seconds: float | None = None
+    capabilities_available: list[str] = Field(default_factory=list)
+    error_details: str | None = None

@@ -49,7 +49,7 @@ from haive.dataflow.registry.discovery import (
     discover_toolkits,
     discover_tools,
 )
-from haive.dataflow.registry.models import (
+from haive.dataflow.registry.models import (  # MCP Models
     ConfigType,
     Configuration,
     Dependency,
@@ -59,6 +59,12 @@ from haive.dataflow.registry.models import (
     GraphDefinition,
     ImportLogItem,
     ImportStatus,
+    MCPPromptDefinition,
+    MCPResourceDefinition,
+    MCPServerConfig,
+    MCPServerHealth,
+    MCPToolDefinition,
+    MCPTransport,
     RegistryItem,
 )
 
@@ -84,6 +90,13 @@ __all__ = [
     "Dependency",
     "EnvironmentVar",
     "ImportLogItem",
+    # MCP Models
+    "MCPTransport",
+    "MCPServerConfig",
+    "MCPToolDefinition",
+    "MCPResourceDefinition",
+    "MCPPromptDefinition",
+    "MCPServerHealth",
     # Discovery
     "discover_all",
     "discover_agents",
