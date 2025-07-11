@@ -301,8 +301,7 @@ def import_embedding_models() -> bool:
                 # Store in Supabase directly if available
                 if registry_system._supabase is not None:
                     try:
-from haive.dataflow.registry.db.supabase import table
-
+                        from haive.dataflow.registry.db.supabase import table
                         # Add or update provider with environment variable
                         provider_data = {
                             "name": provider,
@@ -360,7 +359,7 @@ from haive.dataflow.registry.db.supabase import table
         # Check if Supabase is available for direct DB access
         if registry_system._supabase is not None:
             # Register models via Supabase
-from haive.dataflow.registry.db.supabase import table
+            from haive.dataflow.registry.db.supabase import table
 
             for model_info in EMBEDDING_MODELS:
                 try:

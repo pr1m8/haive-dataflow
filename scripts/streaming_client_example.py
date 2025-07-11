@@ -49,7 +49,8 @@ class HaiveStreamingClient:
                     full_response += chunk
                     yield chunk
 
-            return full_response
+            # Return the full response after streaming
+            # Note: Can't use return in async generator, so we'll handle this differently
 
     async def analyze_stream(self, agent_name, text, include_partial=False):
         """Stream analysis results with structured data"""
@@ -80,7 +81,7 @@ class HaiveStreamingClient:
                         results.update(data)
                         yield results.copy()
 
-            return results
+            # Final results are yielded above; cannot return in async generator
 
     async def debug_stream(self, agent_name, message):
         """Stream with debug information"""
@@ -104,7 +105,7 @@ class HaiveStreamingClient:
                 debug_info.append(chunk)
                 yield chunk
 
-            return debug_info
+            # Debug info is yielded above; cannot return in async generator
 
     async def _stream_chunks(self, websocket):
         """Helper to stream chunks from websocket"""

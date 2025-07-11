@@ -92,6 +92,8 @@ def run_import(
     model_type=None, skip_llm=False, skip_embeddings=False, no_progress=False
 ):
     """Run the model importer."""
+    global TQDM_AVAILABLE
+    
     try:
         from haive.dataflow.registry.importers.litellm_importer import (
             import_embedding_models,
@@ -101,7 +103,6 @@ def run_import(
 
         # Override TQDM_AVAILABLE if progress bars are explicitly disabled
         if no_progress and "TQDM_AVAILABLE" in globals():
-            global TQDM_AVAILABLE
             orig_value = TQDM_AVAILABLE
             TQDM_AVAILABLE = False
             logger.info("Progress bars disabled by user request")
@@ -131,7 +132,6 @@ def run_import(
 
         # Restore original TQDM_AVAILABLE value if it was overridden
         if no_progress and "orig_value" in locals():
-            global TQDM_AVAILABLE
             TQDM_AVAILABLE = orig_value
 
     except ImportError:
