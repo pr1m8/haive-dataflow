@@ -36,7 +36,6 @@ from haive.dataflow.api.routes.agent_discovery_routes import (
 from haive.dataflow.api.routes.agent_routes import router as agent_router
 from haive.dataflow.api.routes.conversation_routes import router as conversation_router
 from haive.dataflow.api.routes.llm_routes import router as llm_router
-from haive.dataflow.api.routes.routes import router as react_agent_router
 from haive.dataflow.api.routes.tools_routes import router as tools_router
 from haive.dataflow.auth.middleware import SupabaseAuthMiddleware
 from haive.dataflow.config.settings import get_settings
@@ -47,52 +46,14 @@ settings = get_settings()
 import os
 import logging
 from fastapi import FastAPI
-from copilotkit.integrations.fastapi import add_fastapi_endpoint
-from copilotkit import CopilotKitRemoteEndpoint, LangGraphAgent
-from haive.agents.simple.agent import SimpleAgent
-from langgraph.checkpoint.postgres import PostgresSaver
 
 from contextlib import asynccontextmanager
-from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
  
 def create_lifespan(api_prefix: str):
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        # Create the agent with async persistence for CopilotKit
-        graph = SimpleAgent(
-            checkpoint_mode="async"  # Use async mode for CopilotKit
-        )
         
-        # Set up the async checkpointer properly in the async context
-        if hasattr(graph, '_async_setup_needed') and graph._async_setup_needed:
-            try:
-                from haive.core.persistence.handlers import setup_async_checkpointer
-                if hasattr(graph, '_async_persistence_config'):
-                    graph.checkpointer = await setup_async_checkpointer(graph._async_persistence_config)
-                    graph._async_setup_needed = False
-                    print(f"Async checkpointer set up successfully: {type(graph.checkpointer).__name__}")
-            except Exception as e:
-                print(f"Error setting up async checkpointer in lifespan: {e}")
-                # Fall back to memory checkpointer
-                from langgraph.checkpoint.memory import MemorySaver
-                graph.checkpointer = MemorySaver()
-        
-        # Now compile the graph with the properly set up checkpointer
-        compiled_graph = graph.compile()
-
-        sdk = CopilotKitRemoteEndpoint(
-            agents=[
-                LangGraphAgent(
-                    name="simple_agent",
-                    description="Simple agent.",
-                    graph=compiled_graph,
-                ),
-            ],
-        )
-        
-        # Add the endpoint to the app
-        add_fastapi_endpoint(app, sdk, f"{api_prefix}/copilotkit")
-        
+        # await setup_copilotkit(app, api_prefix)
         yield
     return lifespan
 
@@ -148,7 +109,7 @@ def create_app() -> FastAPI:
     app.include_router(agent_discovery_router, prefix=prefix)
     app.include_router(conversation_router, prefix=prefix)
     app.include_router(llm_router, prefix=prefix)
-    app.include_router(react_agent_router, prefix=prefix)
+    # app.include_router(react_agent_router, prefix=prefix)
     app.include_router(tools_router, prefix=prefix)
 
     # Health check endpoint
