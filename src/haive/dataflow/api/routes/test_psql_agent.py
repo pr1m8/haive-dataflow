@@ -28,7 +28,8 @@ logger = logging.getLogger(__name__)
 try:
     logger.info("Initializing SimpleAgent...")
     agent = SimpleAgent(
-        persistence=True
+        persistence=True,
+        checkpoint_mode="async"
     )
     print(agent.checkpointer)
     compiled_graph = agent.compile()
