@@ -735,6 +735,7 @@ class RegistrySystem:
                     # TODO: FIX where this is
                     from haive.core.utils.pydantic_utils import serialize_object
                 except ImportError:
+                    pass
 
                     def serialize_object(obj):
                         """Simple serialization helper."""

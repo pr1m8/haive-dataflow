@@ -664,6 +664,7 @@ class RegistrySystem:
                 try:
                     from haive.utils.serialization import serialize_object
                 except ImportError:
+                    pass
 
                     def serialize_object(obj):
                         """Simple serialization helper."""
