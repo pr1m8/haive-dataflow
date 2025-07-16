@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+langgraph
+langchain-core
+copilotkit
+rich
+python-json-logger
