@@ -9,6 +9,7 @@ from datetime import datetime
 
 from haive.agents.simple.agent import SimpleAgent
 from langchain_core.messages import HumanMessage
+from langgraph.checkpoint.memory import InMemorySaver
 
 from copilotkit import CopilotKitRemoteEndpoint, LangGraphAgent
 from copilotkit.integrations.fastapi import add_fastapi_endpoint
@@ -31,6 +32,7 @@ try:
         persistence=True,
         checkpoint_mode="async"
     )
+    # agent.checkpointer = InMemorySaver()
     print(agent.checkpointer)
     compiled_graph = agent.compile()
     print(agent.runnable_config["configurable"])
@@ -73,7 +75,7 @@ async def health_check():
         message=f"API is running, Agent status: {agent_status}"
     )
 
-@app.post("/react-agent/generate")
+@app.post("/simple-agent/generate")
 async def generate(request):
     """Generate endpoint"""
     print(request)
