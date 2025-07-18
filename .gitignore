@@ -157,3 +157,4 @@ resources/embeddings_cache/
 models--*/
 
 **/.claude/settings.local.json
+poetry.lock
