@@ -1724,5 +1724,34 @@ class RegistrySystem:
         return results
 
 
-# Create a singleton instance
-registry_system = RegistrySystem()
+# Create a lazy singleton instance
+_registry_system = None
+
+
+def get_registry_system():
+    """Get the registry system instance (lazy initialization)."""
+    global _registry_system
+    if _registry_system is None:
+        _registry_system = RegistrySystem()
+    return _registry_system
+
+
+# For backwards compatibility
+@property
+def registry_system():
+    """Backwards compatible property access."""
+    return get_registry_system()
+
+
+# Create a lazy property descriptor
+class LazyRegistrySystem:
+    def __get__(self, obj, objtype=None):
+        return get_registry_system()
+
+    def __set__(self, obj, value):
+        global _registry_system
+        _registry_system = value
+
+
+# Create the lazy property
+registry_system = LazyRegistrySystem()

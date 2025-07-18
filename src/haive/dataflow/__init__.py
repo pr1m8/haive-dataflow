@@ -1,4 +1,8 @@
-"""Haive Dataflow - Registry and Discovery System.
+"""Haive Dataflow - Registry and Discovery System (Lazy Loading).
+
+This is a lazy-loading version of the haive-dataflow package that prevents
+heavy initialization at import time. The registry system and database
+connections are only initialized when actually needed.
 
 The haive-dataflow package provides a comprehensive system for component
 discovery, registration, and management in the Haive ecosystem.
@@ -11,7 +15,7 @@ Typical usage example:
     ```python
     from haive.dataflow import registry_system, EntityType, discover_agents
 
-    # Discover and register agents
+    # Discover and register agents (lazy initialization happens here)
     discovered_agents = discover_agents()
     print(f"Discovered {len(discovered_agents)} agents")
 
@@ -38,9 +42,30 @@ This package consists of several modules:
     providers: Provider implementations for various services
 """
 
-from haive.dataflow.registry.core import registry_system
 
-# Import discovery functions
+# Use lazy loading for the registry system
+# Lazy import to prevent heavy initialization
+def get_registry_system():
+    """Get the registry system (lazy loaded)."""
+    from haive.dataflow.registry.core import get_registry_system
+
+    return get_registry_system()
+
+
+# For backwards compatibility
+class LazyRegistryAccess:
+    def __getattr__(self, name):
+        registry = get_registry_system()
+        return getattr(registry, name)
+
+    def __call__(self, *args, **kwargs):
+        registry = get_registry_system()
+        return registry(*args, **kwargs)
+
+
+registry_system = LazyRegistryAccess()
+
+# Import discovery functions (these should also be lazy)
 from haive.dataflow.registry.discovery import (
     discover_agents,
     discover_all,
