@@ -131,7 +131,6 @@ def run_import(
 
         # Restore original TQDM_AVAILABLE value if it was overridden
         if no_progress and "orig_value" in locals():
-            global TQDM_AVAILABLE
             TQDM_AVAILABLE = orig_value
 
     except ImportError:
