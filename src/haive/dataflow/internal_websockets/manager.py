@@ -4,8 +4,8 @@ from uuid import uuid4
 
 from fastapi import WebSocket
 
-from haive.dataflow.auth.supabase import SupabaseAuth
-from haive.dataflow.config.environment import get_supabase_server_config
+from .auth.supabase import SupabaseAuth
+from .config.environment import get_supabase_server_config
 
 logger = logging.getLogger(__name__)
 

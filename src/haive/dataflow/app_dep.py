@@ -4,8 +4,8 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from haive.dataflow.api.registry import agent_registry
-from haive.dataflow.api.router import create_agent_router
+from .api.registry import agent_registry
+from .api.router import create_agent_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

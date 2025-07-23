@@ -7,14 +7,14 @@ from typing import Any, Literal
 
 from fastapi import HTTPException, WebSocket, WebSocketDisconnect
 
-# Import generic API framework
-from haive.api.api.game_agent import AgentResponseBase, GenericAgentAPI
-
 # Import Connect4 components
 from haive_games.connect4.agent import Connect4Agent
 from haive_games.connect4.config import Connect4AgentConfig
 from haive_games.connect4.state import Connect4State
 from pydantic import BaseModel, Field
+
+# Import generic API framework
+from .api.game_agent import AgentResponseBase, GenericAgentAPI
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

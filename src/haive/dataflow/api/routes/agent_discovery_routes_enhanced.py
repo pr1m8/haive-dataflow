@@ -37,10 +37,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel, Field
 
 # Import discovery system
-from haive.core.utils.haive_discovery import ComponentInfo, HaiveComponentDiscovery
-from pydantic import BaseModel, Field
+from .utils.haive_discovery import ComponentInfo, HaiveComponentDiscovery
 
 logger = logging.getLogger(__name__)
 

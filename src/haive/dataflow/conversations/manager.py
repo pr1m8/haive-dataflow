@@ -4,16 +4,17 @@ import logging
 import uuid
 from typing import Any
 
-from haive.core.persistence.factory import (
+from pydantic import BaseModel
+
+from haive.dataflow.config import SupabaseServerConfig
+
+from .persistence.factory import (
     acreate_postgres_checkpointer,
     aget_postgres_checkpoint,
     aput_postgres_checkpoint,
     aregister_postgres_thread,
 )
-from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
-from pydantic import BaseModel
-
-from haive.dataflow.config import SupabaseServerConfig
+from .persistence.postgres_config import PostgresCheckpointerConfig
 
 logger = logging.getLogger(__name__)
 

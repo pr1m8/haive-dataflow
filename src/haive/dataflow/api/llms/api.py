@@ -11,8 +11,9 @@ from typing import Any
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from haive.api.api.llms.models import Provider
 from supabase import create_client
+
+from .api.llms.models import Provider
 
 # Load environment variables
 load_dotenv()

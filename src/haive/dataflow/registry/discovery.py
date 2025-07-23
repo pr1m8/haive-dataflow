@@ -46,12 +46,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from haive.dataflow.registry.core import (  # Import the singleton instance
+from .registry.core import (  # Import the singleton instance
     registry_system,
 )
 
 # Import registry models and utilities
-from haive.dataflow.registry.models import (
+from .registry.models import (
     ConfigType,
     EntityType,
     ImportStatus,

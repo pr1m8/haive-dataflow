@@ -74,11 +74,15 @@ from fastapi import (
     WebSocketDisconnect,
 )
 from fastapi.websockets import WebSocketState
+from pydantic import BaseModel, Field
+
+from .auth.dependencies import require_auth
+from .auth.supabase import SupabaseAuth
 
 # Authentication imports
-from haive.core.engine.agent.config import AgentConfig
-from haive.core.engine.aug_llm import AugLLMConfig
-from haive.core.models.llm.base import (
+from .engine.agent.config import AgentConfig
+from .engine.aug_llm import AugLLMConfig
+from .models.llm.base import (
     AnthropicLLMConfig,
     AzureLLMConfig,
     DeepSeekLLMConfig,
@@ -86,11 +90,7 @@ from haive.core.models.llm.base import (
     MistralLLMConfig,
     OpenAILLMConfig,
 )
-from haive.core.models.llm.provider_types import LLMProvider
-from pydantic import BaseModel, Field
-
-from haive.dataflow.auth.dependencies import require_auth
-from haive.dataflow.auth.supabase import SupabaseAuth
+from .models.llm.provider_types import LLMProvider
 
 logger = logging.getLogger(__name__)
 

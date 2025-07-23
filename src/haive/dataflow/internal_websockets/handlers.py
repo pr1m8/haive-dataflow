@@ -7,10 +7,10 @@ from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from haive.dataflow.auth.credits import CreditsManager, UsageRecord
-from haive.dataflow.config.settings import get_settings
-from haive.dataflow.internal_websockets.manager import ConnectionManager
-from haive.dataflow.persistence.conversations import ConversationManager
+from .auth.credits import CreditsManager, UsageRecord
+from .config.settings import get_settings
+from .internal_websockets.manager import ConnectionManager
+from .persistence.conversations import ConversationManager
 
 # Try importing from your registry
 try:

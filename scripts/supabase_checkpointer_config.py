@@ -11,11 +11,11 @@ import logging
 import os
 from typing import Any, Dict, Optional
 
-from haive.core.engine.agent.config import AgentConfig
-from haive.core.persistence.supabase_config import SupabaseSaver
 from pydantic import BaseModel, Field
 
-from haive.dataflow.config.environment import get_supabase_server_config
+from .config.environment import get_supabase_server_config
+from .engine.agent.config import AgentConfig
+from .persistence.supabase_config import SupabaseSaver
 
 logger = logging.getLogger(__name__)
 

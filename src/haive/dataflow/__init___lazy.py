@@ -43,7 +43,7 @@ This package consists of several modules:
 """
 
 # Import discovery functions (these should also be lazy)
-from haive.dataflow.registry.discovery import (
+from .registry.discovery import (
     discover_agents,
     discover_all,
     discover_engines,
@@ -53,8 +53,8 @@ from haive.dataflow.registry.discovery import (
 )
 
 # Use lazy loading for the registry system
-from haive.dataflow.registry.lazy_core import registry_system
-from haive.dataflow.registry.models import (  # MCP Models
+from .registry.lazy_core import registry_system
+from .registry.models import (  # MCP Models
     ConfigType,
     Configuration,
     Dependency,
@@ -74,7 +74,7 @@ from haive.dataflow.registry.models import (  # MCP Models
 )
 
 # Import serialization utilities
-from haive.dataflow.registry.serialization import (
+from .registry.serialization import (
     SerializationRegistry,
     deserialize_object,
     serialize_object,

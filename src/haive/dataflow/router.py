@@ -6,7 +6,8 @@ from typing import Any
 
 from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi.responses import StreamingResponse
-from haive.api.api.registry import agent_registry
+
+from .api.registry import agent_registry
 
 logger = logging.getLogger(__name__)
 

@@ -13,13 +13,13 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 # Import registry models and utilities
-from haive.dataflow.registry.core import (
+from .registry.core import (
     DependencyType,
     EntityType,
     ImportStatus,
     registry_system,
 )
-from haive.dataflow.registry.serialization import serialize_object
+from .registry.serialization import serialize_object
 
 # Set up logging
 logger = logging.getLogger(__name__)

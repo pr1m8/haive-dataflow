@@ -3,7 +3,6 @@
 TODO: Add detailed description of module functionality
 
 
-
 Example:
     Basic usage::
 

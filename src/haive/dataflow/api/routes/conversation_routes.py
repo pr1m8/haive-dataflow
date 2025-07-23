@@ -53,10 +53,10 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from haive.dataflow.auth.credits import CreditsManager, UsageRecord
-from haive.dataflow.auth.dependencies import require_auth
-from haive.dataflow.config.settings import get_settings
-from haive.dataflow.persistence.conversations import ConversationManager
+from .auth.credits import CreditsManager, UsageRecord
+from .auth.dependencies import require_auth
+from .config.settings import get_settings
+from .persistence.conversations import ConversationManager
 
 # Try importing from your registry
 try:

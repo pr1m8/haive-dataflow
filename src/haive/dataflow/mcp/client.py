@@ -20,7 +20,7 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from haive.dataflow.registry.models import (
+from .registry.models import (
     EntityType,
     MCPServerConfig,
     MCPServerHealth,

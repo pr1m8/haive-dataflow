@@ -49,7 +49,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
 # Import discovery system
-from haive.core.utils.haive_discovery import ComponentInfo, HaiveComponentDiscovery
+from .utils.haive_discovery import ComponentInfo, HaiveComponentDiscovery
 
 # Configure logging
 logging.basicConfig(

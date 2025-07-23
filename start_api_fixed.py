@@ -40,7 +40,7 @@ import sys
 sys.path.insert(0, "src")
 
 # Import the app
-from haive.dataflow.api.app import app
+from .api.app import app
 
 if __name__ == "__main__":
     import uvicorn

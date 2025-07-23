@@ -50,16 +50,19 @@ import logging
 from contextlib import asynccontextmanager
 from typing import Any
 
-from haive.core.persistence.factory import (
+from haive.dataflow.config.environment import (
+    get_postgres_config,
+    get_supabase_server_config,
+)
+
+from .config.environment import (
+    get_supabase_server_config,
+)
+from .persistence.factory import (
     acreate_postgres_checkpointer,
     aget_postgres_checkpoint,
     aput_postgres_checkpoint,
     aregister_postgres_thread,
-)
-
-from haive.dataflow.config.environment import (
-    get_postgres_config,
-    get_supabase_server_config,
 )
 
 logger = logging.getLogger(__name__)

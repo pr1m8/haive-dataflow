@@ -16,7 +16,7 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root / "packages/haive-dataflow/src"))
 sys.path.insert(0, str(project_root / "packages/haive-core/src"))
 
-from haive.dataflow.config.environment import get_supabase_server_config
+from .config.environment import get_supabase_server_config
 
 
 def get_postgres_connection_string():

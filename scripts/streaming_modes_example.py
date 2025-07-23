@@ -12,8 +12,9 @@ Available stream modes:
 
 from typing import Any, AsyncGenerator
 
-from haive.agents.base.agent import Agent
 from pydantic import BaseModel
+
+from .base.agent import Agent
 
 
 class StreamingAgent(Agent):

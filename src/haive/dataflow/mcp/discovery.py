@@ -24,7 +24,7 @@ import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from haive.dataflow.registry.models import (
+from .registry.models import (
     EntityType,
     MCPPromptDefinition,
     MCPResourceDefinition,

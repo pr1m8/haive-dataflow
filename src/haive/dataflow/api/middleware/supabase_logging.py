@@ -14,7 +14,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 # Import Supabase client
 from supabase import create_client
 
-from haive.dataflow.config.environment import get_supabase_server_config
+from .config.environment import get_supabase_server_config
 
 logger = logging.getLogger(__name__)
 

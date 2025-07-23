@@ -17,7 +17,7 @@ from haive.dataflow.core import registry_system
 from haive.dataflow.models import ConfigType, DependencyType, EntityType, ImportStatus
 
 # Set up logging
-from haive.dataflow.utils.logging import setup_discovery_logger
+from .utils.logging import setup_discovery_logger
 
 logger = setup_discovery_logger("providers")
 

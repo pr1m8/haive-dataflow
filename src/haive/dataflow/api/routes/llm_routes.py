@@ -52,10 +52,15 @@ from pydantic import BaseModel, ConfigDict, Field
 logger = logging.getLogger(__name__)
 import traceback
 
-from haive.core.engine.aug_llm import AugLLMConfig
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+# Import authentication dependencies
+from .auth.middleware import require_auth
+from .engine.aug_llm import AugLLMConfig
 
 # Import necessary LLM configurations
-from haive.core.models.llm.base import (
+from .models.llm.base import (
     AnthropicLLMConfig,
     AzureLLMConfig,
     DeepSeekLLMConfig,
@@ -63,12 +68,7 @@ from haive.core.models.llm.base import (
     MistralLLMConfig,
     OpenAILLMConfig,
 )
-from haive.core.models.llm.provider_types import LLMProvider
-from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-
-# Import authentication dependencies
-from haive.dataflow.auth.middleware import require_auth
+from .models.llm.provider_types import LLMProvider
 
 # Create router with prefix and tags
 router = APIRouter(

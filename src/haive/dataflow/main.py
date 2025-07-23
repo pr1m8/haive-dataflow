@@ -28,8 +28,8 @@ logging.basicConfig(
 logger = logging.getLogger("haive.dataflow")
 
 # Import fastapi app
-from haive.dataflow.api.app import app
-from haive.dataflow.config.settings import get_settings
+from .api.app import app
+from .config.settings import get_settings
 
 settings = get_settings()
 

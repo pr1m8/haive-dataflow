@@ -14,8 +14,11 @@ load_dotenv(".env")
 import traceback
 
 import uvicorn
-from haive.core.engine.aug_llm import AugLLMConfig
-from haive.core.models.llm.base import (
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
+from .engine.aug_llm import AugLLMConfig
+from .models.llm.base import (
     AnthropicLLMConfig,
     AzureLLMConfig,
     DeepSeekLLMConfig,
@@ -23,9 +26,7 @@ from haive.core.models.llm.base import (
     MistralLLMConfig,
     OpenAILLMConfig,
 )
-from haive.core.models.llm.provider_types import LLMProvider
-from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from .models.llm.provider_types import LLMProvider
 
 # Create FastAPI app with more detailed metadata
 app = FastAPI(

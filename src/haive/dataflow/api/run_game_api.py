@@ -36,7 +36,7 @@ for path in [haive_root, packages_dir, haive_games_path]:
         sys.path.insert(0, path)
 
 # Import after setting up paths
-from haive.dataflow.api.game_router import discover_game_agents, game_agents, get_router
+from .api.game_router import discover_game_agents, game_agents, get_router
 
 
 def create_app():

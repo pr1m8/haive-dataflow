@@ -30,12 +30,12 @@ module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../
 if module_path not in sys.path:
     sys.path.append(module_path)
 
-# Now import the modules
-from haive.core.engine.agent.agent import Agent
-from haive.core.persistence.supabase_config import SupabaseCheckpointerConfig
-from haive.core.schema.state_schema import StateSchema
+from .api.game_socket import GameSocketServer
 
-from haive.dataflow.api.game_socket import GameSocketServer
+# Now import the modules
+from .engine.agent.agent import Agent
+from .persistence.supabase_config import SupabaseCheckpointerConfig
+from .schema.state_schema import StateSchema
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

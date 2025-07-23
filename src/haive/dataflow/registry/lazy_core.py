@@ -12,7 +12,7 @@ import logging
 import os
 from typing import Any, Dict, List, Optional, Union
 
-from haive.dataflow.registry.models import EntityType
+from .registry.models import EntityType
 
 logger = logging.getLogger(__name__)
 

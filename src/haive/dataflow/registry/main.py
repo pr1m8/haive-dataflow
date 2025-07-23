@@ -1,9 +1,9 @@
 # end_to_end_test.py
 import uuid
 
-from haive.dataflow.registry.core import registry_system
-from haive.dataflow.registry.models import EntityType
-from haive.dataflow.registry.providers.agent_provider import agent_provider
+from .registry.core import registry_system
+from .registry.models import EntityType
+from .registry.providers.agent_provider import agent_provider
 
 # Generate a session ID for tracking imports
 session_id = str(uuid.uuid4())

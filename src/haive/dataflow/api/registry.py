@@ -9,7 +9,7 @@ import traceback
 from datetime import datetime
 from typing import Any
 
-from haive.core.engine.agent.agent import Agent, AgentConfig
+from .engine.agent.agent import Agent, AgentConfig
 
 logger = logging.getLogger(__name__)
 

@@ -11,24 +11,26 @@ import os
 from typing import Any
 
 # Import supabase client utilities
-from haive.dataflow.db.supabase import get_supabase_client, table
+from .db.supabase import get_supabase_client, table
 
 # Import LLM core models for environment variable inspection
 try:
     from haive.core.models.llm.base import LLMConfig, SecureConfigMixin
     from haive.core.models.llm.provider_types import LLMProvider
+
     CORE_LLM_AVAILABLE = True
 except ImportError:
     CORE_LLM_AVAILABLE = False
-    logging.warning("Core LLM models not available - some functionality will be limited")
+    logging.warning(
+        "Core LLM models not available - some functionality will be limited"
+    )
 
 # Set up logging
 logger = logging.getLogger(__name__)
 
 
 class ModelRegistry:
-    """Client for working with registered LLM and embedding models.
-    """
+    """Client for working with registered LLM and embedding models."""
 
     def __init__(self):
         """Initialize the model registry client."""
@@ -42,6 +44,7 @@ class ModelRegistry:
         except Exception as e:
             logger.warning(f"Could not initialize Supabase connection: {e}")
             import traceback
+
             logger.debug(f"Supabase init error traceback: {traceback.format_exc()}")
 
         # Load model data from importers
@@ -55,7 +58,10 @@ class ModelRegistry:
         # Try to import embedding models data
         try:
             from haive.dataflow.importers.embeddings_importer import EMBEDDING_MODELS
-            logger.info(f"Loaded {len(EMBEDDING_MODELS)} embedding models from embeddings_importer")
+
+            logger.info(
+                f"Loaded {len(EMBEDDING_MODELS)} embedding models from embeddings_importer"
+            )
             self._embedding_models_cache = EMBEDDING_MODELS
         except ImportError:
             logger.warning("Could not import embedding models data")
@@ -70,8 +76,7 @@ class ModelRegistry:
             logger.warning("Could not import LLM models data")
 
     def update_provider_availability(self):
-        """Scan environment variables and update provider availability status.
-        """
+        """Scan environment variables and update provider availability status."""
         # Get all required environment variables by scanning the core LLM implementations
         env_vars = self.get_required_environment_vars()
 
@@ -87,30 +92,43 @@ class ModelRegistry:
         if self._supabase:
             try:
                 # Update LLM providers in models schema
-                llm_providers = table(self._supabase, "models.providers").select("*").execute()
+                llm_providers = (
+                    table(self._supabase, "models.providers").select("*").execute()
+                )
                 if llm_providers.data:
                     for provider in llm_providers.data:
                         # Check if any env vars for this provider
                         provider_name = provider.get("name")
-                        matching_env_vars = [var for var in env_vars if var.get("provider_name") == provider_name]
+                        matching_env_vars = [
+                            var
+                            for var in env_vars
+                            if var.get("provider_name") == provider_name
+                        ]
 
-                        env_var_names = [var.get("var_name") for var in matching_env_vars]
-                        is_available = any(env_name in available_vars for env_name in env_var_names if env_name)
+                        env_var_names = [
+                            var.get("var_name") for var in matching_env_vars
+                        ]
+                        is_available = any(
+                            env_name in available_vars
+                            for env_name in env_var_names
+                            if env_name
+                        )
 
                         # Update provider status
-                        table(self._supabase, "models.providers").update({
-                            "is_available": is_available,
-                            "updated_at": "NOW()"
-                        }).eq("id", provider["id"]).execute()
+                        table(self._supabase, "models.providers").update(
+                            {"is_available": is_available, "updated_at": "NOW()"}
+                        ).eq("id", provider["id"]).execute()
 
-                logger.info("Provider availability updated based on environment variables")
+                logger.info(
+                    "Provider availability updated based on environment variables"
+                )
 
             except Exception as e:
                 logger.error(f"Error updating provider availability: {e}")
 
     def get_required_environment_vars(self) -> list[dict[str, Any]]:
         """Scan source code to detect environment variables used by LLM providers.
-        
+
         Returns:
             List of environment variables with provider mapping
         """
@@ -118,7 +136,9 @@ class ModelRegistry:
 
         # If core LLM models aren't available, return empty list
         if not CORE_LLM_AVAILABLE:
-            logger.warning("Core LLM models not available - cannot detect environment variables")
+            logger.warning(
+                "Core LLM models not available - cannot detect environment variables"
+            )
             return env_vars
 
         # Get the LLMProvider enum values
@@ -129,11 +149,14 @@ class ModelRegistry:
 
         # Extra handling for specific environment variables that might be missed
         special_mappings = {
-            "GEMINI": ["GOOGLE_API_KEY", "GEMINI_API_KEY"],  # Check both possible env vars for Gemini
+            "GEMINI": [
+                "GOOGLE_API_KEY",
+                "GEMINI_API_KEY",
+            ],  # Check both possible env vars for Gemini
             "MISTRALAI": ["MISTRAL_API_KEY"],
             "OPENAI": ["OPENAI_API_KEY"],
             "AZURE": ["AZURE_OPENAI_API_KEY"],
-            "ANTHROPIC": ["ANTHROPIC_API_KEY", "CLAUDE_API_KEY"]
+            "ANTHROPIC": ["ANTHROPIC_API_KEY", "CLAUDE_API_KEY"],
         }
 
         # Check each class for environment variable references
@@ -157,7 +180,11 @@ class ModelRegistry:
             for attr_name, attr_value in cls.__annotations__.items():
                 if attr_name == "api_key":
                     # Try to find the default_factory lambda that references os.getenv
-                    field_info = cls.__fields__[attr_name] if hasattr(cls, "__fields__") else None
+                    field_info = (
+                        cls.__fields__[attr_name]
+                        if hasattr(cls, "__fields__")
+                        else None
+                    )
                     if field_info and hasattr(field_info, "default_factory"):
                         default_factory = field_info.default_factory
                         source_code = inspect.getsource(default_factory)
@@ -165,37 +192,53 @@ class ModelRegistry:
                         # Extract environment variable names using a simple approach
                         # Looking for patterns like: os.getenv("ENV_VAR_NAME", "")
                         import re
-                        env_var_matches = re.findall(r'os\.getenv\(["\']([A-Z0-9_]+)["\']', source_code)
+
+                        env_var_matches = re.findall(
+                            r'os\.getenv\(["\']([A-Z0-9_]+)["\']', source_code
+                        )
 
                         for env_var_name in env_var_matches:
-                            env_vars.append({
-                                "var_name": env_var_name,
-                                "provider_name": provider_name,
-                                "is_required": True,
-                                "description": f"API key for {provider_name.title()} provider"
-                            })
-                            logger.debug(f"Detected environment variable: {env_var_name} for provider {provider_name}")
+                            env_vars.append(
+                                {
+                                    "var_name": env_var_name,
+                                    "provider_name": provider_name,
+                                    "is_required": True,
+                                    "description": f"API key for {provider_name.title()} provider",
+                                }
+                            )
+                            logger.debug(
+                                f"Detected environment variable: {env_var_name} for provider {provider_name}"
+                            )
 
         # Add special mappings for providers that might be missed
         for provider, env_var_names in special_mappings.items():
             provider_lower = provider.lower()
 
             # Check if we already have this provider in our env vars
-            has_provider = any(var.get("provider_name", "").lower() == provider_lower for var in env_vars)
+            has_provider = any(
+                var.get("provider_name", "").lower() == provider_lower
+                for var in env_vars
+            )
 
             # If not found or provider is Gemini (we want to ensure both env vars are checked)
             if not has_provider or provider_lower == "gemini":
                 for env_var_name in env_var_names:
                     # Check if this specific env var is already registered
-                    has_var = any(var.get("var_name") == env_var_name for var in env_vars)
+                    has_var = any(
+                        var.get("var_name") == env_var_name for var in env_vars
+                    )
                     if not has_var:
-                        env_vars.append({
-                            "var_name": env_var_name,
-                            "provider_name": provider_lower,
-                            "is_required": True,
-                            "description": f"API key for {provider.title()} provider"
-                        })
-                        logger.debug(f"Added special mapping: {env_var_name} for provider {provider_lower}")
+                        env_vars.append(
+                            {
+                                "var_name": env_var_name,
+                                "provider_name": provider_lower,
+                                "is_required": True,
+                                "description": f"API key for {provider.title()} provider",
+                            }
+                        )
+                        logger.debug(
+                            f"Added special mapping: {env_var_name} for provider {provider_lower}"
+                        )
 
         # If we couldn't extract any from the code, fall back to secure config mixin mapping
         if not env_vars and hasattr(SecureConfigMixin, "_validate_api_key"):
@@ -204,22 +247,31 @@ class ModelRegistry:
 
             # Extract the env_key_map dictionary
             import re
-            env_map_match = re.search(r"env_key_map\s*=\s*{([^}]+)}", source_code, re.DOTALL)
+
+            env_map_match = re.search(
+                r"env_key_map\s*=\s*{([^}]+)}", source_code, re.DOTALL
+            )
 
             if env_map_match:
                 env_map_str = env_map_match.group(1)
 
                 # Parse the environment variable mapping
-                provider_env_pairs = re.findall(r'["\']([a-z0-9_]+)["\']:\s*["\']([A-Z0-9_]+)["\']', env_map_str)
+                provider_env_pairs = re.findall(
+                    r'["\']([a-z0-9_]+)["\']:\s*["\']([A-Z0-9_]+)["\']', env_map_str
+                )
 
                 for provider_name, env_var_name in provider_env_pairs:
-                    env_vars.append({
-                        "var_name": env_var_name,
-                        "provider_name": provider_name,
-                        "is_required": True,
-                        "description": f"API key for {provider_name.title()} provider"
-                    })
-                    logger.debug(f"Extracted environment variable from SecureConfigMixin: {env_var_name} for provider {provider_name}")
+                    env_vars.append(
+                        {
+                            "var_name": env_var_name,
+                            "provider_name": provider_name,
+                            "is_required": True,
+                            "description": f"API key for {provider_name.title()} provider",
+                        }
+                    )
+                    logger.debug(
+                        f"Extracted environment variable from SecureConfigMixin: {env_var_name} for provider {provider_name}"
+                    )
 
         # Check existing environment variables to see which ones are set
         # This is helpful for debugging and may catch variables not found by code analysis
@@ -240,7 +292,7 @@ class ModelRegistry:
                     "cohere": ["COHERE"],
                     "fireworks_ai": ["FIREWORKS"],
                     "together_ai": ["TOGETHER"],
-                    "replicate": ["REPLICATE"]
+                    "replicate": ["REPLICATE"],
                 }
 
                 for provider, prefixes in patterns.items():
@@ -252,13 +304,17 @@ class ModelRegistry:
                     # Check if we already have this environment variable
                     has_var = any(var.get("var_name") == env_name for var in env_vars)
                     if not has_var:
-                        env_vars.append({
-                            "var_name": env_name,
-                            "provider_name": provider_match,
-                            "is_required": True,
-                            "description": f"API key for {provider_match.title()} provider (auto-detected)"
-                        })
-                        logger.debug(f"Auto-detected environment variable: {env_name} for provider {provider_match}")
+                        env_vars.append(
+                            {
+                                "var_name": env_name,
+                                "provider_name": provider_match,
+                                "is_required": True,
+                                "description": f"API key for {provider_match.title()} provider (auto-detected)",
+                            }
+                        )
+                        logger.debug(
+                            f"Auto-detected environment variable: {env_name} for provider {provider_match}"
+                        )
 
         # Register these environment variables in config
         if self._supabase and env_vars:
@@ -292,22 +348,35 @@ class ModelRegistry:
                     continue
 
                 # Check if this env var already exists
-                existing_vars = table(self._supabase, "config.environment_variables").select("*").eq("name", var_name).execute()
+                existing_vars = (
+                    table(self._supabase, "config.environment_variables")
+                    .select("*")
+                    .eq("name", var_name)
+                    .execute()
+                )
 
                 env_var_id = None
                 if existing_vars.data and len(existing_vars.data) > 0:
                     env_var_id = existing_vars.data[0].get("id")
                 else:
                     # Create new entry using only columns that exist in the schema
-                    insert_result = table(self._supabase, "config.environment_variables").insert({
-                        "name": var_name,
-                        "display_name": f"{env_var.get('provider_name', '').title()} API Key",
-                        "description": env_var.get("description", "API key for provider"),
-                        "is_secret": True,
-                        "is_required": env_var.get("is_required", True),
-                        "created_at": "NOW()",
-                        "updated_at": "NOW()"
-                    }).execute()
+                    insert_result = (
+                        table(self._supabase, "config.environment_variables")
+                        .insert(
+                            {
+                                "name": var_name,
+                                "display_name": f"{env_var.get('provider_name', '').title()} API Key",
+                                "description": env_var.get(
+                                    "description", "API key for provider"
+                                ),
+                                "is_secret": True,
+                                "is_required": env_var.get("is_required", True),
+                                "created_at": "NOW()",
+                                "updated_at": "NOW()",
+                            }
+                        )
+                        .execute()
+                    )
 
                     if insert_result.data and len(insert_result.data) > 0:
                         env_var_id = insert_result.data[0].get("id")
@@ -318,47 +387,76 @@ class ModelRegistry:
                 provider_name = env_var.get("provider_name")
                 if provider_name:
                     # Check if provider exists
-                    provider_response = table(self._supabase, "models.providers").select("*").eq("name", provider_name).execute()
+                    provider_response = (
+                        table(self._supabase, "models.providers")
+                        .select("*")
+                        .eq("name", provider_name)
+                        .execute()
+                    )
 
                     provider_id = None
                     if provider_response.data and len(provider_response.data) > 0:
                         provider_id = provider_response.data[0].get("id")
                         # Update is_available
                         is_available = bool(os.getenv(var_name))
-                        table(self._supabase, "models.providers").update({
-                            "is_available": is_available,
-                            "updated_at": "NOW()"
-                        }).eq("id", provider_id).execute()
+                        table(self._supabase, "models.providers").update(
+                            {"is_available": is_available, "updated_at": "NOW()"}
+                        ).eq("id", provider_id).execute()
                     else:
                         # Get or create provider type
-                        provider_type_response = table(self._supabase, "models.provider_types").select("*").eq("name", "llm").execute()
+                        provider_type_response = (
+                            table(self._supabase, "models.provider_types")
+                            .select("*")
+                            .eq("name", "llm")
+                            .execute()
+                        )
                         provider_type_id = None
 
-                        if provider_type_response.data and len(provider_type_response.data) > 0:
+                        if (
+                            provider_type_response.data
+                            and len(provider_type_response.data) > 0
+                        ):
                             provider_type_id = provider_type_response.data[0].get("id")
                         else:
                             # Create provider type if not exists
-                            provider_type_insert = table(self._supabase, "models.provider_types").insert({
-                                "name": "llm",
-                                "display_name": "LLM Provider",
-                                "description": "Provider for Large Language Models",
-                                "created_at": "NOW()"
-                            }).execute()
+                            provider_type_insert = (
+                                table(self._supabase, "models.provider_types")
+                                .insert(
+                                    {
+                                        "name": "llm",
+                                        "display_name": "LLM Provider",
+                                        "description": "Provider for Large Language Models",
+                                        "created_at": "NOW()",
+                                    }
+                                )
+                                .execute()
+                            )
 
-                            if provider_type_insert.data and len(provider_type_insert.data) > 0:
-                                provider_type_id = provider_type_insert.data[0].get("id")
+                            if (
+                                provider_type_insert.data
+                                and len(provider_type_insert.data) > 0
+                            ):
+                                provider_type_id = provider_type_insert.data[0].get(
+                                    "id"
+                                )
 
                         if provider_type_id:
                             # Create provider
-                            provider_insert = table(self._supabase, "models.providers").insert({
-                                "type_id": provider_type_id,
-                                "name": provider_name,
-                                "display_name": provider_name.title(),
-                                "description": f"Provider for {provider_name.title()} models",
-                                "is_available": bool(os.getenv(var_name)),
-                                "created_at": "NOW()",
-                                "updated_at": "NOW()"
-                            }).execute()
+                            provider_insert = (
+                                table(self._supabase, "models.providers")
+                                .insert(
+                                    {
+                                        "type_id": provider_type_id,
+                                        "name": provider_name,
+                                        "display_name": provider_name.title(),
+                                        "description": f"Provider for {provider_name.title()} models",
+                                        "is_available": bool(os.getenv(var_name)),
+                                        "created_at": "NOW()",
+                                        "updated_at": "NOW()",
+                                    }
+                                )
+                                .execute()
+                            )
 
                             if provider_insert.data and len(provider_insert.data) > 0:
                                 provider_id = provider_insert.data[0].get("id")
@@ -370,9 +468,11 @@ class ModelRegistry:
         except Exception as e:
             logger.error(f"Error registering environment variables: {e}")
 
-    def _store_secret_in_vault(self, env_var_id: str, var_name: str, provider_id: str = None):
+    def _store_secret_in_vault(
+        self, env_var_id: str, var_name: str, provider_id: str = None
+    ):
         """Securely store the secret value in the vault schema.
-        
+
         Args:
             env_var_id: ID of the environment variable
             var_name: Name of the environment variable
@@ -391,24 +491,34 @@ class ModelRegistry:
                     return
 
                 # Check if entry already exists
-                existing = table(self._supabase, "vault.user_env_secrets").select("id").eq("user_id", current_user_id).eq("env_var_id", env_var_id).execute()
+                existing = (
+                    table(self._supabase, "vault.user_env_secrets")
+                    .select("id")
+                    .eq("user_id", current_user_id)
+                    .eq("env_var_id", env_var_id)
+                    .execute()
+                )
 
                 if existing.data and len(existing.data) > 0:
                     # Update existing entry
-                    table(self._supabase, "vault.user_env_secrets").update({
-                        "secret_value": value,  # This should be encrypted by Supabase Vault
-                        "updated_at": "NOW()"
-                    }).eq("id", existing.data[0].get("id")).execute()
+                    table(self._supabase, "vault.user_env_secrets").update(
+                        {
+                            "secret_value": value,  # This should be encrypted by Supabase Vault
+                            "updated_at": "NOW()",
+                        }
+                    ).eq("id", existing.data[0].get("id")).execute()
                     logger.info(f"Updated secret value for {var_name} in vault")
                 else:
                     # Create new entry
-                    table(self._supabase, "vault.user_env_secrets").insert({
-                        "user_id": current_user_id,
-                        "env_var_id": env_var_id,
-                        "secret_value": value,  # This should be encrypted by Supabase Vault
-                        "created_at": "NOW()",
-                        "updated_at": "NOW()"
-                    }).execute()
+                    table(self._supabase, "vault.user_env_secrets").insert(
+                        {
+                            "user_id": current_user_id,
+                            "env_var_id": env_var_id,
+                            "secret_value": value,  # This should be encrypted by Supabase Vault
+                            "created_at": "NOW()",
+                            "updated_at": "NOW()",
+                        }
+                    ).execute()
                     logger.info(f"Stored secret value for {var_name} in vault")
 
                 # If we have a provider ID, also store in team_env_secrets for the default team
@@ -416,24 +526,31 @@ class ModelRegistry:
                     default_team_id = self._get_default_team_id(current_user_id)
                     if default_team_id:
                         # Check if entry already exists
-                        existing_team = table(self._supabase, "vault.team_env_secrets").select("id").eq("team_id", default_team_id).eq("env_var_id", env_var_id).execute()
+                        existing_team = (
+                            table(self._supabase, "vault.team_env_secrets")
+                            .select("id")
+                            .eq("team_id", default_team_id)
+                            .eq("env_var_id", env_var_id)
+                            .execute()
+                        )
 
                         if existing_team.data and len(existing_team.data) > 0:
                             # Update existing entry
-                            table(self._supabase, "vault.team_env_secrets").update({
-                                "secret_value": value,
-                                "updated_at": "NOW()"
-                            }).eq("id", existing_team.data[0].get("id")).execute()
+                            table(self._supabase, "vault.team_env_secrets").update(
+                                {"secret_value": value, "updated_at": "NOW()"}
+                            ).eq("id", existing_team.data[0].get("id")).execute()
                         else:
                             # Create new entry
-                            table(self._supabase, "vault.team_env_secrets").insert({
-                                "team_id": default_team_id,
-                                "env_var_id": env_var_id,
-                                "secret_value": value,
-                                "created_by": current_user_id,
-                                "created_at": "NOW()",
-                                "updated_at": "NOW()"
-                            }).execute()
+                            table(self._supabase, "vault.team_env_secrets").insert(
+                                {
+                                    "team_id": default_team_id,
+                                    "env_var_id": env_var_id,
+                                    "secret_value": value,
+                                    "created_by": current_user_id,
+                                    "created_at": "NOW()",
+                                    "updated_at": "NOW()",
+                                }
+                            ).execute()
 
             except Exception as e:
                 if "relation" in str(e) and "does not exist" in str(e):
@@ -466,7 +583,14 @@ class ModelRegistry:
 
         try:
             # Try to find a team where the user is an owner or admin
-            team_response = table(self._supabase, "public.team_members").select("team_id").eq("user_id", user_id).in_("role", ["owner", "admin"]).limit(1).execute()
+            team_response = (
+                table(self._supabase, "public.team_members")
+                .select("team_id")
+                .eq("user_id", user_id)
+                .in_("role", ["owner", "admin"])
+                .limit(1)
+                .execute()
+            )
 
             if team_response.data and len(team_response.data) > 0:
                 return team_response.data[0].get("team_id")
@@ -477,10 +601,10 @@ class ModelRegistry:
 
     def get_secret_from_vault(self, var_name: str) -> str | None:
         """Get a secret value from the vault.
-        
+
         Args:
             var_name: Name of the environment variable
-            
+
         Returns:
             Secret value or None if not found
         """
@@ -494,7 +618,12 @@ class ModelRegistry:
 
         try:
             # Get the environment variable ID
-            env_var_response = table(self._supabase, "config.environment_variables").select("id").eq("name", var_name).execute()
+            env_var_response = (
+                table(self._supabase, "config.environment_variables")
+                .select("id")
+                .eq("name", var_name)
+                .execute()
+            )
 
             if not env_var_response.data or len(env_var_response.data) == 0:
                 return None
@@ -506,7 +635,13 @@ class ModelRegistry:
                 return None
 
             # Try to get from user secrets
-            user_secret_response = table(self._supabase, "vault.user_env_secrets").select("secret_value").eq("user_id", current_user_id).eq("env_var_id", env_var_id).execute()
+            user_secret_response = (
+                table(self._supabase, "vault.user_env_secrets")
+                .select("secret_value")
+                .eq("user_id", current_user_id)
+                .eq("env_var_id", env_var_id)
+                .execute()
+            )
 
             if user_secret_response.data and len(user_secret_response.data) > 0:
                 return user_secret_response.data[0].get("secret_value")
@@ -515,7 +650,13 @@ class ModelRegistry:
             default_team_id = self._get_default_team_id(current_user_id)
 
             if default_team_id:
-                team_secret_response = table(self._supabase, "vault.team_env_secrets").select("secret_value").eq("team_id", default_team_id).eq("env_var_id", env_var_id).execute()
+                team_secret_response = (
+                    table(self._supabase, "vault.team_env_secrets")
+                    .select("secret_value")
+                    .eq("team_id", default_team_id)
+                    .eq("env_var_id", env_var_id)
+                    .execute()
+                )
 
                 if team_secret_response.data and len(team_secret_response.data) > 0:
                     return team_secret_response.data[0].get("secret_value")
@@ -527,7 +668,7 @@ class ModelRegistry:
 
     def get_available_llm_providers(self) -> list[dict[str, Any]]:
         """Get all available LLM providers.
-        
+
         Returns:
             List of available LLM providers
         """
@@ -550,11 +691,19 @@ class ModelRegistry:
                 # Try the table method as a fallback
                 try:
                     from haive.dataflow.db.supabase import table
-                    response = table(self._supabase, "models.providers").select("*").eq("is_available", True).execute()
+
+                    response = (
+                        table(self._supabase, "models.providers")
+                        .select("*")
+                        .eq("is_available", True)
+                        .execute()
+                    )
                     if response.data:
                         return response.data
                 except Exception as table_e:
-                    logger.error(f"Error retrieving providers with table method: {table_e}")
+                    logger.error(
+                        f"Error retrieving providers with table method: {table_e}"
+                    )
 
         # Fall back to environment variable detection
         env_vars = self.get_required_environment_vars()
@@ -568,7 +717,7 @@ class ModelRegistry:
 
     def get_available_embedding_providers(self) -> list[dict[str, Any]]:
         """Get all available embedding providers.
-        
+
         Returns:
             List of available embedding providers
         """
@@ -590,7 +739,9 @@ class ModelRegistry:
                     return response.data
 
             except Exception as e:
-                logger.error(f"Error retrieving available embedding providers using RPC: {e}")
+                logger.error(
+                    f"Error retrieving available embedding providers using RPC: {e}"
+                )
 
                 # Try the table method as a fallback
                 try:
@@ -600,7 +751,12 @@ class ModelRegistry:
                     embedding_providers = []
 
                     # First get available providers
-                    providers_response = table(self._supabase, "models.providers").select("*").eq("is_available", True).execute()
+                    providers_response = (
+                        table(self._supabase, "models.providers")
+                        .select("*")
+                        .eq("is_available", True)
+                        .execute()
+                    )
 
                     if providers_response.data:
                         # Filter to only providers with embedding models
@@ -608,13 +764,24 @@ class ModelRegistry:
                             # Check if provider has embedding models
                             provider_id = provider.get("id")
                             if provider_id:
-                                models_response = table(self._supabase, "models.embedding_models").select("id").eq("provider_id", provider_id).limit(1).execute()
-                                if models_response.data and len(models_response.data) > 0:
+                                models_response = (
+                                    table(self._supabase, "models.embedding_models")
+                                    .select("id")
+                                    .eq("provider_id", provider_id)
+                                    .limit(1)
+                                    .execute()
+                                )
+                                if (
+                                    models_response.data
+                                    and len(models_response.data) > 0
+                                ):
                                     embedding_providers.append(provider)
 
                         return embedding_providers
                 except Exception as table_e:
-                    logger.error(f"Error retrieving embedding providers with table method: {table_e}")
+                    logger.error(
+                        f"Error retrieving embedding providers with table method: {table_e}"
+                    )
 
         # Fall back to environment variable detection
         env_vars = self.get_required_environment_vars()
@@ -628,10 +795,10 @@ class ModelRegistry:
 
     def normalize_model_data(self, model: dict[str, Any]) -> dict[str, Any]:
         """Normalize model data to ensure consistent field access.
-        
+
         Args:
             model: Model data to normalize
-            
+
         Returns:
             Normalized model data
         """
@@ -650,8 +817,13 @@ class ModelRegistry:
 
         # Ensure all important fields are at the top level
         key_fields = [
-            "model_id", "provider", "model_name", "max_tokens",
-            "dimensions", "max_input_tokens", "deprecation_date"
+            "model_id",
+            "provider",
+            "model_name",
+            "max_tokens",
+            "dimensions",
+            "max_input_tokens",
+            "deprecation_date",
         ]
 
         # Copy important fields from metadata to top level if not already present
@@ -666,35 +838,44 @@ class ModelRegistry:
 
         return normalized
 
-    def get_llm_models(self, provider: str | None = None, only_available: bool = False) -> list[dict[str, Any]]:
+    def get_llm_models(
+        self, provider: str | None = None, only_available: bool = False
+    ) -> list[dict[str, Any]]:
         """Get all LLM models, optionally filtered by provider.
-        
+
         Args:
             provider: Optional provider name to filter by
             only_available: If True, only return models from available providers
-            
+
         Returns:
             List of LLM model data
         """
         # Get available providers if filtering by availability
         available_providers = []
         if only_available:
-            available_providers = [p["name"] for p in self.get_available_llm_providers()]
+            available_providers = [
+                p["name"] for p in self.get_available_llm_providers()
+            ]
 
         results = []
 
         # First try to get models from database
         if self._supabase:
             try:
-                logger.debug(f"Fetching LLM models with provider={provider}, only_available={only_available}")
+                logger.debug(
+                    f"Fetching LLM models with provider={provider}, only_available={only_available}"
+                )
 
                 # Build SQL query with proper filtering
                 where_clause = ""
                 if provider:
-                    where_clause = f"WHERE p.name = '{provider.replace('\'', '\'\'')}'"
+                    escaped_provider = provider.replace("'", "''")
+                    where_clause = f"WHERE p.name = '{escaped_provider}'"
                 elif only_available and available_providers:
                     # Format provider names for SQL IN clause with proper escaping
-                    provider_names = "', '".join([p.replace("'", "''") for p in available_providers])
+                    provider_names = "', '".join(
+                        [p.replace("'", "''") for p in available_providers]
+                    )
                     where_clause = f"WHERE p.name IN ('{provider_names}')"
 
                 # Use a simpler joined query that should work with RPC
@@ -726,6 +907,7 @@ class ModelRegistry:
             except Exception as e:
                 logger.error(f"Error retrieving LLM models from database: {e}")
                 import traceback
+
                 logger.debug(f"Get models error traceback: {traceback.format_exc()}")
 
         # If database query didn't return results, try to import models directly
@@ -747,18 +929,27 @@ class ModelRegistry:
                             FROM models.llm_models m
                             JOIN models.providers p ON m.provider_id = p.id
                             """
-                            response = self._supabase.rpc("execute_sql", {"sql": sql}).execute()
+                            response = self._supabase.rpc(
+                                "execute_sql", {"sql": sql}
+                            ).execute()
 
                             if response.data:
                                 for model in response.data:
-                                    if "provider_name" in model and "provider" not in model:
+                                    if (
+                                        "provider_name" in model
+                                        and "provider" not in model
+                                    ):
                                         model["provider"] = model["provider_name"]
 
                                     # Apply filters
                                     if provider and model.get("provider") != provider:
                                         continue
 
-                                    if only_available and model.get("provider") not in available_providers:
+                                    if (
+                                        only_available
+                                        and model.get("provider")
+                                        not in available_providers
+                                    ):
                                         continue
 
                                     normalized_model = self.normalize_model_data(model)
@@ -770,35 +961,44 @@ class ModelRegistry:
 
         return results
 
-    def get_embedding_models(self, provider: str | None = None, only_available: bool = False) -> list[dict[str, Any]]:
+    def get_embedding_models(
+        self, provider: str | None = None, only_available: bool = False
+    ) -> list[dict[str, Any]]:
         """Get all embedding models, optionally filtered by provider.
-        
+
         Args:
             provider: Optional provider name to filter by
             only_available: If True, only return models from available providers
-            
+
         Returns:
             List of embedding model data
         """
         # Get available providers if filtering by availability
         available_providers = []
         if only_available:
-            available_providers = [p["name"] for p in self.get_available_embedding_providers()]
+            available_providers = [
+                p["name"] for p in self.get_available_embedding_providers()
+            ]
 
         results = []
 
         # First try to get from database
         if self._supabase:
             try:
-                logger.debug(f"Fetching embedding models with provider={provider}, only_available={only_available}")
+                logger.debug(
+                    f"Fetching embedding models with provider={provider}, only_available={only_available}"
+                )
 
                 # Build SQL query with proper filtering
                 where_clause = ""
                 if provider:
-                    where_clause = f"WHERE p.name = '{provider.replace('\'', '\'\'')}'"
+                    escaped_provider = provider.replace("'", "''")
+                    where_clause = f"WHERE p.name = '{escaped_provider}'"
                 elif only_available and available_providers:
                     # Format provider names for SQL IN clause with proper escaping
-                    provider_names = "', '".join([p.replace("'", "''") for p in available_providers])
+                    provider_names = "', '".join(
+                        [p.replace("'", "''") for p in available_providers]
+                    )
                     where_clause = f"WHERE p.name IN ('{provider_names}')"
 
                 # Use a simpler joined query that should work with RPC
@@ -830,7 +1030,10 @@ class ModelRegistry:
             except Exception as e:
                 logger.error(f"Error retrieving embedding models from database: {e}")
                 import traceback
-                logger.debug(f"Get embedding models error traceback: {traceback.format_exc()}")
+
+                logger.debug(
+                    f"Get embedding models error traceback: {traceback.format_exc()}"
+                )
 
         # If database doesn't have data, use the cached embedding models from the importer
         if not results and self._embedding_models_cache:
@@ -854,10 +1057,12 @@ class ModelRegistry:
                     "dimensions": model.get("dimensions"),
                     "max_input_tokens": model.get("max_input_tokens"),
                     "supports_batch": model.get("supports_batch", True),
-                    "supports_query_mapping": model.get("supports_query_mapping", False),
+                    "supports_query_mapping": model.get(
+                        "supports_query_mapping", False
+                    ),
                     "pricing": {
                         "input_cost_per_token": model.get("input_cost_per_token", 0)
-                    }
+                    },
                 }
 
                 results.append(model_data)
@@ -895,15 +1100,21 @@ class ModelRegistry:
                             "model_id": model.get("model_id"),
                             "provider": model_provider,
                             "name": model.get("model_name"),
-                            "display_name": model.get("model_name").replace("-", " ").title(),
+                            "display_name": model.get("model_name")
+                            .replace("-", " ")
+                            .title(),
                             "description": model.get("description"),
                             "dimensions": model.get("dimensions"),
                             "max_input_tokens": model.get("max_input_tokens"),
                             "supports_batch": model.get("supports_batch", True),
-                            "supports_query_mapping": model.get("supports_query_mapping", False),
+                            "supports_query_mapping": model.get(
+                                "supports_query_mapping", False
+                            ),
                             "pricing": {
-                                "input_cost_per_token": model.get("input_cost_per_token", 0)
-                            }
+                                "input_cost_per_token": model.get(
+                                    "input_cost_per_token", 0
+                                )
+                            },
                         }
 
                         results.append(model_data)
@@ -914,16 +1125,21 @@ class ModelRegistry:
 
     def get_llm_model(self, model_id: str) -> dict[str, Any] | None:
         """Get a specific LLM model by ID.
-        
+
         Args:
             model_id: ID of the model
-            
+
         Returns:
             Model data or None if not found
         """
         if self._supabase:
             try:
-                response = table(self._supabase, "models.llm_models").select("*").eq("model_id", model_id).execute()
+                response = (
+                    table(self._supabase, "models.llm_models")
+                    .select("*")
+                    .eq("model_id", model_id)
+                    .execute()
+                )
 
                 if response.data and len(response.data) > 0:
                     model = response.data[0]
@@ -932,28 +1148,42 @@ class ModelRegistry:
                     # Get provider
                     provider_id = model.get("provider_id")
                     if provider_id:
-                        provider_response = table(self._supabase, "models.providers").select("*").eq("id", provider_id).execute()
+                        provider_response = (
+                            table(self._supabase, "models.providers")
+                            .select("*")
+                            .eq("id", provider_id)
+                            .execute()
+                        )
                         if provider_response.data and len(provider_response.data) > 0:
                             provider_data = provider_response.data[0]
                             model["provider"] = provider_data.get("name")
-                            model["is_available"] = provider_data.get("is_available", False)
+                            model["is_available"] = provider_data.get(
+                                "is_available", False
+                            )
 
                     # Get capabilities
                     if model_db_id:
-                        capabilities_response = table(
-                            self._supabase,
-                            "models.llm_capabilities"
-                        ).select("*").eq("model_id", model_db_id).execute()
+                        capabilities_response = (
+                            table(self._supabase, "models.llm_capabilities")
+                            .select("*")
+                            .eq("model_id", model_db_id)
+                            .execute()
+                        )
 
-                        if capabilities_response.data and len(capabilities_response.data) > 0:
+                        if (
+                            capabilities_response.data
+                            and len(capabilities_response.data) > 0
+                        ):
                             model["capabilities"] = capabilities_response.data[0]
 
                     # Get pricing
                     if model_db_id:
-                        pricing_response = table(
-                            self._supabase,
-                            "models.llm_pricing"
-                        ).select("*").eq("model_id", model_db_id).execute()
+                        pricing_response = (
+                            table(self._supabase, "models.llm_pricing")
+                            .select("*")
+                            .eq("model_id", model_db_id)
+                            .execute()
+                        )
 
                         if pricing_response.data and len(pricing_response.data) > 0:
                             model["pricing"] = pricing_response.data[0]
@@ -998,7 +1228,8 @@ class ModelRegistry:
                             "provider": provider_value,
                             "name": cls.__name__.replace("LLMConfig", ""),
                             "display_name": cls.__name__.replace("LLMConfig", ""),
-                            "description": cls.__doc__ or f"Configuration for {cls.__name__.replace('LLMConfig', '')} models"
+                            "description": cls.__doc__
+                            or f"Configuration for {cls.__name__.replace('LLMConfig', '')} models",
                         }
 
                         return model_data
@@ -1009,16 +1240,21 @@ class ModelRegistry:
 
     def get_embedding_model(self, model_id: str) -> dict[str, Any] | None:
         """Get a specific embedding model by ID.
-        
+
         Args:
             model_id: ID of the model
-            
+
         Returns:
             Model data or None if not found
         """
         if self._supabase:
             try:
-                response = table(self._supabase, "models.embedding_models").select("*").eq("model_id", model_id).execute()
+                response = (
+                    table(self._supabase, "models.embedding_models")
+                    .select("*")
+                    .eq("model_id", model_id)
+                    .execute()
+                )
 
                 if response.data and len(response.data) > 0:
                     model = response.data[0]
@@ -1027,18 +1263,27 @@ class ModelRegistry:
                     # Get provider
                     provider_id = model.get("provider_id")
                     if provider_id:
-                        provider_response = table(self._supabase, "models.providers").select("*").eq("id", provider_id).execute()
+                        provider_response = (
+                            table(self._supabase, "models.providers")
+                            .select("*")
+                            .eq("id", provider_id)
+                            .execute()
+                        )
                         if provider_response.data and len(provider_response.data) > 0:
                             provider_data = provider_response.data[0]
                             model["provider"] = provider_data.get("name")
-                            model["is_available"] = provider_data.get("is_available", False)
+                            model["is_available"] = provider_data.get(
+                                "is_available", False
+                            )
 
                     # Get pricing
                     if model_db_id:
-                        pricing_response = table(
-                            self._supabase,
-                            "models.embedding_pricing"
-                        ).select("*").eq("model_id", model_db_id).execute()
+                        pricing_response = (
+                            table(self._supabase, "models.embedding_pricing")
+                            .select("*")
+                            .eq("model_id", model_db_id)
+                            .execute()
+                        )
 
                         if pricing_response.data and len(pricing_response.data) > 0:
                             model["pricing"] = pricing_response.data[0]
@@ -1052,7 +1297,7 @@ class ModelRegistry:
 
     def detect_environment_variables(self):
         """Detect available environment variables for LLM and embedding providers.
-        
+
         Returns:
             Dict mapping provider names to available environment variables
         """

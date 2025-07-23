@@ -5,11 +5,12 @@ from datetime import datetime
 from typing import Any, Literal
 
 from fastapi import HTTPException
-from haive.api.api.game_agent import AgentResponseBase, GenericAgentAPI
 from haive_games.tic_tac_toe.agent import TicTacToeAgent
 from haive_games.tic_tac_toe.config import TicTacToeConfig
 from haive_games.tic_tac_toe.state import TicTacToeState
 from pydantic import BaseModel, Field
+
+from .api.game_agent import AgentResponseBase, GenericAgentAPI
 
 # Logging
 logging.basicConfig(level=logging.INFO)

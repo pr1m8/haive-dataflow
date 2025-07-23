@@ -15,10 +15,10 @@ from haive.dataflow.core import registry_system
 from haive.dataflow.models import ConfigType, DependencyType, EntityType, ImportStatus
 
 # Import provider base class
-from haive.dataflow.providers.base import EntityProvider
+from .providers.base import EntityProvider
 
 # Set up logging
-from haive.dataflow.utils.logging import setup_discovery_logger
+from .utils.logging import setup_discovery_logger
 
 logger = setup_discovery_logger("agents")
 

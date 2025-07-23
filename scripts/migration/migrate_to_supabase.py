@@ -20,8 +20,8 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root / "packages/haive-dataflow/src"))
 sys.path.insert(0, str(project_root / "packages/haive-core/src"))
 
-from haive.dataflow.config.environment import get_supabase_server_config
-from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
+from .config.environment import get_supabase_server_config
+from .persistence.supabase_adapter import SupabasePersistence
 
 
 def check_environment():
