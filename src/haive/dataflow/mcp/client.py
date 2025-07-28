@@ -388,7 +388,7 @@ class MCPToolProvider:
                     type=EntityType.MCP_TOOL,
                     description=tool.description,
                     module_path="haive.dataflow.mcp.client",
-                    class_name="MCPToolWrapper",
+                    class_name="MCPToolWrappef",
                     config={
                         "server_name": getattr(tool, "server_name", "unknown"),
                         "tool_name": tool.name,
