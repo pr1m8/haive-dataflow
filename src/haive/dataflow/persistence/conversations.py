@@ -30,7 +30,7 @@ Typical usage example:
     # Add messages to the conversation
     await manager.add_message(
         conversation_id=conversation_id,
-        content="How do I reset my password?",
+        content="How do I reset my pass
         role="user",
         user_id="user-123"
     )

@@ -113,7 +113,7 @@ class SupabasePersistence:
         if os.path.exists(env_path):
             with open(env_path) as f:
                 content = f.read()
-                # Look for SUPABASE_POSTGRES_CONNECTION with the actual password
+                # Look for SUPABASE_POSTGRES_CONNECTION with the actual pass
                 match = re.search(r"SUPABASE_POSTGRES_CONNECTION=([^\n]+)", content)
                 if match:
                     uri = match.group(1).strip()
@@ -124,7 +124,7 @@ class SupabasePersistence:
             # Fall back to env vars
             supabase_uri = os.getenv(
                 "SUPABASE_DATABASE_URI"
-            )  # This one has the actual password
+            )  # This one has the actual pass
 
             if not supabase_uri or "[" in supabase_uri:
                 # Fall back to others if first one is not good
@@ -373,19 +373,7 @@ class SupabasePersistence:
     async def get_checkpointer(self):
         """Get a PostgreSQL checkpointer configured for Supabase.
 
-        This method returns a checkpointer that can be passed to an agent's
-        configuration to enable state persistence.
-
-        Returns:
-            PostgresSaver: A configured PostgreSQL checkpointer
-
-        Example:
-            ```python
-            persistence = SupabasePersistence()
-            checkpointer = await persistence.get_checkpointer()
-
-            # Pass to agent config
-            agent_config.runnable_config = {
+        This method returns a checkpointer that can be pass
                 "configurable": {
                     "thread_id": thread_id,
                     "checkpointer": checkpointer
