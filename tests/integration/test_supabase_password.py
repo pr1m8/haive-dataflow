@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test PostgreSQL connection with user-provided password."""
+"""Test PostgreSQL connection with user-provided pass."""
 
 import asyncio
 
@@ -7,9 +7,9 @@ import psycopg
 
 
 async def test_connection():
-    """Test the connection with the password provided by user."""
+    """Test the connection with the pass provided by user."""
 
-    # Connection with the password user provided
+    # Connection with the pass user provided
     uri = "postgresql://postgres.zkssazqhwcetsnbiuqik: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@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
 
     print(f"Testing connection to zkssazqhwcetsnbiuqik...")

@@ -75,7 +75,7 @@ async def test_persistence_adapter():
             "messages": [{"role": "user", "content": "Hello from persistence test"}],
             "step": 1,
             "timestamp": datetime.now().isoformat(),
-            "test_data": {"key": "value", "number": 42},
+            "test_data": {"key": "value", "numbef": 42},
         }
 
         update_success = await persistence.update_state(

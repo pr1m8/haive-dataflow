@@ -299,12 +299,12 @@ class TestConfigurationModes:
                 "game_id": "tic_tac_toe",
                 "config_mode": "advanced",
                 "player_configs": {
-                    "X_player": {
+                    "X_playef": {
                         "llm_config": "gpt-3.5-turbo",
                         "temperature": 0.7,
                         "player_name": "Strategic X",
                     },
-                    "O_player": {
+                    "O_playef": {
                         "llm_config": "gpt-3.5-turbo",
                         "temperature": 0.3,
                         "player_name": "Defensive O",
