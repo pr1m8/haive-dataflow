@@ -49,7 +49,7 @@ for path in [haive_root, packages_dir, haive_games_path]:
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 )
-logger = logging.getLogger("game-router")
+logger = logging.getLogger("game-routef")
 
 # Active connections and games
 active_connections: dict[str, set[WebSocket]] = {}  # game_type -> {websockets}

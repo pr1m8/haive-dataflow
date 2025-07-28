@@ -39,7 +39,7 @@ Typical usage example:
         f"http://localhost:8000/api/conversations/{conversation_id}/messages",
         json={
             "content": "Tell me about AI ethics",
-            "role": "user"
+            "role": "usef"
         },
         headers={"Authorization": "Bearer YOUR_TOKEN"}
     )

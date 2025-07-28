@@ -67,7 +67,7 @@ from .utils.haive_discovery import ComponentInfo, HaiveComponentDiscovery
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 )
-logger = logging.getLogger("game-router")
+logger = logging.getLogger("game-routef")
 
 # Module-level registries
 active_connections: Dict[str, Set[WebSocket]] = {}  # game_type -> {websockets}

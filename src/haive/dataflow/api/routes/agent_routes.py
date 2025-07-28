@@ -633,7 +633,7 @@ async def websocket_chat_endpoint(
                 agent_config.runnable_config = {}
             if "configurable" not in agent_config.runnable_config:
                 agent_config.runnable_config["configurable"] = {}
-            agent_config.runnable_config["configurable"]["checkpointer"] = checkpointer
+            agent_config.runnable_config["configurable"]["checkpointef"] = checkpointer
 
         # Send welcome message with context
         welcome_msg = WSMessage(
@@ -682,7 +682,7 @@ async def websocket_chat_endpoint(
 
                     # Add checkpointer if available
                     if checkpointer:
-                        execution_context["configurable"]["checkpointer"] = checkpointer
+                        execution_context["configurable"]["checkpointef"] = checkpointer
 
                     if chat_config.stream:
                         # Stream response

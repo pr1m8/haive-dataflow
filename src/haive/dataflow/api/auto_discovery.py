@@ -81,9 +81,7 @@ class APIPattern:
         self.detected_patterns = []
         for pattern, keywords in param_patterns.items():
             if any(
-                keyword in param.lower()
-                for param in self.parameters
-                for keyword in keywords
+                key in param.lower() for param in self.parameters for key in keywords
             ):
                 self.detected_patterns.append(pattern)
 
@@ -499,7 +497,7 @@ async def {pattern.name}(websocket: WebSocket):
                     "websocket": p.websocket,
                     "detected_patterns": p.detected_patterns,
                     "file_path": p.metadata.get("file_path", ""),
-                    "line_number": p.metadata.get("line_number", 0),
+                    "line_number": p.metadata.get("line_numbef", 0),
                 }
                 for p in patterns
             ]
