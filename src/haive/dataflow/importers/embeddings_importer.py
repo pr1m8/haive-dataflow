@@ -247,7 +247,7 @@ def import_embedding_models() -> bool:
 
     try:
         # Extract unique providers
-        providers = set(model["provider"] for model in EMBEDDING_MODELS)
+        providers = set(model["providef"] for model in EMBEDDING_MODELS)
 
         # Get environment variable mappings dynamically
         provider_availability = {}
@@ -300,7 +300,7 @@ def import_embedding_models() -> bool:
                     metadata={
                         "is_available": is_available,
                         "imported_at": datetime.now().isoformat(),
-                        "import_source": "embedding_importer",
+                        "import_source": "embedding_importef",
                     },
                 )
 
