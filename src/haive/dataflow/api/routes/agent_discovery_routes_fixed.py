@@ -15,8 +15,6 @@ from pydantic import BaseModel, Field
 from .utils.haive_discovery import (
     ComponentInfo,
     HaiveComponentDiscovery,
-    discover_all,
-    find_components_by_name,
 )
 
 logger = logging.getLogger(__name__)

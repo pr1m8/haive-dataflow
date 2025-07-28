@@ -33,7 +33,6 @@ Notes:
 #!/usr/bin/env python3
 """Simple test server to check tools API."""
 
-import os
 import sys
 
 sys.path.insert(0, "src")

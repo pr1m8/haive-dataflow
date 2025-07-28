@@ -49,7 +49,6 @@ Note:
     unified discovery system from haive-core for consistency.
 """
 
-import asyncio
 import logging
 import uuid
 from datetime import datetime

@@ -32,10 +32,8 @@ Note:
     to properly integrate with the discovery system.
 """
 
-import asyncio
 import logging
 from datetime import datetime
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
@@ -44,7 +42,6 @@ from pydantic import BaseModel, Field
 # Import discovery system
 from .utils.haive_discovery import (
     ComponentInfo,
-    create_tool_from_component,
     discover_tools_with_schemas,
 )
 

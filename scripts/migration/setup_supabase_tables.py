@@ -125,7 +125,7 @@ def setup_tables():
         # Execute table creation
         for i, sql in enumerate(sql_commands):
             print(f"Executing command {i+1}/{len(sql_commands)}")
-            result = supabase.rpc("exec_sql", {"sql": sql})
+            supabase.rpc("exec_sql", {"sql": sql})
 
         print("✓ Tables created successfully")
 
@@ -133,7 +133,7 @@ def setup_tables():
         for i, policy in enumerate(rls_policies):
             print(f"Creating RLS policy {i+1}/{len(rls_policies)}")
             try:
-                result = supabase.rpc("exec_sql", {"sql": policy})
+                supabase.rpc("exec_sql", {"sql": policy})
             except Exception as e:
                 print(f"Policy {i+1} might already exist: {e}")
 
@@ -147,7 +147,7 @@ def setup_tables():
         # Try a simpler approach - just test if we can query
         try:
             print("Testing basic Supabase connection...")
-            result = supabase.table("threads").select("*").limit(1).execute()
+            supabase.table("threads").select("*").limit(1).execute()
             print("✓ Basic connection works, tables might already exist")
             return True
         except Exception as e2:

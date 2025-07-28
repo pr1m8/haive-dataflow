@@ -30,7 +30,6 @@ if module_path not in sys.path:
     sys.path.append(module_path)
 
 # Now import the modules
-import contextlib
 
 from haive.core.engine.agent.agent import Agent
 from haive.core.schema.state_schema import StateSchema

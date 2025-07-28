@@ -17,9 +17,7 @@ from .utils.haive_discovery import (
     ComponentInfo,
     HaiveComponentDiscovery,
     create_tool_from_component,
-    discover_tools,
     discover_tools_with_schemas,
-    get_all_tools,
 )
 
 logger = logging.getLogger(__name__)

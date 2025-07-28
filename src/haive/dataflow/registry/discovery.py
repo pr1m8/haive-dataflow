@@ -976,7 +976,7 @@ def discover_mcp_servers() -> list[str]:
             loop = asyncio.get_event_loop()
             if loop.is_running():
                 # If loop is running, create a task
-                task = asyncio.create_task(async_discover())
+                asyncio.create_task(async_discover())
                 # For now, return empty list and let it run in background
                 logger.info("MCP discovery running in background")
                 return []

@@ -14,7 +14,7 @@ This shows how to modify the agent_routes.py to support:
 from typing import Any, Literal
 
 # 1. Update AgentChatConfig to include streaming options
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class EnhancedAgentChatConfig(BaseModel):

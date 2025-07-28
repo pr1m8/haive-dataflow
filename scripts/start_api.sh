@@ -4,10 +4,10 @@
 echo "=== Starting Haive API Server ==="
 
 # Change to the haive root directory
-cd /home/will/Projects/haive/backend/haive
+cd /home/will/Projects/haive/backend/haive || exit
 
 # Load environment variables from .env file
-if [ -f .env ]; then
+if [[ -f .env ]]; then
 	echo "Loading environment variables from .env..."
 	set -a
 	source .env
@@ -19,20 +19,20 @@ fi
 
 # Verify critical environment variables
 echo -e "\nChecking critical environment variables:"
-if [ -z "$SUPABASE_JWT_SECRET" ]; then
+if [[ -z ${SUPABASE_JWT_SECRET} ]]; then
 	echo "✗ SUPABASE_JWT_SECRET is not set!"
 else
 	echo "✓ SUPABASE_JWT_SECRET is set (${SUPABASE_JWT_SECRET:0:3}...${SUPABASE_JWT_SECRET: -3})"
 fi
 
-if [ -z "$SUPABASE_URL" ]; then
+if [[ -z ${SUPABASE_URL} ]]; then
 	echo "✗ SUPABASE_URL is not set!"
 else
-	echo "✓ SUPABASE_URL: $SUPABASE_URL"
+	echo "✓ SUPABASE_URL is set: $SUPABASE_URL"
 fi
 
 # Change to dataflow package
-cd packages/haive-dataflow
+cd packages/haive-dataflow || exit
 
 echo -e "\n=== Starting API Server ==="
 echo "URL: http://localhost:8000"

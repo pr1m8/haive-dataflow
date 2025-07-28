@@ -8,7 +8,7 @@ This module provides FastAPI routes for discovering and managing both v1 and v2 
 import importlib
 import inspect
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -106,10 +106,10 @@ def discover_v1_agents() -> List[AgentInfo]:
                             getattr(obj, "__doc__", "V1 config-based agent").split(
                                 "\n"
                             )[0]
-                            if getattr(obj, "__doc__")
+                            if obj.__doc__
                             else "V1 config-based agent"
                         ),
-                        module=f"haive.core.engine.agent.config",
+                        module="haive.core.engine.agent.config",
                         agent_type="v1",
                         version="1.0",
                         config_class=name,
@@ -182,7 +182,7 @@ def discover_v2_agents() -> List[AgentInfo]:
             current_dir = os.path.dirname(os.path.abspath(__file__))
             haive_root = os.path.abspath(os.path.join(current_dir, "../../../../../.."))
 
-            discovery = HaiveComponentDiscovery(haive_root)
+            HaiveComponentDiscovery(haive_root)
 
             # Look for agents in haive-agents package
             agents_path = os.path.join(
@@ -190,7 +190,7 @@ def discover_v2_agents() -> List[AgentInfo]:
             )
             if os.path.exists(agents_path):
                 # Scan for agent modules
-                for root, dirs, files in os.walk(agents_path):
+                for root, _dirs, files in os.walk(agents_path):
                     for file in files:
                         if file.endswith(".py") and file != "__init__.py":
                             module_name = file[:-3]  # Remove .py
@@ -220,7 +220,7 @@ def discover_v2_agents() -> List[AgentInfo]:
                                                     getattr(
                                                         obj, "__doc__", "V2 agent"
                                                     ).split("\n")[0]
-                                                    if getattr(obj, "__doc__")
+                                                    if obj.__doc__
                                                     else "V2 agent"
                                                 ),
                                                 module=module_path,
@@ -414,12 +414,12 @@ async def get_agent_schema(agent_name: str) -> AgentSchema:
 
                     # Get available methods
                     methods = []
-                    for name, method in inspect.getmembers(
+                    for name, _method in inspect.getmembers(
                         agent_class, predicate=inspect.ismethod
                     ):
                         if not name.startswith("_"):
                             methods.append(name)
-                    for name, method in inspect.getmembers(
+                    for name, _method in inspect.getmembers(
                         agent_class, predicate=inspect.isfunction
                     ):
                         if not name.startswith("_"):

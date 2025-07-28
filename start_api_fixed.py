@@ -33,7 +33,6 @@ Notes:
 #!/usr/bin/env python3
 """Start API server with fixed tools route."""
 
-import os
 import sys
 
 # Add paths like the main app does

@@ -31,10 +31,7 @@ from fastapi.responses import HTMLResponse
 
 # Import discovery system
 from haive.core.utils.haive_discovery import (
-    ComponentInfo,
     HaiveComponentDiscovery,
-    discover_all,
-    find_components_by_name,
 )
 
 # Configure logging

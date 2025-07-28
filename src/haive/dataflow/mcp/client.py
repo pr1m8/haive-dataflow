@@ -25,7 +25,6 @@ from .registry.models import (
     MCPServerConfig,
     MCPServerHealth,
     MCPToolDefinition,
-    RegistryItem,
 )
 
 logger = logging.getLogger(__name__)

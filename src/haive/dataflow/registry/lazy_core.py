@@ -9,8 +9,7 @@ defers expensive operations until they're actually used.
 """
 
 import logging
-import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from .registry.models import EntityType
 

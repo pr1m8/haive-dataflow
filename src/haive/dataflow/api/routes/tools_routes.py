@@ -10,7 +10,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field, create_model
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -166,7 +166,7 @@ def discover_tools() -> List[ToolInfo]:
             # Scan tools directory
             try:
                 tools_path = haive.tools.tools.__path__
-                for importer, modname, ispkg in pkgutil.iter_modules(tools_path):
+                for _importer, modname, ispkg in pkgutil.iter_modules(tools_path):
                     if not ispkg and not modname.startswith("_"):
                         try:
                             module = importlib.import_module(
@@ -197,7 +197,7 @@ def discover_tools() -> List[ToolInfo]:
             # Scan toolkits directory
             try:
                 toolkits_path = haive.tools.toolkits.__path__
-                for importer, modname, ispkg in pkgutil.iter_modules(toolkits_path):
+                for _importer, modname, ispkg in pkgutil.iter_modules(toolkits_path):
                     if not modname.startswith("_"):
                         try:
                             module = importlib.import_module(
@@ -322,12 +322,12 @@ def simple_discover_tools() -> List[ToolInfo]:
 
         import haive.tools.tools
 
-        for importer, modname, ispkg in pkgutil.iter_modules(
+        for _importer, modname, ispkg in pkgutil.iter_modules(
             haive.tools.tools.__path__
         ):
             if not ispkg and not modname.startswith("_") and modname != "__init__":
                 try:
-                    module = importlib.import_module(f"haive.tools.tools.{modname}")
+                    importlib.import_module(f"haive.tools.tools.{modname}")
                     tools.append(
                         ToolInfo(
                             name=modname,
@@ -524,8 +524,8 @@ async def invoke_tool(tool_module_path: str, arguments: Dict[str, Any]) -> Any:
                     if hasattr(tool_instance, "invoke") or hasattr(
                         tool_instance, "run"
                     ):
-                        method = getattr(tool_instance, "invoke", None) or getattr(
-                            tool_instance, "run"
+                        method = (
+                            getattr(tool_instance, "invoke", None) or tool_instance.run
                         )
                         result = (
                             await method(**arguments.get("run_args", arguments))

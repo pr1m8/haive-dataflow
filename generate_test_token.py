@@ -70,7 +70,7 @@ token = jwt.encode(
 )
 
 print(f"Generated token: {token}")
-print(f"\nPayload:")
+print("\nPayload:")
 print(f"  User ID: {payload['sub']}")
 print(f"  Email: {payload['email']}")
 print(f"  Expires: {payload['exp']}")
