@@ -83,7 +83,7 @@ async def test_checkpointer():
 
         # Test thread registration
         test_thread_id = "migration-test-thread"
-        test_user_id = "migration-test-user"
+        test_user_id = "migration-test-usef"
 
         success = await persistence.register_thread(
             thread_id=test_thread_id,

@@ -95,7 +95,7 @@ class SupabaseMigrator:
         self.checkpointer = create_supabase_checkpointer(user_id)
 
     async def migrate_thread_data(
-        self, thread_id: str, old_checkpoints: Dict[str, Any]
+        self, thread_id: str, old_checkpoints: dict[str, Any]
     ):
         """Migrate checkpoint data from old storage to Supabase"""
 
@@ -145,7 +145,7 @@ class SupabaseMigrator:
 
 
 # Example usage functions
-def setup_supabase_for_agent(agent_name: str, user_id: str) -> Dict[str, Any]:
+def setup_supabase_for_agent(agent_name: str, user_id: str) -> dict[str, Any]:
     """Set up Supabase configuration for a specific agent"""
 
     config = {

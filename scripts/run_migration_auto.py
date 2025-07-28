@@ -45,7 +45,7 @@ def run_sql_migration():
         print(f"✗ SQL file not found: {sql_file}")
         return False
 
-    with open(sql_file, "r") as f:
+    with open(sql_file) as f:
         sql_content = f.read()
 
     try:

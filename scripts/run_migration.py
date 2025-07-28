@@ -28,7 +28,7 @@ def run_migration():
         print("✓ Connected to Supabase database")
 
         # Read migration file
-        with open("supabase_migration.sql", "r") as f:
+        with open("supabase_migration.sql") as f:
             migration_sql = f.read()
 
         print("Executing migration...")

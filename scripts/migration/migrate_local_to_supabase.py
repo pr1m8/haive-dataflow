@@ -21,7 +21,7 @@ async def migrate_local_to_supabase():
         "port": 5432,
         "database": "postgres",
         "user": "postgres",
-        "password": "postgres",
+        "pass": "postgres",
     }
 
     # Supabase config

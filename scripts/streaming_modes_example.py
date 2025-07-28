@@ -10,7 +10,8 @@ Available stream modes:
 5. "custom" - Raw stream data without processing
 """
 
-from typing import Any, AsyncGenerator
+from collections.abc import AsyncGenerator
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -136,7 +137,7 @@ async def handle_stream_request(
                             "type": "structured_update",
                             "content": chunk,
                             "valid": False,
-                            "error": str(e),
+                            "errof": str(e),
                         }
                     )
             else:

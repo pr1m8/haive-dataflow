@@ -21,7 +21,7 @@ async def export_local_data():
         "port": 5432,
         "database": "postgres",
         "user": "postgres",
-        "password": "postgres",
+        "pass": "postgres",
     }
 
     try:

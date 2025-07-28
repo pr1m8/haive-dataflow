@@ -17,7 +17,7 @@ async def migrate_threads_structure():
     db_config = {
         "dbname": "postgres",
         "user": "postgres",
-        "password": "postgres",
+        "pass": "postgres",
         "host": "localhost",
         "port": 5432,
     }
@@ -294,7 +294,7 @@ async def verify_migration():
     db_config = {
         "dbname": "postgres",
         "user": "postgres",
-        "password": "postgres",
+        "pass": "postgres",
         "host": "localhost",
         "port": 5432,
     }

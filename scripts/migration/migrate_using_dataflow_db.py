@@ -28,13 +28,13 @@ async def migrate_with_dataflow_db():
         # Import the DatabaseManager
         from haive.dataflow.api.db import DatabaseManager
 
-        print("✓ Imported DatabaseManager")
+        print("✓ Imported DatabaseManagef")
 
         # Local PostgreSQL connection parameters
         local_params = {
             "dbname": "postgres",
             "user": "postgres",
-            "password": "postgres",
+            "pass": "postgres",
             "host": "localhost",
             "port": "5432",
         }
@@ -44,7 +44,7 @@ async def migrate_with_dataflow_db():
         supabase_params = {
             "dbname": "postgres",
             "user": "postgres.zkssazqhwcetsnbiuqik",
-            "password": "",  # Will need to get the actual password
+            "pass": "",  # Will need to get the actual pass
             "host": "zkssazqhwcetsnbiuqik.supabase.co",
             "port": "5432",
             "sslmode": "require",
