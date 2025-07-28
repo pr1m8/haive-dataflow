@@ -323,7 +323,7 @@ class ModelRegistry:
         return env_vars
 
     def _get_llm_config_subclasses(self) -> list[type]:
-        """Get all subclasses of LLMConfig"""
+        """Get all subclasses of LLMConfig."""
         if not CORE_LLM_AVAILABLE:
             return []
 

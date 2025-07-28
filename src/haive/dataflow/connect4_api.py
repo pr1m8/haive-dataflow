@@ -1,3 +1,16 @@
+"""Connect4_Api core module.
+
+This module provides connect4 api functionality for the Haive framework.
+
+Classes:
+    Connect4MoveRequest: Connect4MoveRequest implementation.
+    Connect4Request: Connect4Request implementation.
+    Connect4Response: Connect4Response implementation.
+
+Functions:
+    create_game: Create Game functionality.
+"""
+
 import asyncio
 import json
 import logging
@@ -26,7 +39,7 @@ logger = logging.getLogger("connect4-api")
 
 
 class Connect4MoveRequest(BaseModel):
-    """Request to make a move in Connect4"""
+    """Request to make a move in Connect4."""
 
     column: int = Field(..., description="Column index (0-6) for the move")
     explanation: str | None = Field(
@@ -35,7 +48,7 @@ class Connect4MoveRequest(BaseModel):
 
 
 class Connect4Request(BaseModel):
-    """Request to create new Connect4 game"""
+    """Request to create new Connect4 game."""
 
     thread_id: str | None = None
     persistence_type: str = "postgres"
@@ -45,7 +58,7 @@ class Connect4Request(BaseModel):
 
 
 class Connect4Response(AgentResponseBase):
-    """Response for Connect4 game"""
+    """Response for Connect4 game."""
 
     board: list[list[str | None]]
     turn: str
@@ -63,7 +76,7 @@ class Connect4Response(AgentResponseBase):
 
 
 class Connect4API(GenericAgentAPI[Connect4Agent, Connect4AgentConfig]):
-    """API for Connect4 agent"""
+    """API for Connect4 agent."""
 
     def __init__(self):
         super().__init__(
@@ -79,12 +92,12 @@ class Connect4API(GenericAgentAPI[Connect4Agent, Connect4AgentConfig]):
         self._register_connect4_routes()
 
     def _register_connect4_routes(self):
-        """Register Connect4-specific routes"""
+        """Register Connect4-specific routes."""
         app = self.app
 
         @app.post("/games/", response_model=Connect4Response)
         async def create_game(request: Connect4Request):
-            """Create a new Connect4 game"""
+            """Create a new Connect4 game."""
             try:
                 # Generate thread ID if not provided
                 thread_id = request.thread_id or f"connect4_{uuid.uuid4().hex[:8]}"
@@ -130,7 +143,7 @@ class Connect4API(GenericAgentAPI[Connect4Agent, Connect4AgentConfig]):
 
         @app.post("/games/{thread_id}/move", response_model=Connect4Response)
         async def make_move(thread_id: str, move: Connect4MoveRequest):
-            """Make a move in a Connect4 game"""
+            """Make a move in a Connect4 game."""
             try:
                 # Get agent
                 agent = self.agent_manager.get_or_create_agent(thread_id)
@@ -159,7 +172,7 @@ class Connect4API(GenericAgentAPI[Connect4Agent, Connect4AgentConfig]):
 
         @app.get("/games/{thread_id}/ai-move", response_model=Connect4Response)
         async def make_ai_move(thread_id: str):
-            """Let AI make a move in Connect4 game"""
+            """Let AI make a move in Connect4 game."""
             try:
                 # Get agent
                 agent = self.agent_manager.get_or_create_agent(thread_id)
@@ -183,7 +196,7 @@ class Connect4API(GenericAgentAPI[Connect4Agent, Connect4AgentConfig]):
 
         @app.get("/games/{thread_id}", response_model=Connect4Response)
         async def get_game(thread_id: str):
-            """Get the current state of a Connect4 game"""
+            """Get the current state of a Connect4 game."""
             try:
                 # Get agent
                 agent = self.agent_manager.get_or_create_agent(thread_id)
@@ -207,7 +220,7 @@ class Connect4API(GenericAgentAPI[Connect4Agent, Connect4AgentConfig]):
 
         @app.get("/games/", response_model=list[dict[str, Any]])
         async def list_games():
-            """List all Connect4 games"""
+            """List all Connect4 games."""
             try:
                 from haive.api.api.game_agent import (  # ensure this is imported
                     CheckpointDB,
@@ -225,7 +238,7 @@ class Connect4API(GenericAgentAPI[Connect4Agent, Connect4AgentConfig]):
         # Note: We're not overriding but adding a separate specialized endpoint
         @app.websocket("/ws/games/{thread_id}")
         async def connect4_websocket(websocket: WebSocket, thread_id: str):
-            """WebSocket endpoint for Connect4 game with enhanced features"""
+            """WebSocket endpoint for Connect4 game with enhanced features."""
             await websocket.accept()
 
             try:
@@ -379,7 +392,7 @@ connect4_api = Connect4API()
 
 
 def run():
-    """Run the Connect4 API server"""
+    """Run the Connect4 API server."""
     import asyncio
 
     import uvicorn

@@ -1,5 +1,15 @@
+"""Litellm_Importer core module.
+
+This module provides litellm importer functionality for the Haive framework.
+
+Functions:
+    get_or_create_provider_type: Get Or Create Provider Type functionality.
+    get_or_create_provider: Get Or Create Provider functionality.
+    import_llm_models: Import Llm Models functionality.
+"""
+
 #!/usr/bin/env python
-"""Fixed LiteLLM Importer Module
+"""Fixed LiteLLM Importer Module.
 
 This module imports LLM and embedding models from LiteLLM data and
 other sources into Supabase, properly handling all models without limits.

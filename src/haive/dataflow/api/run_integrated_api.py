@@ -1,3 +1,11 @@
+"""Run_Integrated_Api core module.
+
+This module provides run integrated api functionality for the Haive framework.
+
+Functions:
+    main: Main functionality.
+"""
+
 #!/usr/bin/env python
 """Run the integrated Haive API with game support.
 

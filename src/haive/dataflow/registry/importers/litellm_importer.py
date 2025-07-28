@@ -1,3 +1,13 @@
+"""Litellm_Importer core module.
+
+This module provides litellm importer functionality for the Haive framework.
+
+Functions:
+    get_or_create_provider_type: Get Or Create Provider Type functionality.
+    get_or_create_provider: Get Or Create Provider functionality.
+    import_llm_models: Import Llm Models functionality.
+"""
+
 #!/usr/bin/env python
 """LiteLLM model importer for the Haive registry system.
 

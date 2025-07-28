@@ -1,3 +1,8 @@
+"""Main core module.
+
+This module provides main functionality for the Haive framework.
+"""
+
 # end_to_end_test.py
 import uuid
 

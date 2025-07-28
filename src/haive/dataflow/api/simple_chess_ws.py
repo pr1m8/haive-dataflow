@@ -1,3 +1,13 @@
+"""Simple_Chess_Ws core module.
+
+This module provides simple chess ws functionality for the Haive framework.
+
+Functions:
+    get_empty_board: Get Empty Board functionality.
+    make_random_move: Make Random Move functionality.
+    get_game_state: Get Game State functionality.
+"""
+
 #!/usr/bin/env python
 """Simple WebSocket server for streaming chess game state."""
 

@@ -1,3 +1,17 @@
+"""Supabase_Logging core module.
+
+This module provides supabase logging functionality for the Haive framework.
+
+Classes:
+    SupabaseLogger: SupabaseLogger implementation.
+    SupabaseLoggingMiddleware: SupabaseLoggingMiddleware implementation.
+    to: to implementation.
+
+Functions:
+    client: Client functionality.
+    log_request: Log Request functionality.
+"""
+
 # haive/dataflow/api/middleware/supabase_logging.py
 import asyncio
 import json

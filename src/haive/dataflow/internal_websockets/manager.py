@@ -1,3 +1,15 @@
+"""Manager core module.
+
+This module provides manager functionality for the Haive framework.
+
+Classes:
+    ConnectionManager: ConnectionManager implementation.
+
+Functions:
+    authenticate: Authenticate functionality.
+    connect: Connect functionality.
+"""
+
 # haive_dataflow/api/websockets/manager.py
 import logging
 from uuid import uuid4

@@ -1,8 +1,6 @@
-"""Config - TODO: Add brief description
+"""Config - TODO: Add brief description.
 
 TODO: Add detailed description of module functionality
-
-
 
 Example:
     Basic usage::
@@ -10,8 +8,6 @@ Example:
         from haive.config import module_function
 
         # TODO: Add example
-
-
 """
 
 from haive.dataflow.config.environment import (

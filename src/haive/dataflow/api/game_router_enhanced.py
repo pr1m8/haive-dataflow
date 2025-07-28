@@ -1,3 +1,15 @@
+"""Game_Router_Enhanced core module.
+
+This module provides game router enhanced functionality for the Haive framework.
+
+Classes:
+    for: for implementation.
+    information: information implementation.
+
+Functions:
+    discover_game_agents: Discover Game Agents functionality.
+"""
+
 #!/usr/bin/env python
 """Enhanced Game Discovery and WebSocket API for Haive Games.
 

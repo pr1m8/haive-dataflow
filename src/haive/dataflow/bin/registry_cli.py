@@ -1,5 +1,15 @@
+"""Registry_Cli core module.
+
+This module provides registry cli functionality for the Haive framework.
+
+Functions:
+    print_rich: Print Rich functionality.
+    print_header: Print Header functionality.
+    print_subheader: Print Subheader functionality.
+"""
+
 #!/usr/bin/env python
-"""Haive Registry CLI
+"""Haive Registry CLI.
 
 This script provides a command-line interface for the Haive registry system.
 It allows users to:

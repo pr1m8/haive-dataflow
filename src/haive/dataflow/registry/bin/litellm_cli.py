@@ -1,5 +1,15 @@
+"""Litellm_Cli core module.
+
+This module provides litellm cli functionality for the Haive framework.
+
+Functions:
+    run_migrate: Run Migrate functionality.
+    run_import: Run Import functionality.
+    run_verify: Run Verify functionality.
+"""
+
 #!/usr/bin/env python
-"""Haive Vault CLI
+"""Haive Vault CLI.
 
 A command-line utility for managing vault secrets and model imports.
 

@@ -1,4 +1,4 @@
-"""Fixed Vault Reference Migration Script
+"""Fixed Vault Reference Migration Script.
 
 This script migrates API keys and secrets to the vault schema,
 using proper schema mapping with the existing table() helper function.

@@ -1,3 +1,11 @@
+"""Inspect_Supabase core module.
+
+This module provides inspect supabase functionality for the Haive framework.
+
+Functions:
+    main: Main functionality.
+"""
+
 from .db.supabase import (
     fetch_all_schemas_and_tables,
     fetch_foreign_key_relations,

@@ -1,3 +1,14 @@
+"""Logging core module.
+
+This module provides logging functionality for the Haive framework.
+
+Classes:
+    RequestLoggingMiddleware: RequestLoggingMiddleware implementation.
+
+Functions:
+    dispatch: Dispatch functionality.
+"""
+
 # haive_dataflow/api/middleware/logging.py
 import logging
 import time

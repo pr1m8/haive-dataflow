@@ -1,3 +1,16 @@
+"""Credits core module.
+
+This module provides credits functionality for the Haive framework.
+
+Classes:
+    UsageRecord: UsageRecord implementation.
+    CreditsManager: CreditsManager implementation.
+
+Functions:
+    client: Client functionality.
+    check_credits: Check Credits functionality.
+"""
+
 # haive_dataflow/auth/credits.py
 import logging
 from datetime import datetime

@@ -1,8 +1,6 @@
-"""Llms - TODO: Add brief description
+"""Llms - TODO: Add brief description.
 
 TODO: Add detailed description of module functionality
-
-
 
 Example:
     Basic usage::
@@ -10,8 +8,6 @@ Example:
         from haive.llms import module_function
 
         # TODO: Add example
-
-
 """
 
 __all__ = []

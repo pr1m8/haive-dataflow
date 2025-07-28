@@ -1,3 +1,17 @@
+"""Db core module.
+
+This module provides db functionality for the Haive framework.
+
+Classes:
+    DatabaseManager: DatabaseManager implementation.
+    agent_type: agent_type implementation.
+    info: info implementation.
+
+Functions:
+    connect: Connect functionality.
+    create_schema: Create Schema functionality.
+"""
+
 # src/haive/api/db.py
 import logging
 from typing import Any

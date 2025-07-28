@@ -289,7 +289,7 @@ class ConnectionManager:
             return False
 
     async def disconnect(self, websocket: WebSocket, thread_id: str):
-        """Disconnect a WebSocket from a thread"""
+        """Disconnect a WebSocket from a thread."""
         async with self._lock:
             if thread_id in self.active_connections:
                 if websocket in self.active_connections[thread_id]:
@@ -302,7 +302,7 @@ class ConnectionManager:
                         del self.thread_metadata[thread_id]
 
     async def broadcast_to_thread(self, thread_id: str, message: WSMessage):
-        """Broadcast message to all connections in a thread"""
+        """Broadcast message to all connections in a thread."""
         if thread_id in self.active_connections:
             disconnected = []
             for connection in self.active_connections[thread_id]:
@@ -320,7 +320,7 @@ class ConnectionManager:
                 await self.disconnect(conn, thread_id)
 
     async def update_activity(self, thread_id: str):
-        """Update last activity timestamp for a thread"""
+        """Update last activity timestamp for a thread."""
         if thread_id in self.thread_metadata:
             self.thread_metadata[thread_id][
                 "last_activity"
@@ -333,7 +333,7 @@ manager = ConnectionManager()
 
 # Authentication helper function
 def get_user_from_token(token: str) -> str | None:
-    """Validate JWT token and return user ID"""
+    """Validate JWT token and return user ID."""
     # Development mode bypass
     import os
 
@@ -356,7 +356,7 @@ def get_user_from_token(token: str) -> str | None:
 async def load_agent_config(
     agent_name: str, user_id: str, thread_id: str
 ) -> AgentConfig | None:
-    """Load agent configuration from package"""
+    """Load agent configuration from package."""
     try:
         # Look for agent configuration
         agents_path = "/home/will/Projects/haive/backend/haive/packages/haive-agents"
@@ -468,7 +468,7 @@ async def load_agent_config(
 async def configure_agent(
     config: AgentConfig, chat_config: AgentChatConfig
 ) -> AgentConfig:
-    """Configure agent with LLM settings"""
+    """Configure agent with LLM settings."""
     try:
         # Get environment API key based on provider
         env_key_map = {
@@ -551,7 +551,7 @@ async def websocket_chat_endpoint(
     ),
     config: str | None = Query(None, description="JSON encoded chat configuration"),
 ):
-    """WebSocket endpoint for real-time chat with an agent
+    """WebSocket endpoint for real-time chat with an agent.
 
     Args:
         websocket: WebSocket connection
@@ -844,7 +844,7 @@ async def websocket_chat_endpoint(
 # Add REST endpoint to reset thread using authentication
 @router.post("/chat/thread/{thread_id}/reset")
 async def reset_thread(thread_id: str, user_id: str = Depends(require_auth)):
-    """Reset/clear a chat thread"""
+    """Reset/clear a chat thread."""
     try:
         # Verify thread ownership
         if thread_id in manager.thread_metadata:

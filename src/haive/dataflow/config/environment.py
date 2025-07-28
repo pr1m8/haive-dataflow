@@ -1,3 +1,18 @@
+"""Environment configuration module.
+
+This module provides environment functionality for the Haive framework.
+
+Classes:
+    SupabaseClientConfig: SupabaseClientConfig implementation.
+    SupabaseServerConfig: SupabaseServerConfig implementation.
+    PostgresConfig: PostgresConfig implementation.
+
+Functions:
+    get_connection_uri: Get Connection Uri functionality.
+    get_supabase_client_config: Get Supabase Client Config functionality.
+    get_supabase_server_config: Get Supabase Server Config functionality.
+"""
+
 # haive_dataflow/config/environment.py
 import os
 

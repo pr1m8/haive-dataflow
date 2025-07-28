@@ -1,3 +1,15 @@
+"""Supabase core module.
+
+This module provides supabase functionality for the Haive framework.
+
+Classes:
+    SupabaseAuth: SupabaseAuth implementation.
+
+Functions:
+    verify_token: Verify Token functionality.
+    get_user_id: Get User Id functionality.
+"""
+
 # haive/dataflow/auth/supabase.py
 import logging
 from typing import Any

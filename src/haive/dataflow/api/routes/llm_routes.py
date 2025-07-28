@@ -107,7 +107,7 @@ AI_MODELS = {
 
 
 class ToolConfig(BaseModel):
-    """Configuration for a tool to be used with the LLM"""
+    """Configuration for a tool to be used with the LLM."""
 
     name: str = Field(..., description="Name of the tool", example="calculator")
     description: str | None = Field(
@@ -129,7 +129,7 @@ class ToolConfig(BaseModel):
 
 
 class LLMConfigRequest(BaseModel):
-    """Request model for LLM configuration"""
+    """Request model for LLM configuration."""
 
     provider: LLMProvider = Field(
         default=LLMProvider.AZURE,
@@ -188,7 +188,7 @@ class LLMConfigRequest(BaseModel):
 
 
 class LLMGenerationResponse(BaseModel):
-    """Response model for LLM generation"""
+    """Response model for LLM generation."""
 
     response: str = Field(..., description="Generated response from the LLM")
     model: str = Field(..., description="Model used for generation")
@@ -206,7 +206,7 @@ class LLMGenerationResponse(BaseModel):
 
 
 def get_env_api_key(provider: LLMProvider) -> str | None:
-    """Retrieve API key from environment variables based on provider"""
+    """Retrieve API key from environment variables based on provider."""
     env_key_map = {
         LLMProvider.AZURE.value: "AZURE_OPENAI_API_KEY",
         LLMProvider.OPENAI.value: "OPENAI_API_KEY",
@@ -233,7 +233,7 @@ async def generate_response(
     ),
     user_id: str = Depends(require_auth),  # Add authentication dependency
 ):
-    """Generate a response using dynamically configured LLM
+    """Generate a response using dynamically configured LLM.
 
     Args:
         request: LLM configuration details
@@ -349,7 +349,7 @@ async def generate_response(
     description="Submit a single query to multiple LLM configurations for comparison",
 )
 async def batch_generate(request: Request, user_id: str = Depends(require_auth)):
-    """Generate responses from multiple LLM configurations in parallel
+    """Generate responses from multiple LLM configurations in parallel.
 
     Args:
         request: The HTTP request containing the configurations

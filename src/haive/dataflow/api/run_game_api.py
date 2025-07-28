@@ -1,3 +1,13 @@
+"""Run_Game_Api core module.
+
+This module provides run game api functionality for the Haive framework.
+
+Functions:
+    create_app: Create App functionality.
+    root: Root functionality.
+    health_check: Health Check functionality.
+"""
+
 #!/usr/bin/env python
 """Run the Haive Game API with the dynamically discovered game agents.
 

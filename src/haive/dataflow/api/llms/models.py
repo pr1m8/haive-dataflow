@@ -1,3 +1,13 @@
+"""Models model module.
+
+This module provides models functionality for the Haive framework.
+
+Classes:
+    Provider: Provider implementation.
+    ModelCapabilities: ModelCapabilities implementation.
+    Pricing: Pricing implementation.
+"""
+
 from pydantic import BaseModel, Field
 
 

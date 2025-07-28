@@ -1,3 +1,17 @@
+"""Game_Router_Fixed core module.
+
+This module provides game router fixed functionality for the Haive framework.
+
+Classes:
+    state_name: state_name implementation.
+    game_modules: game_modules implementation.
+
+Functions:
+    discover_game_agents: Discover Game Agents functionality.
+    create_game_instance: Create Game Instance functionality.
+    get_game_instance: Get Game Instance functionality.
+"""
+
 #!/usr/bin/env python
 """Game API router for Haive games using the discovery system.
 

@@ -1,8 +1,6 @@
-"""Middleware - TODO: Add brief description
+"""Middleware - TODO: Add brief description.
 
 TODO: Add detailed description of module functionality
-
-
 
 Example:
     Basic usage::
@@ -10,8 +8,6 @@ Example:
         from haive.middleware import module_function
 
         # TODO: Add example
-
-
 """
 
 __all__ = []

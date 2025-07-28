@@ -1,3 +1,15 @@
+"""Serve_Chess_Client core module.
+
+This module provides serve chess client functionality for the Haive framework.
+
+Classes:
+    ChessClientHandler: ChessClientHandler implementation.
+
+Functions:
+    get_static_dir: Get Static Dir functionality.
+    log_message: Log Message functionality.
+"""
+
 #!/usr/bin/env python3
 """Simple HTTP server to serve the chess client HTML/JS interface.
 

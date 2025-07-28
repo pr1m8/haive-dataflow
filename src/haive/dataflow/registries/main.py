@@ -1,3 +1,16 @@
+"""Main core module.
+
+This module provides main functionality for the Haive framework.
+
+Classes:
+    returns: returns implementation.
+
+Functions:
+    ensure_registry_schema: Ensure Registry Schema functionality.
+    ensure_provider_types: Ensure Provider Types functionality.
+    main: Main functionality.
+"""
+
 #!/usr/bin/env python
 """Test script for the LLM and Embedding model registry system."""
 

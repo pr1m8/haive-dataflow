@@ -137,7 +137,7 @@ class GameAPI:
 
         @app.post(f"{self.route_prefix}/", response_model=self.response_model)
         async def create_game(request: GameRequest):
-            """Create a new game instance"""
+            """Create a new game instance."""
             try:
                 # Generate thread ID if not provided
                 thread_id = (
@@ -197,7 +197,7 @@ class GameAPI:
             response_model=self.response_model,
         )
         async def make_move(thread_id: str, move_data: dict[str, Any]):
-            """Make a move in a game"""
+            """Make a move in a game."""
             try:
                 # Get agent
                 agent = self.socket_server.get_or_create_agent(thread_id)
@@ -224,7 +224,7 @@ class GameAPI:
             response_model=self.response_model,
         )
         async def make_ai_move(thread_id: str):
-            """Let AI make a move"""
+            """Let AI make a move."""
             try:
                 # Get agent
                 agent = self.socket_server.get_or_create_agent(thread_id)
@@ -249,7 +249,7 @@ class GameAPI:
             f"{self.route_prefix}/{{thread_id}}", response_model=self.response_model
         )
         async def get_game(thread_id: str):
-            """Get current game state"""
+            """Get current game state."""
             try:
                 # Get agent
                 agent = self.socket_server.get_or_create_agent(thread_id)
@@ -272,7 +272,7 @@ class GameAPI:
 
         @app.post(f"{self.route_prefix}/{{thread_id}}/register-user")
         async def register_user(thread_id: str, user_data: dict[str, Any]):
-            """Register user ID for Supabase RLS"""
+            """Register user ID for Supabase RLS."""
             try:
                 user_id = user_data.get("user_id")
                 if not user_id:

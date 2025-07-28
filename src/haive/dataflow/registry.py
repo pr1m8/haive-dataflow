@@ -1,3 +1,15 @@
+"""Registry core module.
+
+This module provides registry functionality for the Haive framework.
+
+Classes:
+    AgentRegistryService: AgentRegistryService implementation.
+    agent_type: agent_type implementation.
+    by: by implementation.
+
+Functions:
+"""
+
 # src/haive/api/registry.py
 import importlib
 import inspect

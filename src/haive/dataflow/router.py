@@ -1,3 +1,16 @@
+"""Router core module.
+
+This module provides router functionality for the Haive framework.
+
+Classes:
+    try: try implementation.
+
+Functions:
+    create_agent_router: Create Agent Router functionality.
+    list_agents: List Agents functionality.
+    get_agent_info: Get Agent Info functionality.
+"""
+
 # src/haive/api/router.py
 import json
 import logging

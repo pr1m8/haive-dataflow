@@ -1,3 +1,14 @@
+"""Middleware core module.
+
+This module provides middleware functionality for the Haive framework.
+
+Classes:
+    AuthDependency: AuthDependency implementation.
+    SupabaseAuthMiddleware: SupabaseAuthMiddleware implementation.
+
+Functions:
+"""
+
 # haive/dataflow/auth/middleware.py
 import logging
 

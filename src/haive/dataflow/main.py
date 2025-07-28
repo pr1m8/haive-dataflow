@@ -1,3 +1,12 @@
+"""Main core module.
+
+This module provides main functionality for the Haive framework.
+
+Functions:
+    display_startup_info: Display Startup Info functionality.
+    main: Main functionality.
+"""
+
 # haive_dataflow/main.py
 import logging
 import os

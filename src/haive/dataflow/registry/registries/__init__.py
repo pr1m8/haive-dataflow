@@ -1,8 +1,6 @@
-"""Registries - TODO: Add brief description
+"""Registries - TODO: Add brief description.
 
 TODO: Add detailed description of module functionality
-
-
 
 Example:
     Basic usage::
@@ -10,8 +8,6 @@ Example:
         from haive.registries import module_function
 
         # TODO: Add example
-
-
 """
 
 __all__ = []

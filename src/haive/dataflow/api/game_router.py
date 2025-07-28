@@ -1,3 +1,18 @@
+"""Game_Router core module.
+
+This module provides game router functionality for the Haive framework.
+
+Classes:
+    agent_module_name: agent_module_name implementation.
+    in: in implementation.
+    agent: agent implementation.
+
+Functions:
+    discover_game_agents: Discover Game Agents functionality.
+    create_game_instance: Create Game Instance functionality.
+    get_game_instance: Get Game Instance functionality.
+"""
+
 #!/usr/bin/env python
 """Game API router for Haive games.
 

@@ -1,3 +1,11 @@
+"""Run_Simple core module.
+
+This module provides run simple functionality for the Haive framework.
+
+Functions:
+    main: Main functionality.
+"""
+
 #!/usr/bin/env python
 """Simple standalone script to run the Haive Game API.
 

@@ -1,3 +1,14 @@
+"""Auth core module.
+
+This module provides auth functionality for the Haive framework.
+
+Classes:
+    SupabaseAuthMiddleware: SupabaseAuthMiddleware implementation.
+
+Functions:
+    dispatch: Dispatch functionality.
+"""
+
 # haive_dataflow/api/middleware/auth.py
 import logging
 

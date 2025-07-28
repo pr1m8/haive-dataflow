@@ -1,3 +1,13 @@
+"""App_Dep core module.
+
+This module provides app dep functionality for the Haive framework.
+
+Functions:
+    create_app: Create App functionality.
+    startup_event: Startup Event functionality.
+    shutdown_event: Shutdown Event functionality.
+"""
+
 # src/haive/api/app.py
 import logging
 

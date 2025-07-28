@@ -1,3 +1,16 @@
+"""Manager core module.
+
+This module provides manager functionality for the Haive framework.
+
+Classes:
+    ConversationMetadata: ConversationMetadata implementation.
+    ConversationManager: ConversationManager implementation.
+
+Functions:
+    client: Client functionality.
+    create_conversation: Create Conversation functionality.
+"""
+
 # haive/dataflow/conversations/manager.py
 import datetime
 import logging

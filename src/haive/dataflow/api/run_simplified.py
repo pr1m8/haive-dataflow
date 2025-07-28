@@ -1,3 +1,13 @@
+"""Run_Simplified core module.
+
+This module provides run simplified functionality for the Haive framework.
+
+Functions:
+    get_empty_board: Get Empty Board functionality.
+    move_is_valid: Move Is Valid functionality.
+    make_move: Make Move functionality.
+"""
+
 #!/usr/bin/env python3
 """Simplified demo to launch a WebSocket server for chess games.
 

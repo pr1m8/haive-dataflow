@@ -1,3 +1,12 @@
+"""Integrate_Games core module.
+
+This module provides integrate games functionality for the Haive framework.
+
+Functions:
+    configure_import_paths: Configure Import Paths functionality.
+    add_game_routes: Add Game Routes functionality.
+"""
+
 #!/usr/bin/env python
 """Integration module for adding game routes to the main Haive API.
 

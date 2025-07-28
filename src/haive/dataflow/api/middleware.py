@@ -1,3 +1,16 @@
+"""Middleware core module.
+
+This module provides middleware functionality for the Haive framework.
+
+Classes:
+    RequestLoggingMiddleware: RequestLoggingMiddleware implementation.
+    RateLimitMiddleware: RateLimitMiddleware implementation.
+
+Functions:
+    dispatch: Dispatch functionality.
+    dispatch: Dispatch functionality.
+"""
+
 # haive/dataflow/api/middleware.py
 import json
 import logging

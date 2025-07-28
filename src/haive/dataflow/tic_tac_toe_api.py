@@ -1,3 +1,16 @@
+"""Tic_Tac_Toe_Api core module.
+
+This module provides tic tac toe api functionality for the Haive framework.
+
+Classes:
+    TicTacToeMoveRequest: TicTacToeMoveRequest implementation.
+    TicTacToeRequest: TicTacToeRequest implementation.
+    TicTacToeResponse: TicTacToeResponse implementation.
+
+Functions:
+    create_game: Create Game functionality.
+"""
+
 import asyncio
 import logging
 import uuid
@@ -61,7 +74,7 @@ class TicTacToeAPI(GenericAgentAPI[TicTacToeAgent, TicTacToeConfig]):
 
         @app.post("/games/", response_model=TicTacToeResponse)
         async def create_game(request: TicTacToeRequest):
-            """Create a new Tic Tac Toe game"""
+            """Create a new Tic Tac Toe game."""
             try:
                 thread_id = request.thread_id or f"tictactoe_{uuid.uuid4().hex[:8]}"
 
@@ -99,7 +112,7 @@ class TicTacToeAPI(GenericAgentAPI[TicTacToeAgent, TicTacToeConfig]):
 
         @app.post("/games/{thread_id}/move", response_model=TicTacToeResponse)
         async def make_move(thread_id: str, move: TicTacToeMoveRequest):
-            """Make a move in a Tic Tac Toe game"""
+            """Make a move in a Tic Tac Toe game."""
             try:
                 agent = self.agent_manager.get_or_create_agent(thread_id)
 
@@ -126,7 +139,7 @@ class TicTacToeAPI(GenericAgentAPI[TicTacToeAgent, TicTacToeConfig]):
 
         @app.get("/games/{thread_id}/ai-move", response_model=TicTacToeResponse)
         async def ai_move(thread_id: str):
-            """Let AI make a move"""
+            """Let AI make a move."""
             try:
                 agent = self.agent_manager.get_or_create_agent(thread_id)
                 state = agent.run({}, thread_id=thread_id)
@@ -144,7 +157,7 @@ class TicTacToeAPI(GenericAgentAPI[TicTacToeAgent, TicTacToeConfig]):
 
         @app.get("/games/{thread_id}", response_model=TicTacToeResponse)
         async def get_game(thread_id: str):
-            """Get current game state"""
+            """Get current game state."""
             try:
                 agent = self.agent_manager.get_or_create_agent(thread_id)
                 state = agent.run({}, thread_id=thread_id)
@@ -169,7 +182,7 @@ tictactoe_api = TicTacToeAPI()
 
 
 def run():
-    """Run the Tic Tac Toe API server"""
+    """Run the Tic Tac Toe API server."""
     import uvicorn
 
     if __name__ == "__main__":

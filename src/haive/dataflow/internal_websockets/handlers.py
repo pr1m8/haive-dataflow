@@ -1,3 +1,16 @@
+"""Handlers core module.
+
+This module provides handlers functionality for the Haive framework.
+
+Classes:
+    AgentRegistry: AgentRegistry implementation.
+
+Functions:
+    get_agent: Get Agent functionality.
+    stream_agent_response: Stream Agent Response functionality.
+    format_chunk_for_client: Format Chunk For Client functionality.
+"""
+
 # haive_dataflow/api/websockets/handlers.py
 import json
 import logging

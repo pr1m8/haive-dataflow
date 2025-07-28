@@ -1,5 +1,15 @@
+"""Tak core module.
+
+This module provides tak functionality for the Haive framework.
+
+Functions:
+    load_tools_from_module: Load Tools From Module functionality.
+    load_tools_from_directory: Load Tools From Directory functionality.
+    get_or_create_category: Get Or Create Category functionality.
+"""
+
 #!/usr/bin/env python
-"""Hybrid Tools and Toolkits Importer
+"""Hybrid Tools and Toolkits Importer.
 
 This script first identifies tools using your working approach, then imports them to the database.
 """

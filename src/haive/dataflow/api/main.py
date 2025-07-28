@@ -1,3 +1,11 @@
+"""Main core module.
+
+This module provides main functionality for the Haive framework.
+
+Functions:
+    read_root: Read Root functionality.
+"""
+
 from fastapi import FastAPI
 
 from .api.connect4_api import connect4_api

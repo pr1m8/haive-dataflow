@@ -1,3 +1,17 @@
+"""Game_Agent core module.
+
+This module provides game agent functionality for the Haive framework.
+
+Classes:
+    AgentRequest: AgentRequest implementation.
+    AgentResponseBase: AgentResponseBase implementation.
+    CheckpointInfo: CheckpointInfo implementation.
+
+Functions:
+    get_or_create_agent: Get Or Create Agent functionality.
+    register_connection: Register Connection functionality.
+"""
+
 import json
 import logging
 import uuid
@@ -29,7 +43,7 @@ S = TypeVar("S")  # Agent config type
 
 
 class AgentRequest(BaseModel):
-    """Base model for agent requests"""
+    """Base model for agent requests."""
 
     thread_id: str | None = None
     persistence_type: str = "postgres"
@@ -46,7 +60,7 @@ class AgentResponseBase(BaseModel):
 
 
 class CheckpointInfo(BaseModel):
-    """Information about a checkpoint"""
+    """Information about a checkpoint."""
 
     thread_id: str
     checkpoint_id: str
@@ -63,7 +77,7 @@ class CheckpointInfo(BaseModel):
 
 
 class AgentManager:
-    """Manages agent instances and database connections"""
+    """Manages agent instances and database connections."""
 
     def __init__(
         self,
@@ -71,7 +85,7 @@ class AgentManager:
         config_class: type,
         default_persistence: str = "postgres",
     ):
-        """Initialize the agent manager"""
+        """Initialize the agent manager."""
         self.agent_class = agent_class
         self.config_class = config_class
         self.default_persistence = default_persistence
@@ -82,7 +96,7 @@ class AgentManager:
     def get_or_create_agent(
         self, thread_id: str, config_overrides: dict[str, Any] | None = None
     ) -> Any:
-        """Get or create an agent for a thread ID"""
+        """Get or create an agent for a thread ID."""
         if thread_id in self.agents:
             return self.agents[thread_id]
 
@@ -137,29 +151,29 @@ class AgentManager:
         return agent
 
     def register_connection(self, websocket: WebSocket, thread_id: str):
-        """Register a WebSocket connection"""
+        """Register a WebSocket connection."""
         self.active_connections.add(websocket)
         self.connection_thread_map[websocket] = thread_id
 
     def unregister_connection(self, websocket: WebSocket):
-        """Unregister a WebSocket connection"""
+        """Unregister a WebSocket connection."""
         self.active_connections.discard(websocket)
         if websocket in self.connection_thread_map:
             del self.connection_thread_map[websocket]
 
     def get_agent_for_connection(self, websocket: WebSocket) -> Any | None:
-        """Get the agent for a WebSocket connection"""
+        """Get the agent for a WebSocket connection."""
         thread_id = self.connection_thread_map.get(websocket)
         if thread_id:
             return self.agents.get(thread_id)
         return None
 
     def get_active_threads(self) -> list[str]:
-        """Get list of active thread IDs"""
+        """Get list of active thread IDs."""
         return list(self.agents.keys())
 
     def cleanup(self, thread_id: str | None = None):
-        """Clean up resources"""
+        """Clean up resources."""
         if thread_id:
             # Clean up specific thread
             if thread_id in self.agents:
@@ -191,11 +205,11 @@ class AgentManager:
 
 
 class CheckpointDB:
-    """Utilities for working with checkpoint database"""
+    """Utilities for working with checkpoint database."""
 
     @staticmethod
     async def get_checkpoints(thread_id: str) -> list[CheckpointInfo]:
-        """Get checkpoints for a thread"""
+        """Get checkpoints for a thread."""
         import psycopg
 
         try:
@@ -236,7 +250,7 @@ class CheckpointDB:
 
     @staticmethod
     async def get_threads() -> list[dict[str, Any]]:
-        """Get all threads in the database"""
+        """Get all threads in the database."""
         import psycopg
 
         try:
@@ -275,7 +289,7 @@ class CheckpointDB:
 
 
 class GenericAgentAPI(Generic[T, S]):
-    """Generic API framework for any agent type"""
+    """Generic API framework for any agent type."""
 
     def __init__(
         self,
@@ -326,12 +340,12 @@ class GenericAgentAPI(Generic[T, S]):
         self._register_routes()
 
     def _register_routes(self):
-        """Register API routes"""
+        """Register API routes."""
         app = self.app  # For convenience
 
         @app.post("/agents/", response_model=self.response_model)
         async def create_agent(request: AgentRequest):
-            """Create a new agent instance"""
+            """Create a new agent instance."""
             try:
                 # Generate thread ID if not provided
                 thread_id = (
@@ -372,7 +386,7 @@ class GenericAgentAPI(Generic[T, S]):
 
         @app.post("/agents/{thread_id}/run", response_model=self.response_model)
         async def run_agent(thread_id: str, input_data: dict[str, Any]):
-            """Run agent with input data"""
+            """Run agent with input data."""
             try:
                 # Get or create agent
                 agent = self.agent_manager.get_or_create_agent(thread_id)
@@ -395,7 +409,7 @@ class GenericAgentAPI(Generic[T, S]):
 
         @app.get("/agents/{thread_id}", response_model=self.response_model)
         async def get_agent_state(thread_id: str):
-            """Get current agent state"""
+            """Get current agent state."""
             try:
                 # Get or create agent
                 agent = self.agent_manager.get_or_create_agent(thread_id)
@@ -418,7 +432,7 @@ class GenericAgentAPI(Generic[T, S]):
 
         @app.get("/threads/", response_model=list[dict[str, Any]])
         async def get_threads():
-            """Get all threads"""
+            """Get all threads."""
             try:
                 return await CheckpointDB.get_threads()
             except Exception as e:
@@ -431,7 +445,7 @@ class GenericAgentAPI(Generic[T, S]):
             "/threads/{thread_id}/checkpoints", response_model=list[CheckpointInfo]
         )
         async def get_thread_checkpoints(thread_id: str):
-            """Get checkpoints for a thread"""
+            """Get checkpoints for a thread."""
             try:
                 return await CheckpointDB.get_checkpoints(thread_id)
             except Exception as e:
@@ -442,7 +456,7 @@ class GenericAgentAPI(Generic[T, S]):
 
         @app.websocket("/ws/agents/{thread_id}")
         async def websocket_endpoint(websocket: WebSocket, thread_id: str):
-            """WebSocket endpoint for real-time agent updates"""
+            """WebSocket endpoint for real-time agent updates."""
             await websocket.accept()
 
             try:
@@ -524,19 +538,19 @@ class GenericAgentAPI(Generic[T, S]):
 
         @app.on_event("startup")
         async def startup_event():
-            """Startup event handler"""
+            """Startup event handler."""
             logger.info(f"{self.app_name} API starting up")
 
         @app.on_event("shutdown")
         async def shutdown_event():
-            """Shutdown event handler"""
+            """Shutdown event handler."""
             logger.info(f"{self.app_name} API shutting down")
 
             # Clean up resources
             self.agent_manager.cleanup()
 
     def run(self, host: str = "0.0.0.0", port: int = 8000):
-        """Run the API server"""
+        """Run the API server."""
         import uvicorn
 
         uvicorn.run(self.app, host=host, port=port)

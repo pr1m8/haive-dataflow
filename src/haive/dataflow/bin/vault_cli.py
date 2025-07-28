@@ -1,5 +1,15 @@
+"""Vault_Cli core module.
+
+This module provides vault cli functionality for the Haive framework.
+
+Functions:
+    find_module_path: Find Module Path functionality.
+    import_module: Import Module functionality.
+    execute_sql: Execute Sql functionality.
+"""
+
 #!/usr/bin/env python
-"""Fixed Vault CLI
+"""Fixed Vault CLI.
 
 A command-line utility to manage vault secrets and model imports,
 with proper schema mapping for Supabase.

@@ -1,3 +1,14 @@
+"""Rate_Limit core module.
+
+This module provides rate limit functionality for the Haive framework.
+
+Classes:
+    RateLimitMiddleware: RateLimitMiddleware implementation.
+
+Functions:
+    dispatch: Dispatch functionality.
+"""
+
 # haive_dataflow/api/middleware/rate_limit.py
 import json
 import logging

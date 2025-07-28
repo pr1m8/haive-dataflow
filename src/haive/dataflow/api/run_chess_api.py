@@ -1,3 +1,13 @@
+"""Run_Chess_Api core module.
+
+This module provides run chess api functionality for the Haive framework.
+
+Functions:
+    verify_environment: Verify Environment functionality.
+    run_chess_api: Run Chess Api functionality.
+    main: Main functionality.
+"""
+
 #!/usr/bin/env python3
 """Chess API demonstration script.
 
