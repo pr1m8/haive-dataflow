@@ -252,7 +252,7 @@ class Registry(Generic[T]):
         Args:
             name: Name of the component to create
             *args: Positional arguments for the constructor
-            **kwargs: Keyword arguments for the constructor
+            **kwargs: Key arguments for the constructor
 
         Returns:
             Instance of the component if found, None otherwise
