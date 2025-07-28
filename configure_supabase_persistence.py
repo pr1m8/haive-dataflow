@@ -33,13 +33,12 @@ Notes:
 #!/usr/bin/env python3
 """Configure Supabase persistence with correct credentials."""
 
-import os
 from pathlib import Path
 
 # Path to .env file
 env_path = Path(__file__).parent.parent.parent / ".env"
 
-print(f"Configuring Supabase persistence...")
+print("Configuring Supabase persistence...")
 print(f"Environment file: {env_path}")
 
 # Ask user which Supabase project to use
@@ -54,10 +53,10 @@ print("This is NOT the JWT secret, but the actual PostgreSQL password.")
 print("\nYou can find it in your Supabase dashboard under Settings > Database")
 
 print("\nCurrent configuration will use:")
-print(f"  Project: oecoeyomphckolkywbzz")
-print(f"  Host: aws-0-us-east-1.pooler.supabase.com")
-print(f"  Port: 6543")
-print(f"  User: postgres.oecoeyomphckolkywbzz")
+print("  Project: oecoeyomphckolkywbzz")
+print("  Host: aws-0-us-east-1.pooler.supabase.com")
+print("  Port: 6543")
+print("  User: postgres.oecoeyomphckolkywbzz")
 
 print("\nTo switch to zkssazqhwcetsnbiuqik, add this to your .env file:")
 print(
