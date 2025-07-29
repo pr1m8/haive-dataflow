@@ -5,7 +5,6 @@ integrating with the haive-games package.
 """
 
 import logging
-from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
@@ -25,8 +24,8 @@ logger = logging.getLogger(__name__)
 
 def create_games_router(
     prefix: str = "/games",
-    tags: Optional[List[str]] = None,
-    exclude_games: Optional[List[str]] = None,
+    tags: list[str] | None = None,
+    exclude_games: list[str] | None = None,
 ) -> APIRouter:
     """Create a router for the games API.
 
@@ -73,7 +72,7 @@ def create_games_router(
         )
 
         # Mount the games app routes
-        @router.get("/", response_model=List[GameInfo])
+        @router.get("/", response_model=list[GameInfo])
         async def list_games():
             """List all available games."""
             # Forward to the games API

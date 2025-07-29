@@ -35,8 +35,8 @@ from haive.dataflow.mcp.discovery import MCPDiscovery
 from haive.dataflow.mcp.health import MCPHealthMonitor
 
 __all__ = [
-    "MCPDiscovery",
     "MCPClient",
-    "MCPToolProvider",
+    "MCPDiscovery",
     "MCPHealthMonitor",
+    "MCPToolProvider",
 ]

@@ -12,9 +12,10 @@ import ast
 import inspect
 import json
 import logging
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ class APIPattern:
         name: str,
         pattern_type: str,
         handler: Callable,
-        route: Optional[str] = None,
+        route: str | None = None,
         method: str = "GET",
         websocket: bool = False,
         **metadata,
@@ -98,10 +99,10 @@ class APIDiscovery:
 
     def __init__(self, api_dir: Path):
         self.api_dir = Path(api_dir)
-        self.discovered_patterns: List[APIPattern] = []
-        self.failed_imports: List[str] = []
+        self.discovered_patterns: list[APIPattern] = []
+        self.failed_imports: list[str] = []
 
-    def discover_all_patterns(self) -> List[APIPattern]:
+    def discover_all_patterns(self) -> list[APIPattern]:
         """Discover all API patterns in the codebase."""
         logger.info("🔍 Starting API pattern discovery...")
 
@@ -139,7 +140,7 @@ class APIDiscovery:
     def _analyze_file(self, py_file: Path):
         """Analyze a Python file for API patterns."""
         try:
-            with open(py_file, "r", encoding="utf-8") as f:
+            with open(py_file, encoding="utf-8") as f:
                 content = f.read()
 
             # Parse AST to find API handlers
@@ -157,7 +158,7 @@ class APIDiscovery:
 
     def _analyze_function(
         self, node: ast.FunctionDef, py_file: Path, content: str
-    ) -> Optional[APIPattern]:
+    ) -> APIPattern | None:
         """Analyze a function to see if it's an API handler."""
         # Look for API decorators
         api_decorators = self._find_api_decorators(node)
@@ -188,7 +189,7 @@ class APIDiscovery:
             **metadata,
         )
 
-    def _find_api_decorators(self, node: ast.FunctionDef) -> List[str]:
+    def _find_api_decorators(self, node: ast.FunctionDef) -> list[str]:
         """Find API-related decorators on a function."""
         api_decorator_patterns = [
             "app.",
@@ -240,8 +241,8 @@ class APIDiscovery:
         return any(pattern in name_lower for pattern in handler_patterns)
 
     def _extract_decorator_metadata(
-        self, decorators: List[str], content: str
-    ) -> Dict[str, Any]:
+        self, decorators: list[str], content: str
+    ) -> dict[str, Any]:
         """Extract metadata from decorators."""
         metadata = {}
 
@@ -267,7 +268,7 @@ class APIDiscovery:
         return metadata
 
     def _determine_pattern_type(
-        self, node: ast.FunctionDef, metadata: Dict, content: str
+        self, node: ast.FunctionDef, metadata: dict, content: str
     ) -> str:
         """Determine the type of API pattern."""
         func_name = node.name.lower()
@@ -316,12 +317,11 @@ class APIDiscovery:
 class APIRouterGenerator:
     """Generates router configurations from discovered patterns."""
 
-    def __init__(self, patterns: List[APIPattern]):
+    def __init__(self, patterns: list[APIPattern]):
         self.patterns = patterns
 
-    def generate_unified_router(self, output_file: Optional[Path] = None) -> str:
+    def generate_unified_router(self, output_file: Path | None = None) -> str:
         """Generate a unified router that includes all discovered patterns."""
-
         # Group patterns by type
         patterns_by_type = {}
         for pattern in self.patterns:
@@ -340,7 +340,7 @@ class APIRouterGenerator:
         return router_code
 
     def _generate_router_code(
-        self, patterns_by_type: Dict[str, List[APIPattern]]
+        self, patterns_by_type: dict[str, list[APIPattern]]
     ) -> str:
         """Generate the actual router code."""
         imports = [
@@ -379,8 +379,7 @@ class APIRouterGenerator:
         """Generate code for a specific handler pattern."""
         if pattern.websocket:
             return self._generate_websocket_handler(pattern)
-        else:
-            return self._generate_rest_handler(pattern)
+        return self._generate_rest_handler(pattern)
 
     def _generate_rest_handler(self, pattern: APIPattern) -> str:
         """Generate REST endpoint handler."""
@@ -483,7 +482,7 @@ async def {pattern.name}(websocket: WebSocket):
         return ", ".join(params) if params else ""
 
     def _generate_pattern_registry(
-        self, patterns_by_type: Dict[str, List[APIPattern]]
+        self, patterns_by_type: dict[str, list[APIPattern]]
     ) -> str:
         """Generate a registry of all discovered patterns."""
         registry_data = {}
@@ -520,10 +519,10 @@ async def get_discovered_patterns():
 class APIDocumentationGenerator:
     """Generates documentation for discovered API patterns."""
 
-    def __init__(self, patterns: List[APIPattern]):
+    def __init__(self, patterns: list[APIPattern]):
         self.patterns = patterns
 
-    def generate_api_docs(self, output_dir: Path) -> List[Path]:
+    def generate_api_docs(self, output_dir: Path) -> list[Path]:
         """Generate comprehensive API documentation."""
         output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -626,7 +625,7 @@ All endpoints follow consistent error response format:
 """
 
     def _generate_pattern_summary_table(
-        self, patterns_by_type: Dict[str, List[APIPattern]]
+        self, patterns_by_type: dict[str, list[APIPattern]]
     ) -> str:
         """Generate summary table of patterns."""
         table_rows = []
@@ -665,7 +664,7 @@ All endpoints follow consistent error response format:
         return "\\n".join(result)
 
     def _generate_pattern_docs(
-        self, pattern_type: str, patterns: List[APIPattern]
+        self, pattern_type: str, patterns: list[APIPattern]
     ) -> str:
         """Generate documentation for a specific pattern type."""
         return f"""# {pattern_type.title()} API Endpoints
@@ -681,7 +680,7 @@ All endpoints follow consistent error response format:
 {self._generate_usage_examples(patterns)}
 """
 
-    def _generate_endpoint_docs(self, patterns: List[APIPattern]) -> str:
+    def _generate_endpoint_docs(self, patterns: list[APIPattern]) -> str:
         """Generate documentation for individual endpoints."""
         docs = []
 
@@ -742,7 +741,7 @@ All endpoints follow consistent error response format:
             else "Parameters determined by detected patterns."
         )
 
-    def _generate_usage_examples(self, patterns: List[APIPattern]) -> str:
+    def _generate_usage_examples(self, patterns: list[APIPattern]) -> str:
         """Generate usage examples for patterns."""
         if not patterns:
             return "No examples available."
@@ -772,8 +771,7 @@ async def connect_to_{pattern.name}():
 asyncio.run(connect_to_{pattern.name}())
 ```"""
 
-        else:
-            return f"""```python
+        return f"""```python
 import requests
 
 # {pattern.method} request example
@@ -786,7 +784,7 @@ response = requests.{pattern.method.lower()}(url, json={{
 print(response.json())
 ```"""
 
-    def _generate_openapi_spec(self) -> Dict[str, Any]:
+    def _generate_openapi_spec(self) -> dict[str, Any]:
         """Generate OpenAPI specification."""
         spec = {
             "openapi": "3.0.0",

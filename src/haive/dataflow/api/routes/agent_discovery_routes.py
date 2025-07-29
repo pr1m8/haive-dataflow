@@ -8,7 +8,7 @@ This module provides FastAPI routes for discovering and managing both v1 and v2 
 import importlib
 import inspect
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -27,7 +27,7 @@ class AgentInfo(BaseModel):
     module: str = Field(..., description="Module path")
     agent_type: str = Field(..., description="Agent type (v1 or v2)")
     version: str = Field(..., description="Agent version")
-    config_class: Optional[str] = Field(None, description="Config class for v1 agents")
+    config_class: str | None = Field(None, description="Config class for v1 agents")
     category: str = Field(default="general", description="Agent category")
 
 
@@ -37,13 +37,13 @@ class AgentSchema(BaseModel):
     name: str = Field(..., description="Agent name")
     description: str = Field(..., description="Agent description")
     agent_type: str = Field(..., description="Agent type (v1 or v2)")
-    config_schema: Optional[Dict[str, Any]] = Field(
+    config_schema: dict[str, Any] | None = Field(
         None, description="Configuration schema for v1 agents"
     )
-    init_schema: Optional[Dict[str, Any]] = Field(
+    init_schema: dict[str, Any] | None = Field(
         None, description="Initialization schema for v2 agents"
     )
-    methods: List[str] = Field(
+    methods: list[str] = Field(
         default_factory=list, description="Available agent methods"
     )
 
@@ -51,7 +51,7 @@ class AgentSchema(BaseModel):
 class AgentListResponse(BaseModel):
     """Response for agent list endpoint."""
 
-    agents: List[AgentInfo] = Field(..., description="List of available agents")
+    agents: list[AgentInfo] = Field(..., description="List of available agents")
     count: int = Field(..., description="Total number of agents")
     v1_count: int = Field(..., description="Number of v1 agents")
     v2_count: int = Field(..., description="Number of v2 agents")
@@ -61,10 +61,10 @@ class AgentCreateRequest(BaseModel):
     """Request to create/instantiate an agent."""
 
     agent_name: str = Field(..., description="Name of the agent to create")
-    config: Optional[Dict[str, Any]] = Field(
+    config: dict[str, Any] | None = Field(
         None, description="Configuration for v1 agents"
     )
-    init_args: Optional[Dict[str, Any]] = Field(
+    init_args: dict[str, Any] | None = Field(
         None, description="Initialization arguments for v2 agents"
     )
 
@@ -73,18 +73,17 @@ class AgentCreateResponse(BaseModel):
     """Response from agent creation."""
 
     success: bool = Field(..., description="Whether creation was successful")
-    agent_id: Optional[str] = Field(None, description="Created agent ID")
-    agent_type: Optional[str] = Field(None, description="Type of created agent")
-    error: Optional[str] = Field(None, description="Error message if failed")
+    agent_id: str | None = Field(None, description="Created agent ID")
+    agent_type: str | None = Field(None, description="Type of created agent")
+    error: str | None = Field(None, description="Error message if failed")
 
 
-def discover_v1_agents() -> List[AgentInfo]:
+def discover_v1_agents() -> list[AgentInfo]:
     """Discover v1 agents from haive.engine.agent."""
     agents = []
 
     try:
         # Try to import haive.engine.agent modules
-        from haive.core.engine.agent import agent as agent_module
         from haive.core.engine.agent import config as agent_config_module
 
         # Look for config classes that end with 'Config'
@@ -119,7 +118,6 @@ def discover_v1_agents() -> List[AgentInfo]:
 
         # Also check for generic agent with various configs
         try:
-            from haive.core.engine.agent.agent import Agent as V1Agent
 
             # Look for any config classes that could be used with the generic agent
             config_classes = []
@@ -153,13 +151,12 @@ def discover_v1_agents() -> List[AgentInfo]:
     return agents
 
 
-def discover_v2_agents() -> List[AgentInfo]:
+def discover_v2_agents() -> list[AgentInfo]:
     """Discover v2 agents from haive.agents.base.agent."""
     agents = []
 
     try:
         # Check haive.agents.base.agent
-        from haive.agents.base.agent import Agent as V2Agent
 
         agents.append(
             AgentInfo(
@@ -244,7 +241,7 @@ def discover_v2_agents() -> List[AgentInfo]:
     return agents
 
 
-def discover_all_agents() -> List[AgentInfo]:
+def discover_all_agents() -> list[AgentInfo]:
     """Discover both v1 and v2 agents."""
     agents = []
 
@@ -440,7 +437,7 @@ async def get_agent_schema(agent_name: str) -> AgentSchema:
 
 
 @router.get("/{agent_name}")
-async def get_agent_details(agent_name: str) -> Dict[str, Any]:
+async def get_agent_details(agent_name: str) -> dict[str, Any]:
     """Get detailed information about a specific agent.
 
     Args:

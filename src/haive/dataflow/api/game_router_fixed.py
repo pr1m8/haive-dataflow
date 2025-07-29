@@ -23,7 +23,7 @@ It provides WebSocket endpoints for streaming game state and interacting with ga
 import asyncio
 import logging
 from pathlib import Path
-from typing import Any, Dict, Set
+from typing import Any
 
 from fastapi import APIRouter, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -41,8 +41,8 @@ logging.basicConfig(
 logger = logging.getLogger("game-routef")
 
 # Active connections and games
-active_connections: Dict[str, Set[WebSocket]] = {}  # game_type -> {websockets}
-active_games: Dict[str, Dict[str, Any]] = {}  # game_id -> game_state
+active_connections: dict[str, set[WebSocket]] = {}  # game_type -> {websockets}
+active_games: dict[str, dict[str, Any]] = {}  # game_id -> game_state
 
 # Game agent registry
 game_agents = {}
@@ -147,7 +147,7 @@ def discover_game_agents():
         logger.error(f"❌ Error discovering game agents: {e}", exc_info=True)
 
 
-def create_game_instance(game_type: str, game_id: str) -> Dict[str, Any]:
+def create_game_instance(game_type: str, game_id: str) -> dict[str, Any]:
     """Create or get a game instance."""
     if game_type not in game_agents:
         raise ValueError(f"Unknown game type: {game_type}")
@@ -218,7 +218,7 @@ def create_game_instance(game_type: str, game_id: str) -> Dict[str, Any]:
     return active_games[game_key]
 
 
-def get_game_instance(game_type: str, game_id: str) -> Dict[str, Any]:
+def get_game_instance(game_type: str, game_id: str) -> dict[str, Any]:
     """Get an existing game instance."""
     game_key = f"{game_type}:{game_id}"
     return active_games.get(game_key)
@@ -261,7 +261,7 @@ def create_game_router(game_type: str) -> APIRouter:
                 await websocket.send_json(
                     {
                         "type": "error",
-                        "message": f"Failed to create game: {str(e)}",
+                        "message": f"Failed to create game: {e!s}",
                         "game_type": game_type,
                     }
                 )
@@ -291,7 +291,7 @@ def create_game_router(game_type: str) -> APIRouter:
                 await websocket.send_json(
                     {
                         "type": "error",
-                        "message": f"Failed to get initial state: {str(e)}",
+                        "message": f"Failed to get initial state: {e!s}",
                     }
                 )
 
@@ -323,7 +323,7 @@ def create_game_router(game_type: str) -> APIRouter:
                             await websocket.send_json(
                                 {
                                     "type": "error",
-                                    "message": f"Failed to get state: {str(e)}",
+                                    "message": f"Failed to get state: {e!s}",
                                 }
                             )
 
@@ -348,7 +348,7 @@ def create_game_router(game_type: str) -> APIRouter:
                             await websocket.send_json(
                                 {
                                     "type": "error",
-                                    "message": f"Failed to make move: {str(e)}",
+                                    "message": f"Failed to make move: {e!s}",
                                 }
                             )
 
@@ -370,7 +370,7 @@ def create_game_router(game_type: str) -> APIRouter:
                             await websocket.send_json(
                                 {
                                     "type": "error",
-                                    "message": f"Failed to make AI move: {str(e)}",
+                                    "message": f"Failed to make AI move: {e!s}",
                                 }
                             )
 
@@ -389,7 +389,7 @@ def create_game_router(game_type: str) -> APIRouter:
                         await websocket.send_json(
                             {
                                 "type": "error",
-                                "message": f"Error processing message: {str(e)}",
+                                "message": f"Error processing message: {e!s}",
                             }
                         )
                     except:
@@ -406,7 +406,7 @@ def create_game_router(game_type: str) -> APIRouter:
             )
             try:
                 await websocket.send_json(
-                    {"type": "error", "message": f"Server error: {str(e)}"}
+                    {"type": "error", "message": f"Server error: {e!s}"}
                 )
             except:
                 # Connection might be closed, ignore send error

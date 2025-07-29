@@ -18,7 +18,7 @@ Classes:
 import asyncio
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .registry.models import (
     EntityType,
@@ -42,8 +42,6 @@ except ImportError:
 
 try:
     # Import official MCP SDK if available
-    from mcp import types
-    from mcp.server.fastmcp import FastMCP
 
     MCP_SDK_AVAILABLE = True
 except ImportError:
@@ -88,10 +86,10 @@ class MCPClient:
             registry_system: Optional registry system instance
         """
         self.registry_system = registry_system
-        self.mcp_client: Optional[Any] = None
-        self.connected_servers: Dict[str, MCPServerConfig] = {}
-        self.available_tools: List[MCPToolDefinition] = []
-        self.server_health: Dict[str, MCPServerHealth] = {}
+        self.mcp_client: Any | None = None
+        self.connected_servers: dict[str, MCPServerConfig] = {}
+        self.available_tools: list[MCPToolDefinition] = []
+        self.server_health: dict[str, MCPServerHealth] = {}
 
         if not LANGCHAIN_MCP_AVAILABLE:
             logger.error(
@@ -144,7 +142,7 @@ class MCPClient:
             return False
 
     async def connect_to_servers(
-        self, server_configs: Dict[str, MCPServerConfig]
+        self, server_configs: dict[str, MCPServerConfig]
     ) -> bool:
         """Connect to specific MCP servers.
 
@@ -178,7 +176,7 @@ class MCPClient:
             logger.error(f"Failed to connect to MCP servers: {e}")
             return False
 
-    async def get_available_tools(self) -> List[Any]:
+    async def get_available_tools(self) -> list[Any]:
         """Get all available tools from connected MCP servers.
 
         Returns:
@@ -197,7 +195,7 @@ class MCPClient:
             logger.error(f"Failed to load MCP tools: {e}")
             return []
 
-    async def execute_tool(self, tool_name: str, parameters: Dict[str, Any]) -> Any:
+    async def execute_tool(self, tool_name: str, parameters: dict[str, Any]) -> Any:
         """Execute a specific MCP tool.
 
         Args:
@@ -275,7 +273,7 @@ class MCPClient:
             self.server_health[server_name] = health
             return health
 
-    async def get_server_health_status(self) -> Dict[str, MCPServerHealth]:
+    async def get_server_health_status(self) -> dict[str, MCPServerHealth]:
         """Get health status for all connected servers.
 
         Returns:
@@ -291,7 +289,7 @@ class MCPClient:
 
         return self.server_health
 
-    def _convert_to_langchain_config(self, config: MCPServerConfig) -> Dict[str, Any]:
+    def _convert_to_langchain_config(self, config: MCPServerConfig) -> dict[str, Any]:
         """Convert MCPServerConfig to LangChain MCP adapter format.
 
         Args:
@@ -365,7 +363,7 @@ class MCPToolProvider:
         self.mcp_client = mcp_client
         self.registry_system = registry_system
 
-    async def discover_and_register_tools(self) -> List[str]:
+    async def discover_and_register_tools(self) -> list[str]:
         """Discover MCP tools and register them in the dataflow registry.
 
         Returns:
@@ -427,8 +425,8 @@ class MCPServerAdapter:
         """
         self.config = config
         self.is_connected = False
-        self.last_health_check: Optional[datetime] = None
-        self.health_status: Optional[MCPServerHealth] = None
+        self.last_health_check: datetime | None = None
+        self.health_status: MCPServerHealth | None = None
 
     async def connect(self) -> bool:
         """Connect to the MCP server.
@@ -452,7 +450,7 @@ class MCPServerAdapter:
         self.is_connected = False
         logger.info(f"Disconnected from MCP server: {self.config.name}")
 
-    async def execute_tool(self, tool_name: str, parameters: Dict[str, Any]) -> Any:
+    async def execute_tool(self, tool_name: str, parameters: dict[str, Any]) -> Any:
         """Execute a tool on this server.
 
         Args:
@@ -469,7 +467,7 @@ class MCPServerAdapter:
         # For now, return a placeholder
         return f"Tool {tool_name} executed on server {self.config.name} with parameters: {parameters}"
 
-    async def get_available_tools(self) -> List[str]:
+    async def get_available_tools(self) -> list[str]:
         """Get list of available tools on this server.
 
         Returns:

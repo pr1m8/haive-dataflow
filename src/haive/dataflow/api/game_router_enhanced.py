@@ -53,7 +53,7 @@ import logging
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 from fastapi import APIRouter, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -69,9 +69,9 @@ logging.basicConfig(
 logger = logging.getLogger("game-routef")
 
 # Module-level registries
-active_connections: Dict[str, Set[WebSocket]] = {}  # game_type -> {websockets}
-active_games: Dict[str, Dict[str, Any]] = {}  # game_id -> game_state
-game_agents: Dict[str, Dict[str, Any]] = {}  # game_type -> agent_info
+active_connections: dict[str, set[WebSocket]] = {}  # game_type -> {websockets}
+active_games: dict[str, dict[str, Any]] = {}  # game_id -> game_state
+game_agents: dict[str, dict[str, Any]] = {}  # game_type -> agent_info
 
 # Get haive root path
 HAIVE_ROOT = Path(__file__).parents[6]
@@ -127,7 +127,7 @@ def discover_game_agents() -> None:
         logger.error(f"Error discovering game agents: {e}", exc_info=True)
 
 
-def _process_game_components(components: List[ComponentInfo]) -> None:
+def _process_game_components(components: list[ComponentInfo]) -> None:
     """Process discovered components to identify game agents.
 
     Args:
@@ -171,7 +171,7 @@ def _process_game_components(components: List[ComponentInfo]) -> None:
     _discover_by_module_pattern(components)
 
 
-def _discover_by_module_pattern(components: List[ComponentInfo]) -> None:
+def _discover_by_module_pattern(components: list[ComponentInfo]) -> None:
     """Discover games by module organization pattern.
 
     Args:
@@ -220,7 +220,7 @@ def _discover_by_module_pattern(components: List[ComponentInfo]) -> None:
             logger.info(f"Registered game module: {game_name}")
 
 
-def create_game_instance(game_type: str, game_id: str) -> Dict[str, Any]:
+def create_game_instance(game_type: str, game_id: str) -> dict[str, Any]:
     """Create or retrieve a game instance.
 
     Args:
@@ -267,7 +267,7 @@ def create_game_instance(game_type: str, game_id: str) -> Dict[str, Any]:
     return active_games[game_key]
 
 
-def _instantiate_agent(agent_info: Dict[str, Any], game_type: str, game_id: str) -> Any:
+def _instantiate_agent(agent_info: dict[str, Any], game_type: str, game_id: str) -> Any:
     """Instantiate a game agent with appropriate initialization.
 
     Args:
@@ -317,7 +317,7 @@ def _instantiate_agent(agent_info: Dict[str, Any], game_type: str, game_id: str)
     raise RuntimeError(f"Failed to create agent instance for {game_type}")
 
 
-def get_game_instance(game_type: str, game_id: str) -> Optional[Dict[str, Any]]:
+def get_game_instance(game_type: str, game_id: str) -> dict[str, Any] | None:
     """Retrieve an existing game instance.
 
     Args:
@@ -406,7 +406,7 @@ def create_game_router(game_type: str) -> APIRouter:
 
 
 async def _handle_game_websocket(
-    websocket: WebSocket, game_type: str, game_id: str, agent_info: Dict[str, Any]
+    websocket: WebSocket, game_type: str, game_id: str, agent_info: dict[str, Any]
 ) -> None:
     """Handle WebSocket connection for a game session.
 
@@ -449,7 +449,7 @@ async def _handle_game_websocket(
         logger.error(f"WebSocket error for {game_type}:{game_id}: {e}", exc_info=True)
         try:
             await websocket.send_json(
-                {"type": "error", "message": f"Server error: {str(e)}"}
+                {"type": "error", "message": f"Server error: {e!s}"}
             )
         except:
             pass
@@ -461,8 +461,8 @@ async def _handle_game_websocket(
 
 
 async def _initialize_game_session(
-    websocket: WebSocket, game_type: str, game_id: str, agent_info: Dict[str, Any]
-) -> Optional[Dict[str, Any]]:
+    websocket: WebSocket, game_type: str, game_id: str, agent_info: dict[str, Any]
+) -> dict[str, Any] | None:
     """Initialize a game session and send initial state.
 
     Args:
@@ -505,7 +505,7 @@ async def _initialize_game_session(
         await websocket.send_json(
             {
                 "type": "error",
-                "message": f"Failed to initialize game: {str(e)}",
+                "message": f"Failed to initialize game: {e!s}",
                 "game_type": game_type,
             }
         )
@@ -547,7 +547,7 @@ async def _handle_game_messages(
             logger.error(f"Error processing WebSocket message: {e}")
             try:
                 await websocket.send_json(
-                    {"type": "error", "message": f"Error processing message: {str(e)}"}
+                    {"type": "error", "message": f"Error processing message: {e!s}"}
                 )
             except:
                 break
@@ -570,12 +570,12 @@ async def _handle_get_state(
     except Exception as e:
         logger.error(f"Error getting state: {e}")
         await websocket.send_json(
-            {"type": "error", "message": f"Failed to get state: {str(e)}"}
+            {"type": "error", "message": f"Failed to get state: {e!s}"}
         )
 
 
 async def _handle_make_move(
-    websocket: WebSocket, agent: Any, game_type: str, game_id: str, data: Dict[str, Any]
+    websocket: WebSocket, agent: Any, game_type: str, game_id: str, data: dict[str, Any]
 ) -> None:
     """Handle make_move message."""
     try:
@@ -595,7 +595,7 @@ async def _handle_make_move(
     except Exception as e:
         logger.error(f"Error making move: {e}")
         await websocket.send_json(
-            {"type": "error", "message": f"Failed to make move: {str(e)}"}
+            {"type": "error", "message": f"Failed to make move: {e!s}"}
         )
 
 
@@ -617,7 +617,7 @@ async def _handle_ai_move(
     except Exception as e:
         logger.error(f"Error making AI move: {e}")
         await websocket.send_json(
-            {"type": "error", "message": f"Failed to make AI move: {str(e)}"}
+            {"type": "error", "message": f"Failed to make AI move: {e!s}"}
         )
 
 

@@ -1,7 +1,5 @@
 """Example tool for testing the tools API."""
 
-from typing import Dict, List
-
 from pydantic import BaseModel, Field
 
 
@@ -19,7 +17,7 @@ class CalculatorTool:
     description = "Performs mathematical calculations"
     args_schema = CalculatorInput
 
-    def run(self, expression: str, precision: int = 2) -> Dict[str, any]:
+    def run(self, expression: str, precision: int = 2) -> dict[str, any]:
         """Evaluate a mathematical expression.
 
         Args:
@@ -48,7 +46,7 @@ class SearchToolInput(BaseModel):
     max_results: int = Field(default=10, description="Maximum number of results")
 
 
-def simple_search(query: str, max_results: int = 10) -> List[str]:
+def simple_search(query: str, max_results: int = 10) -> list[str]:
     """Simple search function for testing.
 
     Args:

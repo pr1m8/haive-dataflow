@@ -11,8 +11,9 @@ Functions:
     check_credits: Check Credits functionality.
 """
 
-# haive_dataflow/auth/credits.py
 import logging
+
+# haive_dataflow/auth/credits.py
 from datetime import datetime
 from decimal import Decimal
 

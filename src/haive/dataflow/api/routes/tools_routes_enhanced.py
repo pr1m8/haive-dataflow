@@ -34,7 +34,7 @@ Note:
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/tools", tags=["tools"])
 
 # Module-level cache
-_discovery_cache: Dict[str, Any] = {}
+_discovery_cache: dict[str, Any] = {}
 
 
 class ToolInfo(BaseModel):
@@ -73,7 +73,7 @@ class ToolInfo(BaseModel):
     type: str = Field(..., description="Tool type (tool or toolkit)")
     category: str = Field(default="general", description="Tool category")
     has_schema: bool = Field(default=False, description="Whether tool has input schema")
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
@@ -89,7 +89,7 @@ class ToolsListResponse(BaseModel):
         discovery_method: Method used for discovery.
     """
 
-    tools: List[ToolInfo] = Field(..., description="List of available tools")
+    tools: list[ToolInfo] = Field(..., description="List of available tools")
     count: int = Field(..., description="Total number of tools")
     tool_count: int = Field(..., description="Number of individual tools")
     toolkit_count: int = Field(..., description="Number of toolkits")
@@ -112,17 +112,17 @@ class ToolSchema(BaseModel):
 
     name: str = Field(..., description="Tool name")
     description: str = Field(..., description="Tool description")
-    input_schema: Dict[str, Any] = Field(..., description="Input parameters schema")
-    output_schema: Optional[Dict[str, Any]] = Field(
+    input_schema: dict[str, Any] = Field(..., description="Input parameters schema")
+    output_schema: dict[str, Any] | None = Field(
         None, description="Output schema if available"
     )
-    examples: Optional[List[Dict[str, Any]]] = Field(None, description="Usage examples")
-    metadata: Dict[str, Any] = Field(
+    examples: list[dict[str, Any]] | None = Field(None, description="Usage examples")
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
 
-def discover_all_tools(force_refresh: bool = False) -> List[ComponentInfo]:
+def discover_all_tools(force_refresh: bool = False) -> list[ComponentInfo]:
     """Discover all tools using the unified discovery system.
 
     Args:
@@ -190,29 +190,28 @@ def infer_tool_category(component: ComponentInfo) -> str:
     # Category mapping rules
     if any(x in path_lower for x in ["search", "google", "bing", "duckduckgo"]):
         return "search"
-    elif any(x in path_lower for x in ["database", "sql", "mongodb", "redis"]):
+    if any(x in path_lower for x in ["database", "sql", "mongodb", "redis"]):
         return "database"
-    elif any(x in path_lower for x in ["github", "git", "gitlab", "dev"]):
+    if any(x in path_lower for x in ["github", "git", "gitlab", "dev"]):
         return "development"
-    elif any(x in path_lower for x in ["arxiv", "research", "pubmed", "scholar"]):
+    if any(x in path_lower for x in ["arxiv", "research", "pubmed", "scholar"]):
         return "research"
-    elif any(x in path_lower for x in ["compute", "calc", "math", "wolfram"]):
+    if any(x in path_lower for x in ["compute", "calc", "math", "wolfram"]):
         return "computation"
-    elif any(x in path_lower for x in ["weather", "climate"]):
+    if any(x in path_lower for x in ["weather", "climate"]):
         return "weather"
-    elif any(x in path_lower for x in ["finance", "stock", "crypto"]):
+    if any(x in path_lower for x in ["finance", "stock", "crypto"]):
         return "finance"
-    elif any(x in path_lower for x in ["translate", "language"]):
+    if any(x in path_lower for x in ["translate", "language"]):
         return "language"
-    elif any(x in path_lower for x in ["email", "gmail", "office"]):
+    if any(x in path_lower for x in ["email", "gmail", "office"]):
         return "communication"
-    elif "toolkit" in name_lower:
+    if "toolkit" in name_lower:
         return "toolkit"
-    else:
-        return "general"
+    return "general"
 
 
-def extract_tool_schema(component: ComponentInfo) -> Optional[Dict[str, Any]]:
+def extract_tool_schema(component: ComponentInfo) -> dict[str, Any] | None:
     """Extract schema information from a tool component.
 
     Args:
@@ -293,10 +292,8 @@ def component_to_tool_info(component: ComponentInfo) -> ToolInfo:
 
 @router.get("/", response_model=ToolsListResponse)
 async def list_tools(
-    tool_type: Optional[str] = Query(
-        None, description="Filter by type (tool, toolkit)"
-    ),
-    category: Optional[str] = Query(None, description="Filter by category"),
+    tool_type: str | None = Query(None, description="Filter by type (tool, toolkit)"),
+    category: str | None = Query(None, description="Filter by category"),
     force_refresh: bool = Query(False, description="Force refresh discovery cache"),
 ) -> ToolsListResponse:
     """List all available tools with optional filtering.
@@ -346,8 +343,8 @@ async def list_tools(
 @router.get("/search", response_model=ToolsListResponse)
 async def search_tools(
     query: str = Query(..., description="Search query"),
-    tool_type: Optional[str] = Query(None, description="Filter by type"),
-    category: Optional[str] = Query(None, description="Filter by category"),
+    tool_type: str | None = Query(None, description="Filter by type"),
+    category: str | None = Query(None, description="Filter by category"),
 ) -> ToolsListResponse:
     """Search tools by name, description, or module path.
 
@@ -468,8 +465,8 @@ async def get_tool_schema_endpoint(tool_name: str) -> ToolSchema:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/categories", response_model=Dict[str, List[str]])
-async def get_tool_categories() -> Dict[str, List[str]]:
+@router.get("/categories", response_model=dict[str, list[str]])
+async def get_tool_categories() -> dict[str, list[str]]:
     """Get all available tool categories and their tools.
 
     Returns:
@@ -509,8 +506,8 @@ async def get_tool_categories() -> Dict[str, List[str]]:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/stats", response_model=Dict[str, Any])
-async def get_tool_stats() -> Dict[str, Any]:
+@router.get("/stats", response_model=dict[str, Any])
+async def get_tool_stats() -> dict[str, Any]:
     """Get statistics about discovered tools.
 
     Returns:

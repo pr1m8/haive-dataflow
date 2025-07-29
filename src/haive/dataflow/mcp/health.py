@@ -11,7 +11,6 @@ Classes:
 import asyncio
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional
 
 from .registry.models import MCPServerConfig, MCPServerHealth
 
@@ -53,9 +52,9 @@ class MCPHealthMonitor:
         """
         self.mcp_client = mcp_client
         self.monitoring_interval = monitoring_interval
-        self.health_checkers: Dict[str, MCPHealthChecker] = {}
+        self.health_checkers: dict[str, MCPHealthChecker] = {}
         self.is_monitoring = False
-        self._monitoring_task: Optional[asyncio.Task] = None
+        self._monitoring_task: asyncio.Task | None = None
 
     async def start_monitoring(self):
         """Start health monitoring for all connected servers."""
@@ -93,7 +92,7 @@ class MCPHealthMonitor:
 
         logger.info("Stopped health monitoring")
 
-    async def check_all_servers(self) -> Dict[str, MCPServerHealth]:
+    async def check_all_servers(self) -> dict[str, MCPServerHealth]:
         """Perform health check on all servers.
 
         Returns:
@@ -128,7 +127,7 @@ class MCPHealthMonitor:
 
         return health_status
 
-    async def get_health_summary(self) -> Dict[str, any]:
+    async def get_health_summary(self) -> dict[str, any]:
         """Get summary of health status across all servers.
 
         Returns:
@@ -164,7 +163,7 @@ class MCPHealthMonitor:
             "server_details": health_status,
         }
 
-    async def recover_failed_servers(self) -> List[str]:
+    async def recover_failed_servers(self) -> list[str]:
         """Attempt to recover failed servers.
 
         Returns:
@@ -253,7 +252,7 @@ class MCPHealthChecker:
         self.server_name = server_name
         self.server_config = server_config
         self.error_count = 0
-        self.last_successful_check: Optional[datetime] = None
+        self.last_successful_check: datetime | None = None
         self.consecutive_failures = 0
 
     async def check_health(self) -> MCPServerHealth:
@@ -349,11 +348,11 @@ class MCPHealthChecker:
                 # For stdio, check if command is available
                 return await self._check_command_available()
 
-            elif self.server_config.transport.value == "http":
+            if self.server_config.transport.value == "http":
                 # For HTTP, try a simple request
                 return await self._check_http_connectivity()
 
-            elif self.server_config.transport.value == "sse":
+            if self.server_config.transport.value == "sse":
                 # For SSE, check endpoint availability
                 return await self._check_sse_connectivity()
 
@@ -406,7 +405,7 @@ class MCPHealthChecker:
         # For now, return True as placeholder
         return True
 
-    async def _get_available_capabilities(self) -> List[str]:
+    async def _get_available_capabilities(self) -> list[str]:
         """Get list of available capabilities from the server.
 
         Returns:

@@ -51,7 +51,6 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from haive.dataflow.config.environment import (
-    get_postgres_config,
     get_supabase_server_config,
 )
 
@@ -137,17 +136,16 @@ class SupabasePersistence:
             return PostgresCheckpointerConfig(
                 connection_string=supabase_uri, setup_needed=True
             )
-        else:
-            # Fall back to individual parameters (if needed)
-            return PostgresCheckpointerConfig(
-                db_host=os.getenv("SUPABASE_HOST", "localhost"),
-                db_port=int(os.getenv("SUPABASE_PORT", "6543")),
-                db_name=os.getenv("SUPABASE_DBNAME", "postgres"),
-                db_user=os.getenv("SUPABASE_USER", "postgres"),
-                db_pass=os.getenv("SUPABASE_PASSWORD", ""),
-                ssl_mode="require",
-                setup_needed=True,
-            )
+        # Fall back to individual parameters (if needed)
+        return PostgresCheckpointerConfig(
+            db_host=os.getenv("SUPABASE_HOST", "localhost"),
+            db_port=int(os.getenv("SUPABASE_PORT", "6543")),
+            db_name=os.getenv("SUPABASE_DBNAME", "postgres"),
+            db_user=os.getenv("SUPABASE_USER", "postgres"),
+            db_pass=os.getenv("SUPABASE_PASSWORD", ""),
+            ssl_mode="require",
+            setup_needed=True,
+        )
 
     @asynccontextmanager
     async def rls_context(self, connection, user_id: str):

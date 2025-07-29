@@ -7,7 +7,7 @@ tools in the Haive ecosystem using the haive-core discovery system.
 import asyncio
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -34,7 +34,7 @@ class ToolInfo(BaseModel):
     module: str = Field(..., description="Module path")
     type: str = Field(..., description="Tool type (tool or toolkit)")
     category: str = Field(default="general", description="Tool category")
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
@@ -42,7 +42,7 @@ class ToolInfo(BaseModel):
 class ToolsListResponse(BaseModel):
     """Response for tools list endpoint."""
 
-    tools: List[ToolInfo] = Field(..., description="List of available tools")
+    tools: list[ToolInfo] = Field(..., description="List of available tools")
     count: int = Field(..., description="Total number of tools")
     tool_count: int = Field(..., description="Number of individual tools")
     toolkit_count: int = Field(..., description="Number of toolkits")
@@ -56,11 +56,11 @@ class ToolSchema(BaseModel):
 
     name: str = Field(..., description="Tool name")
     description: str = Field(..., description="Tool description")
-    input_schema: Dict[str, Any] = Field(..., description="Input parameters schema")
-    output_schema: Optional[Dict[str, Any]] = Field(
+    input_schema: dict[str, Any] = Field(..., description="Input parameters schema")
+    output_schema: dict[str, Any] | None = Field(
         None, description="Output schema if available"
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
@@ -69,7 +69,7 @@ class ToolInvokeRequest(BaseModel):
     """Request to invoke a tool."""
 
     tool_name: str = Field(..., description="Name of the tool to invoke")
-    arguments: Dict[str, Any] = Field(..., description="Arguments to pass to the tool")
+    arguments: dict[str, Any] = Field(..., description="Arguments to pass to the tool")
 
 
 class ToolInvokeResponse(BaseModel):
@@ -77,12 +77,12 @@ class ToolInvokeResponse(BaseModel):
 
     success: bool = Field(..., description="Whether invocation was successful")
     result: Any = Field(None, description="Result from the tool")
-    error: Optional[str] = Field(None, description="Error message if failed")
+    error: str | None = Field(None, description="Error message if failed")
 
 
 # Cache for discovered tools
-_cached_tools: Optional[List[ComponentInfo]] = None
-_discovery_instance: Optional[HaiveComponentDiscovery] = None
+_cached_tools: list[ComponentInfo] | None = None
+_discovery_instance: HaiveComponentDiscovery | None = None
 
 
 def get_discovery_instance() -> HaiveComponentDiscovery:
@@ -96,7 +96,7 @@ def get_discovery_instance() -> HaiveComponentDiscovery:
     return _discovery_instance
 
 
-def discover_all_tools(force_refresh: bool = False) -> List[ComponentInfo]:
+def discover_all_tools(force_refresh: bool = False) -> list[ComponentInfo]:
     """Discover all tools using the unified discovery system."""
     global _cached_tools
 
@@ -124,7 +124,7 @@ def discover_all_tools(force_refresh: bool = False) -> List[ComponentInfo]:
         return discover_tools_fallback()
 
 
-def discover_tools_fallback() -> List[ComponentInfo]:
+def discover_tools_fallback() -> list[ComponentInfo]:
     """Fallback tool discovery if the main discovery fails."""
     try:
         logger.info("Using fallback tool discovery...")
@@ -407,7 +407,7 @@ async def invoke_tool_endpoint(request: ToolInvokeRequest) -> ToolInvokeResponse
 
 
 @router.get("/{tool_name}")
-async def get_tool_details(tool_name: str) -> Dict[str, Any]:
+async def get_tool_details(tool_name: str) -> dict[str, Any]:
     """Get detailed information about a specific tool.
 
     Args:
@@ -475,7 +475,7 @@ async def get_tool_details(tool_name: str) -> Dict[str, Any]:
 
 
 @router.post("/refresh")
-async def refresh_tool_cache() -> Dict[str, Any]:
+async def refresh_tool_cache() -> dict[str, Any]:
     """Refresh the tool discovery cache.
 
     Returns:
@@ -502,7 +502,7 @@ async def refresh_tool_cache() -> Dict[str, Any]:
 
 
 @router.get("/stats/summary")
-async def get_tool_stats() -> Dict[str, Any]:
+async def get_tool_stats() -> dict[str, Any]:
     """Get summary statistics about discovered tools.
 
     Returns:
@@ -546,7 +546,7 @@ async def get_tool_stats() -> Dict[str, Any]:
 
 
 @router.get("/categories")
-async def get_tool_categories() -> Dict[str, List[str]]:
+async def get_tool_categories() -> dict[str, list[str]]:
     """Get all available tool categories and their tools.
 
     Returns:

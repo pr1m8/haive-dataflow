@@ -180,7 +180,6 @@ def main():
 
         # Try to import LiteLLM
         try:
-            from haive.dataflow.importers.litellm_importer import import_llm_models
 
             logger.info(
                 "  ✅ LiteLLM importer is available (imports models from GitHub)"

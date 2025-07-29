@@ -30,7 +30,6 @@ from datetime import datetime
 
 # Try to import tqdm for progress bars
 try:
-    from tqdm import tqdm
 
     TQDM_AVAILABLE = True
 except ImportError:

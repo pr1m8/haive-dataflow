@@ -6,7 +6,7 @@ using the haive-core discovery system.
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -31,9 +31,9 @@ class AgentInfo(BaseModel):
     module: str = Field(..., description="Module path")
     agent_type: str = Field(..., description="Agent type (v1 or v2)")
     version: str = Field(..., description="Agent version")
-    config_class: Optional[str] = Field(None, description="Config class for v1 agents")
+    config_class: str | None = Field(None, description="Config class for v1 agents")
     category: str = Field(default="general", description="Agent category")
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
@@ -44,16 +44,16 @@ class AgentSchema(BaseModel):
     name: str = Field(..., description="Agent name")
     description: str = Field(..., description="Agent description")
     agent_type: str = Field(..., description="Agent type (v1 or v2)")
-    config_schema: Optional[Dict[str, Any]] = Field(
+    config_schema: dict[str, Any] | None = Field(
         None, description="Configuration schema for v1 agents"
     )
-    init_schema: Optional[Dict[str, Any]] = Field(
+    init_schema: dict[str, Any] | None = Field(
         None, description="Initialization schema for v2 agents"
     )
-    methods: List[str] = Field(
+    methods: list[str] = Field(
         default_factory=list, description="Available agent methods"
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
@@ -61,7 +61,7 @@ class AgentSchema(BaseModel):
 class AgentListResponse(BaseModel):
     """Response for agent list endpoint."""
 
-    agents: List[AgentInfo] = Field(..., description="List of available agents")
+    agents: list[AgentInfo] = Field(..., description="List of available agents")
     count: int = Field(..., description="Total number of agents")
     v1_count: int = Field(..., description="Number of v1 agents")
     v2_count: int = Field(..., description="Number of v2 agents")
@@ -74,10 +74,10 @@ class AgentCreateRequest(BaseModel):
     """Request to create/instantiate an agent."""
 
     agent_name: str = Field(..., description="Name of the agent to create")
-    config: Optional[Dict[str, Any]] = Field(
+    config: dict[str, Any] | None = Field(
         None, description="Configuration for v1 agents"
     )
-    init_args: Optional[Dict[str, Any]] = Field(
+    init_args: dict[str, Any] | None = Field(
         None, description="Initialization arguments for v2 agents"
     )
 
@@ -86,14 +86,14 @@ class AgentCreateResponse(BaseModel):
     """Response from agent creation."""
 
     success: bool = Field(..., description="Whether creation was successful")
-    agent_id: Optional[str] = Field(None, description="Created agent ID")
-    agent_type: Optional[str] = Field(None, description="Type of created agent")
-    error: Optional[str] = Field(None, description="Error message if failed")
+    agent_id: str | None = Field(None, description="Created agent ID")
+    agent_type: str | None = Field(None, description="Type of created agent")
+    error: str | None = Field(None, description="Error message if failed")
 
 
 # Cache for discovered agents
-_cached_agents: Optional[List[ComponentInfo]] = None
-_discovery_instance: Optional[HaiveComponentDiscovery] = None
+_cached_agents: list[ComponentInfo] | None = None
+_discovery_instance: HaiveComponentDiscovery | None = None
 
 
 def get_discovery_instance() -> HaiveComponentDiscovery:
@@ -107,7 +107,7 @@ def get_discovery_instance() -> HaiveComponentDiscovery:
     return _discovery_instance
 
 
-def discover_all_agents(force_refresh: bool = False) -> List[ComponentInfo]:
+def discover_all_agents(force_refresh: bool = False) -> list[ComponentInfo]:
     """Discover all agents using the unified discovery system."""
     global _cached_agents
 
@@ -392,7 +392,7 @@ async def get_agent_schema(agent_name: str) -> AgentSchema:
 
 
 @router.get("/{agent_name}")
-async def get_agent_details(agent_name: str) -> Dict[str, Any]:
+async def get_agent_details(agent_name: str) -> dict[str, Any]:
     """Get detailed information about a specific agent.
 
     Args:
@@ -453,7 +453,7 @@ async def get_agent_details(agent_name: str) -> Dict[str, Any]:
 
 
 @router.post("/refresh")
-async def refresh_agent_cache() -> Dict[str, Any]:
+async def refresh_agent_cache() -> dict[str, Any]:
     """Refresh the agent discovery cache.
 
     Returns:
@@ -486,7 +486,7 @@ async def refresh_agent_cache() -> Dict[str, Any]:
 
 
 @router.get("/stats/summary")
-async def get_agent_stats() -> Dict[str, Any]:
+async def get_agent_stats() -> dict[str, Any]:
     """Get summary statistics about discovered agents.
 
     Returns:

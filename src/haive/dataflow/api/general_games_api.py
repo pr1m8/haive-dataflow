@@ -8,7 +8,7 @@ documentation and game selection capabilities.
 import importlib
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.openapi.utils import get_openapi
@@ -42,10 +42,10 @@ class GameInfo(BaseModel):
     name: str = Field(description="Display name of the game")
     game_id: str = Field(description="Unique identifier for the game")
     description: str = Field(description="Description of the game")
-    players: List[str] = Field(description="List of player roles")
-    example_configs: List[str] = Field(description="Available example configurations")
-    default_models: Dict[str, str] = Field(description="Default models for each player")
-    api_endpoints: Dict[str, str] = Field(description="API endpoints for this game")
+    players: list[str] = Field(description="List of player roles")
+    example_configs: list[str] = Field(description="Available example configurations")
+    default_models: dict[str, str] = Field(description="Default models for each player")
+    api_endpoints: dict[str, str] = Field(description="API endpoints for this game")
 
 
 class GameSelectionRequest(BaseModel):
@@ -56,16 +56,16 @@ class GameSelectionRequest(BaseModel):
         default="simple",
         description="Configuration mode: simple, example, advanced, legacy",
     )
-    player_models: Optional[Dict[str, str]] = Field(
+    player_models: dict[str, str] | None = Field(
         default=None, description="Models for each player (simple mode)"
     )
-    example_config: Optional[str] = Field(
+    example_config: str | None = Field(
         default=None, description="Example configuration name (example mode)"
     )
-    player_configs: Optional[Dict[str, Any]] = Field(
+    player_configs: dict[str, Any] | None = Field(
         default=None, description="Advanced player configurations"
     )
-    game_settings: Optional[Dict[str, Any]] = Field(
+    game_settings: dict[str, Any] | None = Field(
         default=None, description="Additional game settings"
     )
 
@@ -79,7 +79,7 @@ class GeneralGameAPI:
         games_package: str = "haive.games",
         route_prefix: str = "/api/games",
         ws_route_prefix: str = "/ws/games",
-        exclude_games: Optional[List[str]] = None,
+        exclude_games: list[str] | None = None,
     ):
         """Initialize the general game API.
 
@@ -96,8 +96,8 @@ class GeneralGameAPI:
         self.ws_route_prefix = ws_route_prefix
         self.exclude_games = exclude_games or ["go", "among_us"]  # Default exclusions
 
-        self.discovered_games: Dict[str, Dict[str, Any]] = {}
-        self.game_apis: Dict[str, Any] = (
+        self.discovered_games: dict[str, dict[str, Any]] = {}
+        self.game_apis: dict[str, Any] = (
             {}
         )  # Changed from GameAPI to Any for flexibility
 
@@ -139,7 +139,7 @@ class GeneralGameAPI:
             except Exception as e:
                 logger.warning(f"Failed to import game {game_name}: {e}")
 
-    def _import_game(self, game_name: str) -> Optional[Dict[str, Any]]:
+    def _import_game(self, game_name: str) -> dict[str, Any] | None:
         """Import a specific game and extract its information."""
         if not Agent:
             logger.warning("Agent class not available - cannot import games")
@@ -246,7 +246,7 @@ class GeneralGameAPI:
         """Register API routes for all discovered games."""
 
         # Main games list endpoint
-        @self.app.get(f"{self.route_prefix}/", response_model=List[GameInfo])
+        @self.app.get(f"{self.route_prefix}/", response_model=list[GameInfo])
         async def list_games():
             """List all available games."""
             games = []
@@ -307,37 +307,36 @@ class GeneralGameAPI:
                     )
                 config_kwargs["player_configs"] = request.player_configs
 
-            else:  # simple mode
-                if request.player_models:
-                    # Map generic player1/player2 to game-specific fields
-                    if game_id == "chess":
-                        config_kwargs["white_model"] = request.player_models.get(
-                            "player1", "gpt-4"
-                        )
-                        config_kwargs["black_model"] = request.player_models.get(
-                            "player2", "claude-3-opus"
-                        )
-                    elif game_id == "connect4":
-                        config_kwargs["red_model"] = request.player_models.get(
-                            "player1", "gpt-4"
-                        )
-                        config_kwargs["yellow_model"] = request.player_models.get(
-                            "player2", "claude-3-opus"
-                        )
-                    elif game_id == "tic_tac_toe":
-                        config_kwargs["x_model"] = request.player_models.get(
-                            "player1", "gpt-4"
-                        )
-                        config_kwargs["o_model"] = request.player_models.get(
-                            "player2", "claude-3-opus"
-                        )
-                    else:
-                        config_kwargs["player1_model"] = request.player_models.get(
-                            "player1", "gpt-4"
-                        )
-                        config_kwargs["player2_model"] = request.player_models.get(
-                            "player2", "claude-3-opus"
-                        )
+            elif request.player_models:
+                # Map generic player1/player2 to game-specific fields
+                if game_id == "chess":
+                    config_kwargs["white_model"] = request.player_models.get(
+                        "player1", "gpt-4"
+                    )
+                    config_kwargs["black_model"] = request.player_models.get(
+                        "player2", "claude-3-opus"
+                    )
+                elif game_id == "connect4":
+                    config_kwargs["red_model"] = request.player_models.get(
+                        "player1", "gpt-4"
+                    )
+                    config_kwargs["yellow_model"] = request.player_models.get(
+                        "player2", "claude-3-opus"
+                    )
+                elif game_id == "tic_tac_toe":
+                    config_kwargs["x_model"] = request.player_models.get(
+                        "player1", "gpt-4"
+                    )
+                    config_kwargs["o_model"] = request.player_models.get(
+                        "player2", "claude-3-opus"
+                    )
+                else:
+                    config_kwargs["player1_model"] = request.player_models.get(
+                        "player1", "gpt-4"
+                    )
+                    config_kwargs["player2_model"] = request.player_models.get(
+                        "player2", "claude-3-opus"
+                    )
 
             # Add any additional game settings
             if request.game_settings:
@@ -369,7 +368,7 @@ class GeneralGameAPI:
             for game_id, game_info in self.discovered_games.items():
                 self._create_game_api(game_id, game_info)
 
-    def _create_game_api(self, game_id: str, game_info: Dict[str, Any]):
+    def _create_game_api(self, game_id: str, game_info: dict[str, Any]):
         """Create API for a specific game."""
         if not GameAPI:
             logger.warning("GameAPI not available - skipping game API creation")
@@ -487,8 +486,8 @@ class GeneralGameAPI:
 
 
 def create_general_game_api(
-    app: Optional[FastAPI] = None, **kwargs
-) -> Tuple[FastAPI, GeneralGameAPI]:
+    app: FastAPI | None = None, **kwargs
+) -> tuple[FastAPI, GeneralGameAPI]:
     """Create a general game API that discovers all games.
 
     Args:

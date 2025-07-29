@@ -1,5 +1,4 @@
-"""
-Embedding Models Importer for the Haive Registry System.
+"""Embedding Models Importer for the Haive Registry System.
 
 This module provides functionality for importing embedding models
 from various providers and registering them in the system.
@@ -229,8 +228,7 @@ EMBEDDING_MODELS = [
 
 
 def import_embedding_models() -> bool:
-    """
-    Import embedding models into the registry.
+    """Import embedding models into the registry.
 
     Returns:
         True if successful, False otherwise

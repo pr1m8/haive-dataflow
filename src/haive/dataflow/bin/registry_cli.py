@@ -44,7 +44,6 @@ if str(project_root) not in sys.path:
 try:
     from rich import box
     from rich.console import Console
-    from rich.markdown import Markdown
     from rich.panel import Panel
     from rich.syntax import Syntax
     from rich.table import Table
@@ -65,7 +64,7 @@ try:
         discover_tools,
     )
     from haive.dataflow.registry.importers.litellm_importer import import_llm_models
-    from haive.dataflow.registry.models import EntityType, ImportStatus
+    from haive.dataflow.registry.models import EntityType
 except ImportError as e:
     print(f"Error importing registry system: {e}")
     print(

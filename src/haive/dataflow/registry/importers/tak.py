@@ -29,7 +29,6 @@ logger = logging.getLogger(__name__)
 
 # Check for langchain dependencies
 try:
-    from langchain_core.documents import Document
     from langchain_core.tools import BaseTool
 except ImportError:
     logger.error(

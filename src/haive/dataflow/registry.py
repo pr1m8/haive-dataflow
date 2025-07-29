@@ -10,7 +10,6 @@ Classes:
 Functions:
 """
 
-# src/haive/api/registry.py
 import importlib
 import inspect
 import logging
@@ -18,6 +17,8 @@ import os
 import pkgutil
 import sys
 import traceback
+
+# src/haive/api/registry.py
 from datetime import datetime
 from typing import Any
 

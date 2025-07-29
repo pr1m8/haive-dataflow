@@ -980,9 +980,8 @@ def discover_mcp_servers() -> list[str]:
                 # For now, return empty list and let it run in background
                 logger.info("MCP discovery running in background")
                 return []
-            else:
-                # If no loop running, run directly
-                return asyncio.run(async_discover())
+            # If no loop running, run directly
+            return asyncio.run(async_discover())
         except RuntimeError:
             # No event loop, run directly
             return asyncio.run(async_discover())

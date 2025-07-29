@@ -9,10 +9,11 @@ Functions:
     dispatch: Dispatch functionality.
 """
 
-# haive_dataflow/api/middleware/rate_limit.py
 import json
 import logging
 import time
+
+# haive_dataflow/api/middleware/rate_limit.py
 from collections import defaultdict
 
 from fastapi import Request, Response

@@ -11,9 +11,10 @@ Functions:
     format_chunk_for_client: Format Chunk For Client functionality.
 """
 
-# haive_dataflow/api/websockets/handlers.py
 import json
 import logging
+
+# haive_dataflow/api/websockets/handlers.py
 from datetime import datetime
 from decimal import Decimal
 from typing import Any

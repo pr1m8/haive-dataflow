@@ -712,7 +712,7 @@ async def websocket_chat_endpoint(
                             if chat_config.stream_format == "text":
                                 # Extract text content only
                                 if isinstance(chunk, dict):
-                                    if "messages" in chunk and chunk["messages"]:
+                                    if chunk.get("messages"):
                                         messages = chunk["messages"]
                                         if messages and hasattr(
                                             messages[-1], "content"
@@ -737,18 +737,17 @@ async def websocket_chat_endpoint(
                                         else "dict"
                                     ),
                                 }
-                            else:  # auto format
-                                # Default behavior - extract messages for message mode
-                                if (
-                                    chat_config.stream_mode == "messages"
-                                    and isinstance(chunk, dict)
-                                    and "messages" in chunk
-                                ):
-                                    messages = chunk["messages"]
-                                    if messages and hasattr(messages[-1], "content"):
-                                        content = messages[-1].content
-                                else:
-                                    content = chunk
+                            # Default behavior - extract messages for message mode
+                            elif (
+                                chat_config.stream_mode == "messages"
+                                and isinstance(chunk, dict)
+                                and "messages" in chunk
+                            ):
+                                messages = chunk["messages"]
+                                if messages and hasattr(messages[-1], "content"):
+                                    content = messages[-1].content
+                            else:
+                                content = chunk
 
                             if content is not None:
                                 response_msg = WSMessage(
