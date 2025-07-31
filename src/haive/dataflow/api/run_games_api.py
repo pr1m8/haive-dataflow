@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Run the Haive Games API with dynamic game discovery.
+"""Run the Haive Games API with dynamic game discovery.
 
 This script runs a standalone API for game agents with dynamic discovery
 from the haive-games package. It creates WebSocket endpoints for each
@@ -18,6 +17,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
+
+from haive.dataflow.api.game_router import discover_game_agents, game_agents, get_router
 
 # Configure logging
 logging.basicConfig(
@@ -62,11 +63,6 @@ def create_app():
     # Add the game router
     try:
         # Import the game_router module
-        from haive.dataflow.api.game_router import (
-            discover_game_agents,
-            game_agents,
-            get_router,
-        )
 
         # Discover game agents
         discover_game_agents()
@@ -119,6 +115,7 @@ def create_app():
 
     except Exception as e:
         logger.error(f"Error setting up game routes: {e}", exc_info=True)
+        error_message = str(e)
 
         # Add fallback route
         @app.get("/", response_class=HTMLResponse)
@@ -131,7 +128,7 @@ def create_app():
                 </head>
                 <body>
                     <h1>Haive Games API</h1>
-                    <p>Error: {str(e)}</p>
+                    <p>Error: {error_message}</p>
                 </body>
             </html>
             """

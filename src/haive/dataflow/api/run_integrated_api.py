@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Run the integrated Haive API with game support.
+"""Run the integrated Haive API with game support.
 
 This script runs the main Haive API with the integrated game routes.
 It sets up proper import paths and runs the app with uvicorn.
@@ -14,6 +13,8 @@ import os
 import sys
 
 import uvicorn
+
+from haive.dataflow.api.app import app
 
 # Configure logging
 logging.basicConfig(
@@ -35,7 +36,6 @@ def main():
     """Run the integrated API."""
     try:
         # Import the app
-        from haive.dataflow.api.app import app
 
         logger.info("Starting integrated Haive API with game support...")
         logger.info("Server will be available at http://localhost:8000")

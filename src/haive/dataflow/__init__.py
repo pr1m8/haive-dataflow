@@ -1,4 +1,8 @@
-"""Haive Dataflow - Registry and Discovery System.
+"""Haive Dataflow - Registry and Discovery System (Lazy Loading).
+
+This is a lazy-loading version of the haive-dataflow package that prevents
+heavy initialization at import time. The registry system and database
+connections are only initialized when actually needed.
 
 The haive-dataflow package provides a comprehensive system for component
 discovery, registration, and management in the Haive ecosystem.
@@ -11,7 +15,7 @@ Typical usage example:
     ```python
     from haive.dataflow import registry_system, EntityType, discover_agents
 
-    # Discover and register agents
+    # Discover and register agents (lazy initialization happens here)
     discovered_agents = discover_agents()
     print(f"Discovered {len(discovered_agents)} agents")
 
@@ -38,9 +42,10 @@ This package consists of several modules:
     providers: Provider implementations for various services
 """
 
-from haive.dataflow.registry.core import registry_system
+# Use lazy loading for the registry system
+# Lazy import to prevent heavy initialization
 
-# Import discovery functions
+from haive.dataflow.registry.core import get_registry_system
 from haive.dataflow.registry.discovery import (
     discover_agents,
     discover_all,
@@ -49,7 +54,7 @@ from haive.dataflow.registry.discovery import (
     discover_toolkits,
     discover_tools,
 )
-from haive.dataflow.registry.models import (
+from haive.dataflow.registry.models import (  # MCP Models
     ConfigType,
     Configuration,
     Dependency,
@@ -59,40 +64,69 @@ from haive.dataflow.registry.models import (
     GraphDefinition,
     ImportLogItem,
     ImportStatus,
+    MCPPromptDefinition,
+    MCPResourceDefinition,
+    MCPServerConfig,
+    MCPServerHealth,
+    MCPToolDefinition,
+    MCPTransport,
     RegistryItem,
 )
-
-# Import serialization utilities
 from haive.dataflow.registry.serialization import (
     SerializationRegistry,
     deserialize_object,
     serialize_object,
 )
 
+
+# For backwards compatibility
+class LazyRegistryAccess:
+    def __getattr__(self, name):
+        registry = get_registry_system()
+        return getattr(registry, name)
+
+    def __call__(self, *args, **kwargs):
+        registry = get_registry_system()
+        return registry(*args, **kwargs)
+
+
+registry_system = LazyRegistryAccess()
+
+# Import discovery functions (these should also be lazy)
+
+# Import serialization utilities
+
 # Export for convenient imports
 __all__ = [
-    # Core registry system
-    "registry_system",
+    "ConfigType",
+    "Configuration",
+    "Dependency",
+    "DependencyType",
     # Models
     "EntityType",
-    "ConfigType",
-    "DependencyType",
-    "ImportStatus",
-    "RegistryItem",
-    "Configuration",
-    "GraphDefinition",
-    "Dependency",
     "EnvironmentVar",
+    "GraphDefinition",
     "ImportLogItem",
+    "ImportStatus",
+    "MCPPromptDefinition",
+    "MCPResourceDefinition",
+    "MCPServerConfig",
+    "MCPServerHealth",
+    "MCPToolDefinition",
+    # MCP Models
+    "MCPTransport",
+    "RegistryItem",
+    "SerializationRegistry",
+    "deserialize_object",
+    "discover_agents",
     # Discovery
     "discover_all",
-    "discover_agents",
-    "discover_tools",
-    "discover_toolkits",
     "discover_engines",
     "discover_games",
+    "discover_toolkits",
+    "discover_tools",
+    # Core registry system
+    "registry_system",
     # Serialization
     "serialize_object",
-    "deserialize_object",
-    "SerializationRegistry",
 ]

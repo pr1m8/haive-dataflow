@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""
-Run the Haive Game API with the dynamically discovered game agents.
+"""Run the Haive Game API with the dynamically discovered game agents.
 
 This script creates a FastAPI application that includes both the main API
 and the game routes for all discovered game agents. It runs the server
@@ -18,6 +17,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
+
+from .api.game_router import discover_game_agents, game_agents, get_router
 
 # Configure logging
 logging.basicConfig(
@@ -37,7 +38,6 @@ for path in [haive_root, packages_dir, haive_games_path]:
         sys.path.insert(0, path)
 
 # Import after setting up paths
-from haive.dataflow.api.game_router import discover_game_agents, game_agents, get_router
 
 
 def create_app():
@@ -80,8 +80,10 @@ def create_app():
     app.include_router(game_router)
 
     logger.info(
-        f"Discovered and registered routes for {len(game_agents)} games: {list(game_agents.keys())}"
-    )
+        f"Discovered and registered routes for {
+            len(game_agents)} games: {
+            list(
+                game_agents.keys())}")
 
     return app
 

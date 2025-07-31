@@ -1,7 +1,8 @@
 # debug_jwt.py
 import os
-import jwt
 from datetime import datetime, timedelta
+
+import jwt
 
 # Print environment variables (with secrets partially masked)
 jwt_secret = os.getenv("SUPABASE_JWT_SECRET", "")
@@ -16,20 +17,20 @@ else:
 test_payload = {
     "sub": "test-user",
     "exp": datetime.utcnow() + timedelta(minutes=5),
-    "iat": datetime.utcnow()
+    "iat": datetime.utcnow(),
 }
 
 try:
     # Try to create a JWT with this secret
     token = jwt.encode(test_payload, jwt_secret, algorithm="HS256")
     print(f"Successfully created test token: {token[:10]}...")
-    
+
     # Try to decode the token we just created
     decoded = jwt.decode(token, jwt_secret, algorithms=["HS256"])
     print("Successfully decoded test token!")
     print("This confirms the JWT secret is valid for JWT operations")
 except Exception as e:
-    print(f"ERROR testing JWT operations: {str(e)}")
+    print(f"ERROR testing JWT operations: {e!s}")
     print("This suggests the JWT secret might not be valid")
 
 # For comparison, print the beginning of the token from logs

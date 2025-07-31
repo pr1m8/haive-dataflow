@@ -35,31 +35,27 @@ Example:
     >>> print(f"Discovered {len(discovered_tools)} tools and {len(discovered_toolkits)} toolkits")
 """
 
+import asyncio
 import importlib
 import inspect
 import logging
 import os
 import pkgutil
-import sys
 import traceback
 import uuid
 from datetime import datetime
-from importlib import import_module
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Any
 
-from haive.dataflow.registry.core import (  # Import the singleton instance
-    registry_system,
-)
+from pydantic import BaseModel
+
+from haive.dataflow.mcp.discovery import discover_mcp_servers as mcp_discover
+
+from .registry.core import registry_system  # Import the singleton instance
+from .registry.models import ConfigType, EntityType, ImportStatus
 
 # Import registry models and utilities
-from haive.dataflow.registry.models import (
-    ConfigType,
-    DependencyType,
-    EntityType,
-    ImportStatus,
-)
-from haive.dataflow.registry.serialization import serialize_object
+
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -75,7 +71,7 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 
 
-def discover_modules(base_path: str) -> List[str]:
+def discover_modules(base_path: str) -> list[str]:
     """Discover all Python modules under a base path.
 
     This function recursively explores a package to find all Python modules.
@@ -108,7 +104,7 @@ def discover_modules(base_path: str) -> List[str]:
             return []
 
         # Walk through the package
-        for loader, module_name, is_pkg in pkgutil.walk_packages([base_dir]):
+        for _loader, module_name, is_pkg in pkgutil.walk_packages([base_dir]):
             full_module_name = f"{base_path}.{module_name}"
             discovered_modules.append(full_module_name)
 
@@ -120,16 +116,15 @@ def discover_modules(base_path: str) -> List[str]:
         return discovered_modules
 
     except ImportError as e:
-        logger.error(f"Error importing base module {base_path}: {e}")
+        logger.exception(f"Error importing base module {base_path}: {e}")
         return []
     except Exception as e:
-        logger.error(f"Error discovering modules in {base_path}: {e}")
+        logger.exception(f"Error discovering modules in {base_path}: {e}")
         return []
 
 
 def is_pydantic_model(obj: Any) -> bool:
-    """
-    Check if an object is a Pydantic model.
+    """Check if an object is a Pydantic model.
 
     Args:
         obj: Object to check
@@ -138,16 +133,13 @@ def is_pydantic_model(obj: Any) -> bool:
         True if it's a Pydantic model, False otherwise
     """
     try:
-        from pydantic import BaseModel
-
         return inspect.isclass(obj) and issubclass(obj, BaseModel)
     except (ImportError, TypeError):
         return False
 
 
-def discover_agents(module_paths: Optional[List[str]] = None) -> List[str]:
-    """
-    Discover and register agents.
+def discover_agents(module_paths: list[str] | None = None) -> list[str]:
+    """Discover and register agents.
 
     Args:
         module_paths: Optional list of module paths to search
@@ -183,7 +175,7 @@ def discover_agents(module_paths: Optional[List[str]] = None) -> List[str]:
                     is_agent_config = False
 
                     # Check class name and inheritance
-                    if name.endswith("Config") or name.endswith("AgentConfig"):
+                    if name.endswith(("Config", "AgentConfig")):
                         # Check inheritance - look for AgentConfig in mro
                         for base in obj.__mro__:
                             if base.__name__ in ["AgentConfig"]:
@@ -263,9 +255,8 @@ def discover_agents(module_paths: Optional[List[str]] = None) -> List[str]:
                                         config_data=instance.engine,
                                     )
                             except Exception as e:
-                                logger.error(
-                                    f"Error registering configurations for {agent_name}: {e}"
-                                )
+                                logger.exception(
+                                    f"Error registering configurations for {agent_name}: {e}")
 
                             # Log success
                             registry_system.add_import_log(
@@ -281,9 +272,8 @@ def discover_agents(module_paths: Optional[List[str]] = None) -> List[str]:
                         except Exception as e:
                             # Log error
                             error_tb = traceback.format_exc()
-                            logger.error(
-                                f"Error registering agent {name} from {module_name}: {e}\n{error_tb}"
-                            )
+                            logger.exception(
+                                f"Error registering agent {name} from {module_name}: {e}\n{error_tb}")
 
                             registry_system.add_import_log(
                                 import_session=import_session,
@@ -296,15 +286,14 @@ def discover_agents(module_paths: Optional[List[str]] = None) -> List[str]:
 
             except Exception as e:
                 error_tb = traceback.format_exc()
-                logger.error(f"Error processing module {module_name}: {e}\n{error_tb}")
+                logger.exception(f"Error processing module {module_name}: {e}\n{error_tb}")
 
     logger.info(f"Discovered {len(registered_ids)} agents")
     return registered_ids
 
 
-def discover_tools(module_paths: Optional[List[str]] = None) -> List[str]:
-    """
-    Discover and register tools.
+def discover_tools(module_paths: list[str] | None = None) -> list[str]:
+    """Discover and register tools.
 
     Args:
         module_paths: Optional list of module paths to search
@@ -368,7 +357,8 @@ def discover_tools(module_paths: Optional[List[str]] = None) -> List[str]:
                                     # Try to instantiate with no args
                                     instance = obj()
                                 except Exception:
-                                    # If that fails, skip - we'll register the class at least
+                                    # If that fails, skip - we'll register the class at
+                                    # least
                                     pass
 
                                 # Get tool info
@@ -386,7 +376,8 @@ def discover_tools(module_paths: Optional[List[str]] = None) -> List[str]:
                                 # Check for API key requirements
                                 required_env_vars = []
                                 if instance:
-                                    # Look for attributes that might suggest API key requirements
+                                    # Look for attributes that might suggest API key
+                                    # requirements
                                     for attr_name in [
                                         "api_key",
                                         "api_token",
@@ -394,7 +385,9 @@ def discover_tools(module_paths: Optional[List[str]] = None) -> List[str]:
                                         "key",
                                     ]:
                                         if hasattr(instance, attr_name):
-                                            env_var = f"{tool_name.upper()}_{attr_name.upper()}"
+                                            env_var = f"{
+                                                tool_name.upper()}_{
+                                                attr_name.upper()}"
                                             required_env_vars.append(env_var)
 
                             # For functions, extract info
@@ -444,9 +437,8 @@ def discover_tools(module_paths: Optional[List[str]] = None) -> List[str]:
                         except Exception as e:
                             # Log error
                             error_tb = traceback.format_exc()
-                            logger.error(
-                                f"Error registering tool {name} from {module_name}: {e}\n{error_tb}"
-                            )
+                            logger.exception(
+                                f"Error registering tool {name} from {module_name}: {e}\n{error_tb}")
 
                             registry_system.add_import_log(
                                 import_session=import_session,
@@ -459,15 +451,14 @@ def discover_tools(module_paths: Optional[List[str]] = None) -> List[str]:
 
             except Exception as e:
                 error_tb = traceback.format_exc()
-                logger.error(f"Error processing module {module_name}: {e}\n{error_tb}")
+                logger.exception(f"Error processing module {module_name}: {e}\n{error_tb}")
 
     logger.info(f"Discovered {len(registered_ids)} tools")
     return registered_ids
 
 
-def discover_toolkits(module_paths: Optional[List[str]] = None) -> List[str]:
-    """
-    Discover and register toolkits.
+def discover_toolkits(module_paths: list[str] | None = None) -> list[str]:
+    """Discover and register toolkits.
 
     Args:
         module_paths: Optional list of module paths to search
@@ -522,7 +513,8 @@ def discover_toolkits(module_paths: Optional[List[str]] = None) -> List[str]:
                                 # Try to instantiate with no args
                                 instance = obj()
                             except Exception:
-                                # If that fails, skip - we'll register the class at least
+                                # If that fails, skip - we'll register the class at
+                                # least
                                 pass
 
                             # Get toolkit info
@@ -580,7 +572,9 @@ def discover_toolkits(module_paths: Optional[List[str]] = None) -> List[str]:
                                     "key",
                                 ]:
                                     if hasattr(instance, attr_name):
-                                        env_var = f"{toolkit_name.upper()}_{attr_name.upper()}"
+                                        env_var = f"{
+                                            toolkit_name.upper()}_{
+                                            attr_name.upper()}"
                                         registry_system.add_environment_var(
                                             registry_id=toolkit_id,
                                             env_name=env_var,
@@ -601,9 +595,8 @@ def discover_toolkits(module_paths: Optional[List[str]] = None) -> List[str]:
                         except Exception as e:
                             # Log error
                             error_tb = traceback.format_exc()
-                            logger.error(
-                                f"Error registering toolkit {name} from {module_name}: {e}\n{error_tb}"
-                            )
+                            logger.exception(
+                                f"Error registering toolkit {name} from {module_name}: {e}\n{error_tb}")
 
                             registry_system.add_import_log(
                                 import_session=import_session,
@@ -616,15 +609,14 @@ def discover_toolkits(module_paths: Optional[List[str]] = None) -> List[str]:
 
             except Exception as e:
                 error_tb = traceback.format_exc()
-                logger.error(f"Error processing module {module_name}: {e}\n{error_tb}")
+                logger.exception(f"Error processing module {module_name}: {e}\n{error_tb}")
 
     logger.info(f"Discovered {len(registered_ids)} toolkits")
     return registered_ids
 
 
-def discover_engines(module_paths: Optional[List[str]] = None) -> List[str]:
-    """
-    Discover and register engines.
+def discover_engines(module_paths: list[str] | None = None) -> list[str]:
+    """Discover and register engines.
 
     Args:
         module_paths: Optional list of module paths to search
@@ -661,9 +653,7 @@ def discover_engines(module_paths: Optional[List[str]] = None) -> List[str]:
 
                     # Check class name and inheritance
                     if name.endswith("Config") and (
-                        name.endswith("LLMConfig")
-                        or name.endswith("EngineConfig")
-                        or name.endswith("AugLLMConfig")
+                        name.endswith(("LLMConfig", "EngineConfig", "AugLLMConfig"))
                     ):
                         # Check inheritance - look for Engine or Config in mro
                         for base in obj.__mro__:
@@ -692,7 +682,8 @@ def discover_engines(module_paths: Optional[List[str]] = None) -> List[str]:
                                 # Try to instantiate with no args
                                 instance = obj()
                             except Exception:
-                                # If that fails, skip - we'll register the class at least
+                                # If that fails, skip - we'll register the class at
+                                # least
                                 pass
 
                             # Get engine info
@@ -745,8 +736,9 @@ def discover_engines(module_paths: Optional[List[str]] = None) -> List[str]:
                             if instance:
                                 # Look for API key pattern
                                 if hasattr(instance, "api_key"):
-                                    # Check if it's a reference to an environment variable
-                                    api_key = getattr(instance, "api_key")
+                                    # Check if it's a reference to an environment
+                                    # variable
+                                    api_key = instance.api_key
                                     if not api_key or (
                                         isinstance(api_key, str) and "${" in api_key
                                     ):
@@ -781,9 +773,8 @@ def discover_engines(module_paths: Optional[List[str]] = None) -> List[str]:
                         except Exception as e:
                             # Log error
                             error_tb = traceback.format_exc()
-                            logger.error(
-                                f"Error registering engine {name} from {module_name}: {e}\n{error_tb}"
-                            )
+                            logger.exception(
+                                f"Error registering engine {name} from {module_name}: {e}\n{error_tb}")
 
                             registry_system.add_import_log(
                                 import_session=import_session,
@@ -796,15 +787,14 @@ def discover_engines(module_paths: Optional[List[str]] = None) -> List[str]:
 
             except Exception as e:
                 error_tb = traceback.format_exc()
-                logger.error(f"Error processing module {module_name}: {e}\n{error_tb}")
+                logger.exception(f"Error processing module {module_name}: {e}\n{error_tb}")
 
     logger.info(f"Discovered {len(registered_ids)} engines")
     return registered_ids
 
 
-def discover_games(module_paths: Optional[List[str]] = None) -> List[str]:
-    """
-    Discover and register games.
+def discover_games(module_paths: list[str] | None = None) -> list[str]:
+    """Discover and register games.
 
     Args:
         module_paths: Optional list of module paths to search
@@ -881,9 +871,8 @@ def discover_games(module_paths: Optional[List[str]] = None) -> List[str]:
                         except Exception as e:
                             # Log error
                             error_tb = traceback.format_exc()
-                            logger.error(
-                                f"Error registering game {name} from {module_name}: {e}\n{error_tb}"
-                            )
+                            logger.exception(
+                                f"Error registering game {name} from {module_name}: {e}\n{error_tb}")
 
                             registry_system.add_import_log(
                                 import_session=import_session,
@@ -896,15 +885,14 @@ def discover_games(module_paths: Optional[List[str]] = None) -> List[str]:
 
             except Exception as e:
                 error_tb = traceback.format_exc()
-                logger.error(f"Error processing module {module_name}: {e}\n{error_tb}")
+                logger.exception(f"Error processing module {module_name}: {e}\n{error_tb}")
 
     logger.info(f"Discovered {len(registered_ids)} games")
     return registered_ids
 
 
-def discover_all() -> Dict[EntityType, List[str]]:
-    """
-    Discover and register all entity types.
+def discover_all() -> dict[EntityType, list[str]]:
+    """Discover and register all entity types.
 
     Returns:
         Dictionary mapping entity types to lists of registered IDs
@@ -926,4 +914,77 @@ def discover_all() -> Dict[EntityType, List[str]]:
     # Discover games
     results[EntityType.GAME] = discover_games()
 
+    # Discover MCP servers
+    results[EntityType.MCP_SERVER] = discover_mcp_servers()
+
     return results
+
+
+def discover_mcp_servers() -> list[str]:
+    """Discover and register MCP (Model Context Protocol) servers.
+
+    This function discovers MCP servers from various sources including:
+    - npm packages (@modelcontextprotocol/*)
+    - PyPI packages (mcp-*)
+    - Local configurations
+    - Existing haive-mcp downloaded servers
+
+    Returns:
+        List of registry IDs for registered MCP servers
+
+    Example:
+        >>> mcp_servers = discover_mcp_servers()
+        >>> print(f"Discovered {len(mcp_servers)} MCP servers")
+    """
+    logger.info("Starting MCP server discovery")
+
+    try:
+        # Import MCP discovery (lazy import to avoid circular dependencies)
+        # Discover MCP servers and register them
+
+        async def async_discover():
+            registry_items = await mcp_discover(registry_system)
+            registered_ids = []
+
+            for item in registry_items:
+                try:
+                    # Register the item
+                    entity_id = registry_system.register_entity(
+                        name=item.name,
+                        type=item.type,
+                        description=item.description,
+                        module_path=item.module_path,
+                        class_name=item.class_name,
+                        config=item.config,
+                        tags=item.tags,
+                    )
+                    registered_ids.append(entity_id)
+                    logger.info(f"Registered MCP server: {item.name} -> {entity_id}")
+
+                except Exception as e:
+                    logger.exception(f"Failed to register MCP server {item.name}: {e}")
+
+            return registered_ids
+
+        # Run async discovery
+        try:
+            # Try to get existing event loop
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If loop is running, create a task
+                asyncio.create_task(async_discover())
+                # For now, return empty list and let it run in background
+                logger.info("MCP discovery running in background")
+                return []
+            # If no loop running, run directly
+            return asyncio.run(async_discover())
+        except RuntimeError:
+            # No event loop, run directly
+            return asyncio.run(async_discover())
+
+    except ImportError as e:
+        logger.warning(f"MCP discovery not available: {e}")
+        return []
+    except Exception as e:
+        logger.exception(f"Failed to discover MCP servers: {e}")
+        return []

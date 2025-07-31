@@ -1,5 +1,62 @@
-# websocket_chat_router.py
+"""WebSocket and REST API endpoints for agent interactions.
+
+This module provides WebSocket-based communication with Haive agents, enabling
+real-time interactions, streaming responses, and persistent conversation state.
+It also includes REST endpoints for agent management and configuration.
+
+The WebSocket protocol supports different message types for user messages,
+agent responses, status updates, and error handling. Connections are managed
+per thread, allowing multiple concurrent agent sessions.
+
+Key components:
+- WebSocket connection manager for handling multiple clients
+- Message types and formats for structured communication
+- Authentication and authorization using Supabase
+- Agent configuration and customization options
+- Streaming response support for real-time feedback
+
+Typical usage example:
+
+    ```python
+    # Client-side WebSocket example
+    import websockets
+    import json
+    import asyncio
+
+    async def connect_to_agent():
+        uri = "ws://localhost:8000/api/ws/agent/chat?token=YOUR_AUTH_TOKEN"
+        async with websockets.connect(uri) as websocket:
+            # Send initial configuration
+            await websocket.send(json.dumps({
+                "type": "config",
+                "content": {
+                    "agent_name": "TextAnalyzer",
+                    "provider": "openai",
+                    "model": "gpt-4",
+                    "stream": True
+                }
+            }))
+
+            # Send a message to the agent
+            await websocket.send(json.dumps({
+                "type": "message",
+                "content": "Analyze this text for sentiment"
+            }))
+
+            # Receive streaming responses
+            while True:
+                response = json.loads(await websocket.recv())
+                if response["type"] == "response":
+                    print(response["content"])
+                elif response["type"] == "state_complete":
+                    break
+
+    asyncio.run(connect_to_agent())
+    ```
+"""
+
 import asyncio
+import contextlib
 import importlib.util
 import json
 import logging
@@ -7,7 +64,7 @@ import os
 import uuid
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from fastapi import (
     APIRouter,
@@ -18,11 +75,16 @@ from fastapi import (
     WebSocketDisconnect,
 )
 from fastapi.websockets import WebSocketState
+from haive.core.engine.agent.agent import AGENT_REGISTRY
+from pydantic import BaseModel, Field
 
-# Authentication imports
-from haive.core.engine.agent.config import AgentConfig
-from haive.core.engine.aug_llm import AugLLMConfig
-from haive.core.models.llm.base import (
+from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
+
+from .auth.dependencies import require_auth
+from .auth.supabase import SupabaseAuth
+from .engine.agent.config import AgentConfig
+from .engine.aug_llm import AugLLMConfig
+from .models.llm.base import (
     AnthropicLLMConfig,
     AzureLLMConfig,
     DeepSeekLLMConfig,
@@ -30,11 +92,10 @@ from haive.core.models.llm.base import (
     MistralLLMConfig,
     OpenAILLMConfig,
 )
-from haive.core.models.llm.provider_types import LLMProvider
-from pydantic import BaseModel, Field
+from .models.llm.provider_types import LLMProvider
 
-from haive.dataflow.auth.dependencies import require_auth
-from haive.dataflow.auth.supabase import SupabaseAuth
+# Authentication imports
+
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +109,20 @@ router = APIRouter(
 
 # Message types
 class WSMessageType(str, Enum):
-    """WebSocket message types"""
+    """WebSocket message types for agent communication.
+
+    This enumeration defines the different types of messages that can be
+    exchanged over the WebSocket connection. Each type has a specific
+    purpose and expected format.
+
+    Attributes:
+        MESSAGE: User message sent to the agent
+        RESPONSE: Agent response sent back to the user
+        STATUS: System status updates (connection, processing, etc.)
+        ERROR: Error messages for exception handling
+        STATE: Incremental agent state updates during processing
+        STATE_COMPLETE: Final agent state after processing completes
+    """
 
     MESSAGE = "message"  # User message
     RESPONSE = "response"  # Agent response
@@ -59,12 +133,32 @@ class WSMessageType(str, Enum):
 
 
 class WSMessage(BaseModel):
-    """WebSocket message format"""
+    """WebSocket message format for agent communication.
+
+    This model defines the standard format for all messages exchanged over
+    the WebSocket connection. It provides a consistent structure with
+    metadata for message handling and tracking.
+
+    Attributes:
+        type: The type of message (from WSMessageType enum)
+        content: The actual message content (type depends on message type)
+        thread_id: Optional ID for persistent chat threads
+        stream_index: Optional index for streaming response chunks
+        timestamp: When the message was created (defaults to current time)
+
+    Example:
+        >>> message = WSMessage(
+        ...     type=WSMessageType.MESSAGE,
+        ...     content="Analyze this text",
+        ...     thread_id="thread-123"
+        ... )
+        >>> json_str = message.json()
+    """
 
     type: WSMessageType = Field(..., description="Message type")
     content: Any = Field(..., description="Message content")
-    thread_id: Optional[str] = Field(None, description="Thread ID for persistent chat")
-    stream_index: Optional[int] = Field(None, description="Stream chunk index")
+    thread_id: str | None = Field(None, description="Thread ID for persistent chat")
+    stream_index: int | None = Field(None, description="Stream chunk index")
     timestamp: datetime = Field(
         default_factory=datetime.utcnow, description="Message timestamp"
     )
@@ -74,28 +168,111 @@ class WSMessage(BaseModel):
 
 
 class AgentChatConfig(BaseModel):
-    """Configuration for agent chat session"""
+    """Configuration for agent chat sessions via WebSocket.
+
+    This model defines the configuration options for an agent chat session,
+    including which agent to use, LLM settings, and behavior options like
+    streaming and persistence.
+
+    Attributes:
+        agent_name: Name of the agent to use for this chat session
+        provider: LLM provider to use (e.g., AZURE, OPENAI, ANTHROPIC)
+        model: Specific model to use from the provider
+        temperature: Sampling temperature for response generation (0.0-1.0)
+        system_prompt: Optional override for the agent's system prompt
+        persistent: Whether to persist chat state between messages
+        stream: Whether to stream responses incrementally
+        extra_params: Additional provider-specific parameters
+
+    Example:
+        >>> config = AgentChatConfig(
+        ...     agent_name="TextAnalyzer",
+        ...     provider=LLMProvider.OPENAI,
+        ...     model="gpt-4",
+        ...     temperature=0.5,
+        ...     system_prompt="You are an expert text analyst.",
+        ...     stream=True
+        ... )
+    """
 
     agent_name: str = Field(..., description="Agent to use")
     provider: LLMProvider = Field(default=LLMProvider.AZURE, description="LLM provider")
     model: str = Field(default="GPT-4 Turbo", description="Model to use")
     temperature: float = Field(default=0.7, ge=0.0, le=1.0)
-    system_prompt: Optional[str] = Field(None, description="System prompt override")
+    system_prompt: str | None = Field(None, description="System prompt override")
     persistent: bool = Field(default=True, description="Whether to persist chat state")
     stream: bool = Field(default=True, description="Whether to stream responses")
-    extra_params: Optional[Dict[str, Any]] = Field(default=None)
+    # Enhanced streaming options
+    stream_mode: str = Field(
+        default="messages",
+        description="Stream mode: messages, values, updates, debug, custom",
+    )
+    stream_format: str = Field(
+        default="auto", description="Output format: auto, json, text, structured"
+    )
+    progressive_updates: bool = Field(
+        default=False, description="Send partial schema-valid results"
+    )
+    buffer_chunks: bool = Field(
+        default=False, description="Buffer multiple chunks before sending"
+    )
+    chunk_size: int = Field(default=1, description="Number of chunks to buffer")
+    extra_params: dict[str, Any] | None = Field(default=None)
 
 
 class ConnectionManager:
-    """Manages WebSocket connections per thread"""
+    """Manages WebSocket connections for agent chat sessions.
+
+    This class provides functionality for managing WebSocket connections,
+    organizing them by thread, and handling connection lifecycle events.
+    It supports multiple concurrent connections to the same thread,
+    enabling features like shared sessions and observers.
+
+    The connection manager maintains:
+    - Active WebSocket connections grouped by thread ID
+    - Metadata for each thread (configuration, state, etc.)
+    - Thread-safe operations with asyncio locks
+
+    Attributes:
+        active_connections: Dictionary mapping thread IDs to lists of WebSocket connections
+        thread_metadata: Dictionary mapping thread IDs to metadata dictionaries
+        _lock: Asyncio lock for thread-safe operations on shared data structures
+    """
 
     def __init__(self):
-        self.active_connections: Dict[str, List[WebSocket]] = {}
-        self.thread_metadata: Dict[str, Dict[str, Any]] = {}
+        """Initialize the connection manager.
+
+        Creates empty dictionaries for tracking connections and
+        metadata, and initializes the asyncio lock for thread safety.
+        """
+        self.active_connections: dict[str, list[WebSocket]] = {}
+        self.thread_metadata: dict[str, dict[str, Any]] = {}
         self._lock = asyncio.Lock()
 
     async def connect(self, websocket: WebSocket, thread_id: str, user_id: str) -> bool:
-        """Connect a WebSocket to a thread"""
+        """Connect a WebSocket to a thread.
+
+        This method accepts a new WebSocket connection and associates it with
+        the specified thread. If this is the first connection to the thread,
+        it also initializes the thread metadata.
+
+        Args:
+            websocket: The WebSocket connection to add
+            thread_id: The ID of the thread to connect to
+            user_id: The ID of the user making the connection
+
+        Returns:
+            bool: True if the connection was successful, False otherwise
+
+        Raises:
+            WebSocketDisconnect: If the connection cannot be established
+
+        Example:
+            >>> manager = ConnectionManager()
+            >>> success = await manager.connect(websocket, "thread-123", "user-456")
+            >>> if success:
+            ...     print("Connection established")
+        """
         try:
             await websocket.accept()
             async with self._lock:
@@ -113,11 +290,11 @@ class ConnectionManager:
             logger.info(f"WebSocket connected to thread {thread_id}")
             return True
         except Exception as e:
-            logger.error(f"Error connecting WebSocket: {e}")
+            logger.exception(f"Error connecting WebSocket: {e}")
             return False
 
     async def disconnect(self, websocket: WebSocket, thread_id: str):
-        """Disconnect a WebSocket from a thread"""
+        """Disconnect a WebSocket from a thread."""
         async with self._lock:
             if thread_id in self.active_connections:
                 if websocket in self.active_connections[thread_id]:
@@ -130,7 +307,7 @@ class ConnectionManager:
                         del self.thread_metadata[thread_id]
 
     async def broadcast_to_thread(self, thread_id: str, message: WSMessage):
-        """Broadcast message to all connections in a thread"""
+        """Broadcast message to all connections in a thread."""
         if thread_id in self.active_connections:
             disconnected = []
             for connection in self.active_connections[thread_id]:
@@ -140,7 +317,7 @@ class ConnectionManager:
                     else:
                         disconnected.append(connection)
                 except Exception as e:
-                    logger.error(f"Error broadcasting to WebSocket: {e}")
+                    logger.exception(f"Error broadcasting to WebSocket: {e}")
                     disconnected.append(connection)
 
             # Clean up disconnected sockets
@@ -148,7 +325,7 @@ class ConnectionManager:
                 await self.disconnect(conn, thread_id)
 
     async def update_activity(self, thread_id: str):
-        """Update last activity timestamp for a thread"""
+        """Update last activity timestamp for a thread."""
         if thread_id in self.thread_metadata:
             self.thread_metadata[thread_id][
                 "last_activity"
@@ -160,22 +337,30 @@ manager = ConnectionManager()
 
 
 # Authentication helper function
-def get_user_from_token(token: str) -> Optional[str]:
-    """Validate JWT token and return user ID"""
+def get_user_from_token(token: str) -> str | None:
+    """Validate JWT token and return user ID."""
+    # Development mode bypass
+
+    haive_env = os.getenv("HAIVE_ENV")
+    logger.info(f"HAIVE_ENV: {haive_env}, token: {token[:20]}...")
+    if haive_env == "development" and token == "test":
+        logger.warning("Using development bypass for authentication")
+        return "test-user"
+
     try:
         auth = SupabaseAuth()
         user_id = auth.get_user_id(token)
         return user_id
     except Exception as e:
-        logger.error(f"Token validation error: {e}")
+        logger.exception(f"Token validation error: {e}")
         return None
 
 
 # Agent loading helper
 async def load_agent_config(
     agent_name: str, user_id: str, thread_id: str
-) -> Optional[AgentConfig]:
-    """Load agent configuration from package"""
+) -> AgentConfig | None:
+    """Load agent configuration from package."""
     try:
         # Look for agent configuration
         agents_path = "/home/will/Projects/haive/backend/haive/packages/haive-agents"
@@ -187,7 +372,7 @@ async def load_agent_config(
 
         # Try to load config file
         config_file = os.path.join(agent_path, "config.py")
-        state_file = os.path.join(agent_path, "state.py")
+        os.path.join(agent_path, "state.py")
         agent_file = os.path.join(agent_path, "agent.py")
 
         # Check for required files
@@ -210,7 +395,6 @@ async def load_agent_config(
                     and issubclass(item, AgentConfig)
                     and item != AgentConfig
                 ):
-
                     # Create instance with context information
                     config_instance = item()
                     break
@@ -261,7 +445,6 @@ async def load_agent_config(
                         ):
                             # Register agent class for this config
                             item.config_class = type(config_instance)
-                            from haive.core.engine.agent.agent import AGENT_REGISTRY
 
                             AGENT_REGISTRY[type(config_instance)] = item
                             logger.info(f"Registered agent class: {item_name}")
@@ -270,16 +453,16 @@ async def load_agent_config(
                     logger.warning(f"Failed to load agent module: {e}")
 
             logger.info(
-                f"Loaded agent config: {config_instance.__class__.__name__} for thread {thread_id}"
-            )
+                f"Loaded agent config: {
+                    config_instance.__class__.__name__} for thread {thread_id}")
             return config_instance
 
         except Exception as e:
-            logger.error(f"Error loading config module: {e}")
+            logger.exception(f"Error loading config module: {e}")
             return None
 
     except Exception as e:
-        logger.error(f"Error loading agent config: {e}")
+        logger.exception(f"Error loading agent config: {e}")
         return None
 
 
@@ -287,7 +470,7 @@ async def load_agent_config(
 async def configure_agent(
     config: AgentConfig, chat_config: AgentChatConfig
 ) -> AgentConfig:
-    """Configure agent with LLM settings"""
+    """Configure agent with LLM settings."""
     try:
         # Get environment API key based on provider
         env_key_map = {
@@ -330,7 +513,8 @@ async def configure_agent(
 
         # Create AugLLM configuration with context
         aug_llm_config = AugLLMConfig(
-            llm_config=llm_config, prompt_template=None  # Use default template
+            llm_config=llm_config,
+            prompt_template=None,  # Use default template
         )
 
         # Preserve metadata when updating engine
@@ -355,7 +539,7 @@ async def configure_agent(
         return config
 
     except Exception as e:
-        logger.error(f"Error configuring agent: {e}")
+        logger.exception(f"Error configuring agent: {e}")
         raise
 
 
@@ -365,13 +549,12 @@ async def websocket_chat_endpoint(
     websocket: WebSocket,
     agent_name: str,
     token: str = Query(..., description="JWT authentication token"),
-    thread_id: Optional[str] = Query(
+    thread_id: str | None = Query(
         None, description="Existing thread ID for persistence"
     ),
-    config: Optional[str] = Query(None, description="JSON encoded chat configuration"),
+    config: str | None = Query(None, description="JSON encoded chat configuration"),
 ):
-    """
-    WebSocket endpoint for real-time chat with an agent
+    """WebSocket endpoint for real-time chat with an agent.
 
     Args:
         websocket: WebSocket connection
@@ -411,8 +594,47 @@ async def websocket_chat_endpoint(
             await websocket.close(code=1002, reason=f"Agent '{agent_name}' not found")
             return
 
-        # Configure agent
+        # Configure agent with Supabase checkpointing
         agent_config = await configure_agent(agent_config, chat_config)
+
+        # Set up Supabase checkpointing for authenticated users
+        checkpointer = None
+        if chat_config.persistent and user_id:
+            # Create Supabase persistence adapter
+            persistence = SupabasePersistence()
+
+            # Get checkpointer for the agent
+            checkpointer = await persistence.get_checkpointer()
+
+            # Register thread with user ownership
+            await persistence.register_thread(
+                thread_id=thread_id,
+                user_id=user_id,
+                metadata={
+                    "agent_name": agent_name,
+                    "chat_config": chat_config.dict(),
+                    "created_via": "websocket_api",
+                },
+            )
+
+            # Update agent config metadata
+            agent_config.metadata.update(
+                {
+                    "persistence_backend": "supabase",
+                    "thread_id": thread_id,
+                    "user_id": user_id,
+                }
+            )
+
+            # Set the checkpointer in the agent's runnable config
+            if (
+                not hasattr(agent_config, "runnable_config")
+                or agent_config.runnable_config is None
+            ):
+                agent_config.runnable_config = {}
+            if "configurable" not in agent_config.runnable_config:
+                agent_config.runnable_config["configurable"] = {}
+            agent_config.runnable_config["configurable"]["checkpointer"] = checkpointer
 
         # Send welcome message with context
         welcome_msg = WSMessage(
@@ -459,6 +681,10 @@ async def websocket_chat_endpoint(
                         }
                     }
 
+                    # Add checkpointer if available
+                    if checkpointer:
+                        execution_context["configurable"]["checkpointer"] = checkpointer
+
                     if chat_config.stream:
                         # Stream response
                         stream_index = 0
@@ -474,27 +700,65 @@ async def websocket_chat_endpoint(
                         )
                         await websocket.send_json(start_msg.dict())
 
-                        # Stream agent response
+                        # Stream agent response with configured mode
                         async for chunk in agent.astream(
                             message_content,
                             thread_id=thread_id,
-                            stream_mode="messages",
+                            stream_mode=chat_config.stream_mode,
                             config=execution_context,
                         ):
-                            # Extract message content from chunk
-                            if isinstance(chunk, dict) and "messages" in chunk:
+                            # Process chunk based on stream format
+                            content = None
+
+                            if chat_config.stream_format == "text":
+                                # Extract text content only
+                                if isinstance(chunk, dict):
+                                    if chunk.get("messages"):
+                                        messages = chunk["messages"]
+                                        if messages and hasattr(
+                                            messages[-1], "content"
+                                        ):
+                                            content = messages[-1].content
+                                    elif "content" in chunk:
+                                        content = chunk["content"]
+                                    elif "text" in chunk:
+                                        content = chunk["text"]
+                                else:
+                                    content = str(chunk)
+                            elif chat_config.stream_format == "json":
+                                # Send full chunk as JSON
+                                content = chunk
+                            elif chat_config.stream_format == "structured":
+                                # Include type information
+                                content = {
+                                    "data": chunk,
+                                    "type": (
+                                        type(chunk).__name__
+                                        if hasattr(chunk, "__class__")
+                                        else "dict"
+                                    ),
+                                }
+                            # Default behavior - extract messages for message mode
+                            elif (
+                                chat_config.stream_mode == "messages"
+                                and isinstance(chunk, dict)
+                                and "messages" in chunk
+                            ):
                                 messages = chunk["messages"]
                                 if messages and hasattr(messages[-1], "content"):
                                     content = messages[-1].content
+                            else:
+                                content = chunk
 
-                                    response_msg = WSMessage(
-                                        type=WSMessageType.RESPONSE,
-                                        content=content,
-                                        thread_id=thread_id,
-                                        stream_index=stream_index,
-                                    )
-                                    await websocket.send_json(response_msg.dict())
-                                    stream_index += 1
+                            if content is not None:
+                                response_msg = WSMessage(
+                                    type=WSMessageType.RESPONSE,
+                                    content=content,
+                                    thread_id=thread_id,
+                                    stream_index=stream_index,
+                                )
+                                await websocket.send_json(response_msg.dict())
+                                stream_index += 1
 
                         # Send stream completion
                         complete_msg = WSMessage(
@@ -536,7 +800,7 @@ async def websocket_chat_endpoint(
                                 )
                                 await websocket.send_json(state_msg.dict())
                         except Exception as e:
-                            logger.error(f"Error getting state: {e}")
+                            logger.exception(f"Error getting state: {e}")
 
                 except json.JSONDecodeError:
                     error_msg = WSMessage(
@@ -546,7 +810,7 @@ async def websocket_chat_endpoint(
                     await websocket.send_json(error_msg.dict())
 
                 except Exception as e:
-                    logger.error(f"Error processing message: {e}")
+                    logger.exception(f"Error processing message: {e}")
                     error_msg = WSMessage(
                         type=WSMessageType.ERROR, content={"error": str(e)}
                     )
@@ -555,32 +819,26 @@ async def websocket_chat_endpoint(
         except WebSocketDisconnect:
             logger.info(f"WebSocket disconnected for thread {thread_id}")
         except Exception as e:
-            logger.error(f"WebSocket error: {e}")
+            logger.exception(f"WebSocket error: {e}")
             error_msg = WSMessage(type=WSMessageType.ERROR, content={"error": str(e)})
-            try:
+            with contextlib.suppress(BaseException):
                 await websocket.send_json(error_msg.dict())
-            except:
-                pass
         finally:
             # Cleanup
             await manager.disconnect(websocket, thread_id)
-            try:
+            with contextlib.suppress(BaseException):
                 await websocket.close()
-            except:
-                pass
 
     except Exception as e:
-        logger.error(f"Fatal error in WebSocket chat: {e}")
-        try:
+        logger.exception(f"Fatal error in WebSocket chat: {e}")
+        with contextlib.suppress(BaseException):
             await websocket.close(code=1011, reason="Internal server error")
-        except:
-            pass
 
 
 # Add REST endpoint to reset thread using authentication
 @router.post("/chat/thread/{thread_id}/reset")
 async def reset_thread(thread_id: str, user_id: str = Depends(require_auth)):
-    """Reset/clear a chat thread"""
+    """Reset/clear a chat thread."""
     try:
         # Verify thread ownership
         if thread_id in manager.thread_metadata:
@@ -601,5 +859,5 @@ async def reset_thread(thread_id: str, user_id: str = Depends(require_auth)):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error resetting thread: {e}")
+        logger.exception(f"Error resetting thread: {e}")
         raise HTTPException(status_code=500, detail=str(e))

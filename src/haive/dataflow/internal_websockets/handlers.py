@@ -1,21 +1,25 @@
 # haive_dataflow/api/websockets/handlers.py
-import asyncio
+
 import json
 import logging
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from langchain_core.messages import HumanMessage
 
-from haive.dataflow.auth.credits import CreditsManager, UsageRecord
-from haive.dataflow.config.settings import get_settings
-from haive.dataflow.internal_websockets.manager import ConnectionManager
-from haive.dataflow.persistence.conversations import ConversationManager
+from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
+from haive.dataflow.registry import AgentRegistry
+
+from .auth.credits import CreditsManager, UsageRecord
+from .config.settings import get_settings
+from .internal_websockets.manager import ConnectionManager
+from .persistence.conversations import ConversationManager
 
 # Try importing from your registry
 try:
-    from haive.dataflow.registry import AgentRegistry
+    from dataflow.registry import AgentRegistry
 except ImportError:
     # Mock registry for testing
     class AgentRegistry:
@@ -106,7 +110,6 @@ async def stream_agent_response(websocket: WebSocket, thread_id: str):
 
             # Add the user message to state
             message_content = message["content"]
-            from langchain_core.messages import HumanMessage
 
             if isinstance(state, dict) and "messages" in state:
                 state["messages"].append(HumanMessage(content=message_content))
@@ -135,9 +138,6 @@ async def stream_agent_response(websocket: WebSocket, thread_id: str):
                 final_state = await agent.ainvoke(state, config)
 
                 # Update conversation state
-                from haive.dataflow.persistence.supabase_adapter import (
-                    SupabasePersistence,
-                )
 
                 persistence = SupabasePersistence()
                 success = await persistence.update_state(
@@ -174,27 +174,26 @@ async def stream_agent_response(websocket: WebSocket, thread_id: str):
                 )
 
             except Exception as e:
-                logger.error(f"Error in streaming: {e}")
+                logger.exception(f"Error in streaming: {e}")
                 await websocket.send_json({"type": "error", "detail": str(e)})
 
     except WebSocketDisconnect:
         logger.info(f"WebSocket disconnected: {thread_id}/{connection_id}")
         connection_manager.disconnect(thread_id, connection_id)
     except Exception as e:
-        logger.error(f"WebSocket error: {e}")
+        logger.exception(f"WebSocket error: {e}")
         try:
             await websocket.send_json({"type": "error", "detail": str(e)})
             await websocket.close()
-        except:
+        except BaseException:
             pass
         connection_manager.disconnect(thread_id, connection_id)
 
 
-def format_chunk_for_client(chunk: Any) -> Dict[str, Any]:
+def format_chunk_for_client(chunk: Any) -> dict[str, Any]:
     """Format a streaming chunk for client consumption."""
     if isinstance(chunk, dict):
         # For structured data
         return {"type": "chunk", "data": chunk}
-    else:
-        # For text chunks
-        return {"type": "chunk", "data": {"text": str(chunk)}}
+    # For text chunks
+    return {"type": "chunk", "data": {"text": str(chunk)}}

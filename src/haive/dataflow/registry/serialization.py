@@ -50,19 +50,11 @@ Example:
     ... )
 """
 
-import inspect
-import json
 import logging
 import types
-import typing
+from collections.abc import Callable
 from enum import Enum
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Optional,
-    Type,
-)
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -116,10 +108,9 @@ class SerializationRegistry:
         cls,
         type_name: str,
         serializer: Callable,
-        deserializer: Optional[Callable] = None,
+        deserializer: Callable | None = None,
     ):
-        """
-        Register serializer and deserializer for a type.
+        """Register serializer and deserializer for a type.
 
         Args:
             type_name: Fully qualified type name
@@ -132,8 +123,7 @@ class SerializationRegistry:
 
     @classmethod
     def can_serialize(cls, obj: Any) -> bool:
-        """
-        Check if the object can be serialized with a registered serializer.
+        """Check if the object can be serialized with a registered serializer.
 
         Args:
             obj: Object to check
@@ -155,9 +145,8 @@ class SerializationRegistry:
         return False
 
     @classmethod
-    def _resolve_type(cls, type_name: str) -> Optional[Type]:
-        """
-        Resolve a type name to an actual type.
+    def _resolve_type(cls, type_name: str) -> type | None:
+        """Resolve a type name to an actual type.
 
         Args:
             type_name: Fully qualified type name
@@ -171,17 +160,15 @@ class SerializationRegistry:
                 module_name, class_name = type_name.rsplit(".", 1)
                 module = __import__(module_name, fromlist=[class_name])
                 return getattr(module, class_name)
-            else:
-                # Built-in type
-                return globals().get(type_name) or __builtins__.get(type_name)
+            # Built-in type
+            return globals().get(type_name) or __builtins__.get(type_name)
         except (ImportError, AttributeError) as e:
             logger.debug(f"Failed to resolve type {type_name}: {e}")
             return None
 
     @classmethod
     def serialize(cls, obj: Any) -> Any:
-        """
-        Serialize an object using registered serializers.
+        """Serialize an object using registered serializers.
 
         Args:
             obj: Object to serialize
@@ -207,7 +194,7 @@ class SerializationRegistry:
                 logger.warning(f"Error in serializer for {type_name}: {e}")
 
         # Handle built-in types
-        if isinstance(obj, (str, int, float, bool, type(None))):
+        if isinstance(obj, str | int | float | bool | type(None)):
             return obj
 
         # Handle dictionaries
@@ -215,7 +202,7 @@ class SerializationRegistry:
             return {key: cls.serialize(value) for key, value in obj.items()}
 
         # Handle lists and tuples
-        if isinstance(obj, (list, tuple)):
+        if isinstance(obj, list | tuple):
             serialized = [cls.serialize(item) for item in obj]
             if isinstance(obj, tuple):
                 return {"__type__": "tuple", "data": serialized}
@@ -235,7 +222,7 @@ class SerializationRegistry:
             return {"__type__": obj_type_name, "data": cls.serialize(data)}
 
         # Handle functions and methods
-        if isinstance(obj, (types.FunctionType, types.MethodType)):
+        if isinstance(obj, types.FunctionType | types.MethodType):
             return {
                 "__type__": "function",
                 "data": {
@@ -265,8 +252,7 @@ class SerializationRegistry:
 
     @classmethod
     def deserialize(cls, data: Any) -> Any:
-        """
-        Deserialize an object using registered deserializers.
+        """Deserialize an object using registered deserializers.
 
         Args:
             data: Serialized data
@@ -275,7 +261,7 @@ class SerializationRegistry:
             Deserialized object
         """
         # Handle None and primitive types
-        if data is None or isinstance(data, (str, int, float, bool)):
+        if data is None or isinstance(data, str | int | float | bool):
             return data
 
         # Handle typed objects
@@ -296,7 +282,7 @@ class SerializationRegistry:
 
             # Handle sets
             if type_name == "set":
-                return set(cls.deserialize(item) for item in type_data)
+                return {cls.deserialize(item) for item in type_data}
 
             # Handle functions
             if type_name == "function":
@@ -307,8 +293,9 @@ class SerializationRegistry:
                     return getattr(module, type_data["name"])
                 except Exception as e:
                     logger.warning(
-                        f"Error deserializing function {type_data['module']}.{type_data['name']}: {e}"
-                    )
+                        f"Error deserializing function {
+                            type_data['module']}.{
+                            type_data['name']}: {e}")
                     return None
 
             # Handle classes
@@ -320,8 +307,9 @@ class SerializationRegistry:
                     return getattr(module, type_data["name"])
                 except Exception as e:
                     logger.warning(
-                        f"Error deserializing class {type_data['module']}.{type_data['name']}: {e}"
-                    )
+                        f"Error deserializing class {
+                            type_data['module']}.{
+                            type_data['name']}: {e}")
                     return None
 
             # Handle string representations
@@ -363,7 +351,7 @@ class SerializationRegistry:
 # Register serializers for common types
 
 
-def _serialize_type_hints(hints: Dict[str, Any]) -> Dict[str, str]:
+def _serialize_type_hints(hints: dict[str, Any]) -> dict[str, str]:
     """Serialize type hints."""
     result = {}
     for name, hint in hints.items():
@@ -400,7 +388,7 @@ def _serialize_pydantic_field(field):
     return data
 
 
-def _serialize_pydantic_model(model: Type[BaseModel]) -> Dict[str, Any]:
+def _serialize_pydantic_model(model: type[BaseModel]) -> dict[str, Any]:
     """Serialize a Pydantic model class."""
     data = {
         "name": model.__name__,
@@ -434,9 +422,8 @@ def _serialize_pydantic_model(model: Type[BaseModel]) -> Dict[str, Any]:
     return data
 
 
-def _deserialize_pydantic_model(data: Dict[str, Any]) -> Optional[Type[BaseModel]]:
-    """
-    Deserialize a Pydantic model class.
+def _deserialize_pydantic_model(data: dict[str, Any]) -> type[BaseModel] | None:
+    """Deserialize a Pydantic model class.
 
     Note: This creates a simple representation of the model, not the actual class.
     """
@@ -468,9 +455,8 @@ SerializationRegistry.register(
 )
 
 
-def serialize_object(obj: Any) -> Dict[str, Any]:
-    """
-    Serialize an object to a format suitable for storage.
+def serialize_object(obj: Any) -> dict[str, Any]:
+    """Serialize an object to a format suitable for storage.
 
     Args:
         obj: Object to serialize
@@ -481,9 +467,8 @@ def serialize_object(obj: Any) -> Dict[str, Any]:
     return SerializationRegistry.serialize(obj)
 
 
-def deserialize_object(data: Dict[str, Any]) -> Any:
-    """
-    Deserialize an object from stored data.
+def deserialize_object(data: dict[str, Any]) -> Any:
+    """Deserialize an object from stored data.
 
     Args:
         data: Serialized representation

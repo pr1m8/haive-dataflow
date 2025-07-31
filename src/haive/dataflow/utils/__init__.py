@@ -1,8 +1,7 @@
-"""
-Utilities for the Haive Registry System
+"""Utilities for the Haive Registry System.
 
-This package provides utility functions and helpers for the registry system,
-including logging utilities and other common functionality.
+This package provides utility functions and helpers for the registry
+system, including logging utilities and other common functionality.
 """
 
 from haive.dataflow.utils.logging import (
@@ -15,9 +14,9 @@ from haive.dataflow.utils.logging import (
 
 # Export for convenient imports
 __all__ = [
-    "setup_logger",
+    "log_entity_operation",
     "setup_discovery_logger",
     "setup_import_logger",
+    "setup_logger",
     "setup_operation_logger",
-    "log_entity_operation",
 ]

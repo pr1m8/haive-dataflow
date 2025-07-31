@@ -37,8 +37,10 @@ import logging
 import os
 import uuid
 from datetime import datetime
-from enum import Enum, auto
-from typing import Any, Dict, List, Optional
+from enum import Enum
+from typing import Any
+
+from haive.dataflow.db.supabase import get_supabase_client, table
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -139,31 +141,43 @@ class RegistrySystem:
         # Try to initialize Supabase client
         try:
             # Import Supabase client
-            from haive.dataflow.db.supabase import get_supabase_client
 
             self._supabase = get_supabase_client()
             logger.info("Supabase connection initialized for registry system")
 
             # Initialize registry schema if needed for backwards compatibility
-            self._ensure_registry_schema()
+            try:
+                self._ensure_registry_schema()
+            except Exception as schema_e:
+                logger.warning(f"Could not ensure registry schema: {schema_e}")
 
             # Check for provider types in the new schema
-            self._ensure_provider_types()
+            try:
+                self._ensure_provider_types()
+            except Exception as provider_e:
+                logger.warning(f"Could not ensure provider types: {provider_e}")
         except Exception as e:
             logger.warning(f"Could not initialize Supabase connection: {e}")
             logger.info("Registry system running in in-memory mode only")
 
     def _ensure_registry_schema(self):
-        """Ensure the registry schema is properly set up for backward compatibility."""
+        """Ensure the registry schema is properly set up for backward
+        compatibility.
+        """
         try:
             # Check if the registry schema exists
-            schema_check = self._supabase.query(
-                "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'registry'"
+            schema_check = self._supabase.rpc(
+                "execute_sql",
+                {
+                    "sql": "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'registry'"
+                },
             ).execute()
 
             if not schema_check.data or len(schema_check.data) == 0:
                 # Create registry schema if it doesn't exist
-                self._supabase.query("CREATE SCHEMA IF NOT EXISTS registry").execute()
+                self._supabase.rpc(
+                    "execute_sql", {"sql": "CREATE SCHEMA IF NOT EXISTS registry"}
+                ).execute()
                 logger.info("Created registry schema for backward compatibility")
 
             # Check for required tables
@@ -233,33 +247,34 @@ class RegistrySystem:
 
             for schema, table_name, columns in tables:
                 # Check if table exists
-                table_check = self._supabase.query(
-                    f"SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = '{schema}' AND tablename = '{table_name}'"
-                ).execute()
+                table_check = self._supabase.rpc(
+                    "execute_sql", {
+                        "sql": f"SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = '{schema}' AND tablename = '{table_name}'"}, ).execute()
 
                 if not table_check.data or len(table_check.data) == 0:
                     # Create table
-                    self._supabase.query(
-                        f"CREATE TABLE IF NOT EXISTS {schema}.{table_name} ({columns})"
-                    ).execute()
+                    self._supabase.rpc(
+                        "execute_sql", {
+                            "sql": f"CREATE TABLE IF NOT EXISTS {schema}.{table_name} ({columns})"}, ).execute()
                     logger.info(
-                        f"Created table {schema}.{table_name} for backward compatibility"
-                    )
+                        f"Created table {schema}.{table_name} for backward compatibility")
 
         except Exception as e:
-            logger.error(f"Error ensuring registry schema: {e}")
+            logger.exception(f"Error ensuring registry schema: {e}")
 
     def _ensure_provider_types(self):
         """Ensure the provider types exist in the models schema."""
         try:
             # Check if provider_types table exists in models schema
-            table_check = self._supabase.query(
-                "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'models' AND tablename = 'provider_types'"
+            table_check = self._supabase.rpc(
+                "execute_sql",
+                {
+                    "sql": "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'models' AND tablename = 'provider_types'"
+                },
             ).execute()
 
             if table_check.data and len(table_check.data) > 0:
                 # Check if we have the basic provider types
-                from haive.dataflow.db.supabase import table
 
                 provider_types_response = (
                     table(self._supabase, "models.provider_types").select("*").execute()
@@ -305,11 +320,10 @@ class RegistrySystem:
         self,
         name: str,
         entity_type: EntityType,
-        description: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        description: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
-        """
-        Register a new entity in the registry.
+        """Register a new entity in the registry.
 
         Args:
             name: Name of the entity
@@ -343,7 +357,6 @@ class RegistrySystem:
         # Store in Supabase if available
         if self._supabase is not None:
             try:
-                from haive.dataflow.db.supabase import table
 
                 # Convert metadata to JSON string for storage if needed
                 db_entity = dict(entity_data)
@@ -354,8 +367,7 @@ class RegistrySystem:
                 success = False
 
                 if (
-                    entity_type == EntityType.LLM_PROVIDER
-                    or entity_type == EntityType.LLM
+                    entity_type in (EntityType.LLM_PROVIDER, EntityType.LLM)
                 ):
                     try:
                         # Get provider type ID for LLM
@@ -393,7 +405,8 @@ class RegistrySystem:
                                     f"Stored LLM provider {name} in models.providers"
                                 )
 
-                                # If we have metadata from LiteLLM, automatically register an environment variable
+                                # If we have metadata from LiteLLM, automatically
+                                # register an environment variable
                                 if (
                                     metadata
                                     and metadata.get("import_source") == "litellm"
@@ -422,8 +435,7 @@ class RegistrySystem:
                         logger.warning(f"Error storing {name} in models.providers: {e}")
 
                 elif (
-                    entity_type == EntityType.EMBEDDING_PROVIDER
-                    or entity_type == EntityType.EMBEDDING
+                    entity_type in (EntityType.EMBEDDING_PROVIDER, EntityType.EMBEDDING)
                 ):
                     try:
                         # Get provider type ID for embedding
@@ -459,8 +471,7 @@ class RegistrySystem:
                             if response.data:
                                 success = True
                                 logger.info(
-                                    f"Stored embedding provider {name} in models.providers"
-                                )
+                                    f"Stored embedding provider {name} in models.providers")
 
                                 # Register environment variable for API key
                                 env_var_name = f"{name.upper()}_API_KEY"
@@ -468,12 +479,14 @@ class RegistrySystem:
                                     var_name=env_var_name,
                                     provider_name=name,
                                     is_required=True,
-                                    description=f"API key for {name.title()} embedding provider",
+                                    description=f"API key for {
+                                        name.title()} embedding provider",
                                 )
                     except Exception as e:
                         logger.warning(f"Error storing {name} in models.providers: {e}")
 
-                # If not stored in the new schema location or it failed, try config.components
+                # If not stored in the new schema location or it failed, try
+                # config.components
                 if not success:
                     try:
                         # Get or create component type
@@ -530,7 +543,7 @@ class RegistrySystem:
                             success = True
                             logger.info(f"Stored {name} in legacy registry.items")
                     except Exception as e:
-                        logger.error(
+                        logger.exception(
                             f"Error storing entity in legacy registry.items: {e}"
                         )
 
@@ -538,7 +551,7 @@ class RegistrySystem:
                     logger.warning(f"Failed to store {name} in any location")
 
             except Exception as e:
-                logger.error(f"Error storing entity in database: {e}")
+                logger.exception(f"Error storing entity in database: {e}")
 
         logger.info(f"Registered entity: {name} ({entity_type}) with ID: {registry_id}")
         return registry_id
@@ -546,7 +559,6 @@ class RegistrySystem:
     def _get_or_create_provider_type(self, type_name, display_name):
         """Helper method to get or create a provider type."""
         try:
-            from haive.dataflow.db.supabase import table
 
             # Check if the provider type exists
             response = (
@@ -584,14 +596,16 @@ class RegistrySystem:
             RETURNING *
             """
 
-            sql_response = self._supabase.query(
-                create_query,
+            sql_response = self._supabase.rpc(
+                "execute_sql",
                 {
-                    1: provider_type_data["id"],
-                    2: provider_type_data["name"],
-                    3: provider_type_data["display_name"],
-                    4: provider_type_data["description"],
-                    5: provider_type_data["created_at"],
+                    "sql": create_query.replace(
+                        "$1", "'" + provider_type_data["id"] + "'"
+                    )
+                    .replace("$2", "'" + provider_type_data["name"] + "'")
+                    .replace("$3", "'" + provider_type_data["display_name"] + "'")
+                    .replace("$4", "'" + provider_type_data["description"] + "'")
+                    .replace("$5", "'" + provider_type_data["created_at"] + "'")
                 },
             ).execute()
 
@@ -599,7 +613,7 @@ class RegistrySystem:
                 return sql_response.data[0]
 
         except Exception as e:
-            logger.error(f"Error getting or creating provider type {type_name}: {e}")
+            logger.exception(f"Error getting or creating provider type {type_name}: {e}")
 
         return None
 
@@ -644,14 +658,16 @@ class RegistrySystem:
             RETURNING id
             """
 
-            sql_response = self._supabase.query(
-                create_query,
+            sql_response = self._supabase.rpc(
+                "execute_sql",
                 {
-                    1: component_type_data["id"],
-                    2: component_type_data["name"],
-                    3: component_type_data["display_name"],
-                    4: component_type_data["description"],
-                    5: component_type_data["created_at"],
+                    "sql": create_query.replace(
+                        "$1", "'" + component_type_data["id"] + "'"
+                    )
+                    .replace("$2", "'" + component_type_data["name"] + "'")
+                    .replace("$3", "'" + component_type_data["display_name"] + "'")
+                    .replace("$4", "'" + component_type_data["description"] + "'")
+                    .replace("$5", "'" + component_type_data["created_at"] + "'")
                 },
             ).execute()
 
@@ -659,15 +675,14 @@ class RegistrySystem:
                 return sql_response.data[0]["id"]
 
         except Exception as e:
-            logger.error(f"Error getting or creating component type {type_name}: {e}")
+            logger.exception(f"Error getting or creating component type {type_name}: {e}")
 
         return None
 
     def add_configuration(
         self, registry_id: str, config_type: ConfigType, config_data: Any
-    ) -> Optional[str]:
-        """
-        Add a configuration to an entity.
+    ) -> str | None:
+        """Add a configuration to an entity.
 
         Args:
             registry_id: ID of the registered entity
@@ -706,18 +721,16 @@ class RegistrySystem:
         # Store in Supabase if available
         if self._supabase is not None:
             try:
-                from haive.dataflow.db.supabase import table
 
                 # Try to serialize the data
                 try:
-                    # TODO: FIX where this is
-                    from haive.core.utils.pydantic_utils import serialize_object
+                    from dataflow.serialization import serialize_object
                 except ImportError:
 
                     def serialize_object(obj):
                         """Simple serialization helper."""
                         if isinstance(
-                            obj, (dict, list, str, int, float, bool, type(None))
+                            obj, dict | list | str | int | float | bool | type(None)
                         ):
                             return obj
                         return str(obj)
@@ -732,15 +745,14 @@ class RegistrySystem:
                 ).execute()
 
             except Exception as e:
-                logger.error(f"Error storing configuration in database: {e}")
+                logger.exception(f"Error storing configuration in database: {e}")
 
         return config_id
 
     def add_dependency(
         self, registry_id: str, dependent_id: str, dependency_type: DependencyType
-    ) -> Optional[str]:
-        """
-        Add a dependency between two entities.
+    ) -> str | None:
+        """Add a dependency between two entities.
 
         Args:
             registry_id: ID of the entity that depends on another
@@ -779,7 +791,6 @@ class RegistrySystem:
         # Store in Supabase if available
         if self._supabase is not None:
             try:
-                from haive.dataflow.db.supabase import table
 
                 # Insert into registry.dependencies table
                 table(self._supabase, "registry.dependencies").insert(
@@ -787,7 +798,7 @@ class RegistrySystem:
                 ).execute()
 
             except Exception as e:
-                logger.error(f"Error storing dependency in database: {e}")
+                logger.exception(f"Error storing dependency in database: {e}")
 
         return dependency_id
 
@@ -796,10 +807,9 @@ class RegistrySystem:
         var_name: str,
         provider_name: str,
         is_required: bool = True,
-        description: Optional[str] = None,
-    ) -> Optional[str]:
-        """
-        Add an environment variable to the registry.
+        description: str | None = None,
+    ) -> str | None:
+        """Add an environment variable to the registry.
 
         Args:
             var_name: Name of the environment variable
@@ -819,10 +829,9 @@ class RegistrySystem:
         var_name: str,
         provider_name: str,
         is_required: bool = True,
-        description: Optional[str] = None,
-    ) -> Optional[str]:
-        """
-        Implementation method to register an environment variable.
+        description: str | None = None,
+    ) -> str | None:
+        """Implementation method to register an environment variable.
 
         Args:
             var_name: Name of the environment variable
@@ -853,7 +862,6 @@ class RegistrySystem:
         # Store in Supabase if available
         if self._supabase is not None:
             try:
-                from haive.dataflow.db.supabase import table
 
                 # Try to add to config.environment_variables (new schema)
                 try:
@@ -891,10 +899,10 @@ class RegistrySystem:
 
                         if response.data and len(response.data) > 0:
                             logger.info(
-                                f"Added environment variable {var_name} to config.environment_variables"
-                            )
+                                f"Added environment variable {var_name} to config.environment_variables")
 
-                            # Now try to create a component-environment mapping if we have the provider in components
+                            # Now try to create a component-environment mapping if we
+                            # have the provider in components
                             try:
                                 provider_response = (
                                     table(self._supabase, "config.components")
@@ -923,12 +931,10 @@ class RegistrySystem:
                                         self._supabase, "config.component_env_mappings"
                                     ).insert(mapping_data).execute()
                                     logger.info(
-                                        f"Created component to environment mapping for {provider_name} and {var_name}"
-                                    )
+                                        f"Created component to environment mapping for {provider_name} and {var_name}")
                             except Exception as mapping_e:
                                 logger.warning(
-                                    f"Error creating component-environment mapping: {mapping_e}"
-                                )
+                                    f"Error creating component-environment mapping: {mapping_e}")
 
                             return env_var_id
                     else:
@@ -946,8 +952,7 @@ class RegistrySystem:
                             env_var_data
                         ).eq("id", existing_id).execute()
                         logger.info(
-                            f"Updated environment variable {var_name} in config.environment_variables"
-                        )
+                            f"Updated environment variable {var_name} in config.environment_variables")
                         return existing_id
 
                 except Exception as e:
@@ -967,7 +972,9 @@ class RegistrySystem:
                         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
                     );
                     """
-                    self._supabase.query(create_env_vars_table).execute()
+                    self._supabase.rpc(
+                        "execute_sql", {"sql": create_env_vars_table}
+                    ).execute()
 
                     # Check if record already exists
                     response = (
@@ -991,8 +998,7 @@ class RegistrySystem:
                         ).eq("id", existing_id).execute()
                         env_var_id = existing_id
                         logger.info(
-                            f"Updated environment variable {var_name} in registry.environment_vars"
-                        )
+                            f"Updated environment variable {var_name} in registry.environment_vars")
                     else:
                         # Insert new record
                         response = (
@@ -1002,8 +1008,7 @@ class RegistrySystem:
                         )
                         if response.data and len(response.data) > 0:
                             logger.info(
-                                f"Added environment variable {var_name} to registry.environment_vars"
-                            )
+                                f"Added environment variable {var_name} to registry.environment_vars")
                             return env_var_id
                 except Exception as legacy_e:
                     logger.warning(
@@ -1011,21 +1016,28 @@ class RegistrySystem:
                     )
 
             except Exception as e:
-                logger.error(f"Error storing environment variable in database: {e}")
+                logger.exception(f"Error storing environment variable in database: {e}")
 
         return env_var_id
 
     def _ensure_registry_schema(self):
-        """Ensure the registry schema is properly set up for backward compatibility."""
+        """Ensure the registry schema is properly set up for backward
+        compatibility.
+        """
         try:
             # Check if the registry schema exists
-            schema_check = self._supabase.query(
-                "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'registry'"
+            schema_check = self._supabase.rpc(
+                "execute_sql",
+                {
+                    "sql": "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'registry'"
+                },
             ).execute()
 
             if not schema_check.data or len(schema_check.data) == 0:
                 # Create registry schema if it doesn't exist
-                self._supabase.query("CREATE SCHEMA IF NOT EXISTS registry").execute()
+                self._supabase.rpc(
+                    "execute_sql", {"sql": "CREATE SCHEMA IF NOT EXISTS registry"}
+                ).execute()
                 logger.info("Created registry schema for backward compatibility")
 
             # Check for required tables
@@ -1096,25 +1108,23 @@ class RegistrySystem:
             for schema, table_name, columns in tables:
                 try:
                     # Check if table exists
-                    table_check = self._supabase.query(
-                        f"SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = '{schema}' AND tablename = '{table_name}'"
-                    ).execute()
+                    table_check = self._supabase.rpc(
+                        "execute_sql", {
+                            "sql": f"SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = '{schema}' AND tablename = '{table_name}'"}, ).execute()
 
                     if not table_check.data or len(table_check.data) == 0:
                         # Create table
-                        self._supabase.query(
-                            f"CREATE TABLE IF NOT EXISTS {schema}.{table_name} ({columns})"
-                        ).execute()
+                        self._supabase.rpc(
+                            "execute_sql", {
+                                "sql": f"CREATE TABLE IF NOT EXISTS {schema}.{table_name} ({columns})"}, ).execute()
                         logger.info(
-                            f"Created table {schema}.{table_name} for backward compatibility"
-                        )
+                            f"Created table {schema}.{table_name} for backward compatibility")
                 except Exception as table_e:
                     logger.warning(
-                        f"Error checking/creating table {schema}.{table_name}: {table_e}"
-                    )
+                        f"Error checking/creating table {schema}.{table_name}: {table_e}")
 
         except Exception as e:
-            logger.error(f"Error ensuring registry schema: {e}")
+            logger.exception(f"Error ensuring registry schema: {e}")
 
     def add_import_log(
         self,
@@ -1122,11 +1132,10 @@ class RegistrySystem:
         entity_name: str,
         entity_type: str,
         status: ImportStatus,
-        message: Optional[str] = None,
-        traceback_str: Optional[str] = None,
+        message: str | None = None,
+        traceback_str: str | None = None,
     ) -> None:
-        """
-        Add an import log entry.
+        """Add an import log entry.
 
         Args:
             import_session: Import session identifier
@@ -1154,18 +1163,16 @@ class RegistrySystem:
         # Store in Supabase if available
         if self._supabase is not None:
             try:
-                from haive.dataflow.db.supabase import table
 
                 # Try to add to audit.import_logs (new schema)
                 try:
-                    response = (
+                    (
                         table(self._supabase, "audit.import_logs")
                         .insert(log_entry)
                         .execute()
                     )
                     logger.info(
-                        f"Successfully logged import for {entity_name} to audit.import_logs"
-                    )
+                        f"Successfully logged import for {entity_name} to audit.import_logs")
                     return
                 except Exception as e:
                     logger.warning(
@@ -1173,11 +1180,9 @@ class RegistrySystem:
                     )
 
                     # Check if it's a table not found error
-                    if (
-                        hasattr(e, "code")
-                        and getattr(e, "code") == "42P01"
-                        or str(e).find("does not exist") >= 0
-                    ):
+                    if (hasattr(e, "code") and e.code == "42P01") or str(e).find(
+                        "does not exist"
+                    ) >= 0:
                         # Try to create the table
                         try:
                             create_table_query = """
@@ -1192,21 +1197,22 @@ class RegistrySystem:
                                 created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
                             );
                             """
-                            self._supabase.query(create_table_query).execute()
+                            self._supabase.rpc(
+                                "execute_sql", {"sql": create_table_query}
+                            ).execute()
                             logger.info("Created audit.import_logs table")
 
                             # Try inserting again after creating the table
-                            response = (
+                            (
                                 table(self._supabase, "audit.import_logs")
                                 .insert(log_entry)
                                 .execute()
                             )
                             logger.info(
-                                f"Successfully logged import for {entity_name} after creating table"
-                            )
+                                f"Successfully logged import for {entity_name} after creating table")
                             return
                         except Exception as create_e:
-                            logger.error(
+                            logger.exception(
                                 f"Error creating audit.import_logs table: {create_e}"
                             )
 
@@ -1217,25 +1223,26 @@ class RegistrySystem:
                     INSERT INTO audit.import_logs (id, import_session, entity_name, entity_type, status, message, traceback, created_at)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                     """
-                    self._supabase.query(
-                        insert_query,
+                    self._supabase.rpc(
+                        "execute_sql",
                         {
-                            1: log_entry["id"],
-                            2: log_entry["import_session"],
-                            3: log_entry["entity_name"],
-                            4: log_entry["entity_type"],
-                            5: log_entry["status"],
-                            6: log_entry["message"],
-                            7: log_entry["traceback"],
-                            8: log_entry["created_at"],
+                            "sql": insert_query.replace(
+                                "$1", "'" + log_entry["id"] + "'"
+                            )
+                            .replace("$2", "'" + log_entry["import_session"] + "'")
+                            .replace("$3", "'" + log_entry["entity_name"] + "'")
+                            .replace("$4", "'" + log_entry["entity_type"] + "'")
+                            .replace("$5", "'" + log_entry["status"] + "'")
+                            .replace("$6", "'" + (log_entry["message"] or "") + "'")
+                            .replace("$7", "'" + (log_entry["traceback"] or "") + "'")
+                            .replace("$8", "'" + log_entry["created_at"] + "'")
                         },
                     ).execute()
                     logger.info(
-                        f"Successfully logged import for {entity_name} using direct query"
-                    )
+                        f"Successfully logged import for {entity_name} using direct query")
                     return
                 except Exception as query_e:
-                    logger.error(
+                    logger.exception(
                         f"Error with direct query to audit.import_logs: {query_e}"
                     )
 
@@ -1254,26 +1261,26 @@ class RegistrySystem:
                             created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
                         );
                         """
-                        self._supabase.query(create_legacy_table_query).execute()
+                        self._supabase.rpc(
+                            "execute_sql", {"sql": create_legacy_table_query}
+                        ).execute()
 
                         # Insert into legacy table
                         table(self._supabase, "registry.import_logs").insert(
                             log_entry
                         ).execute()
                         logger.info(
-                            f"Successfully logged import for {entity_name} to legacy registry.import_logs table"
-                        )
+                            f"Successfully logged import for {entity_name} to legacy registry.import_logs table")
                     except Exception as legacy_e:
                         logger.warning(
                             f"Error storing import log in legacy location: {legacy_e}"
                         )
 
             except Exception as e:
-                logger.error(f"Error storing import log in database: {e}")
+                logger.exception(f"Error storing import log in database: {e}")
 
-    def get_entity(self, entity_id: str) -> Optional[Dict[str, Any]]:
-        """
-        Get an entity by ID.
+    def get_entity(self, entity_id: str) -> dict[str, Any] | None:
+        """Get an entity by ID.
 
         Args:
             entity_id: ID of the entity
@@ -1288,7 +1295,6 @@ class RegistrySystem:
         # Try Supabase if available
         if self._supabase is not None:
             try:
-                from haive.dataflow.db.supabase import table
 
                 response = (
                     table(self._supabase, "registry.items")
@@ -1301,13 +1307,12 @@ class RegistrySystem:
                     return response.data[0]
 
             except Exception as e:
-                logger.error(f"Error retrieving entity from database: {e}")
+                logger.exception(f"Error retrieving entity from database: {e}")
 
         return None
 
-    def get_entities_by_type(self, entity_type: EntityType) -> List[Dict[str, Any]]:
-        """
-        Get all entities of a specific type.
+    def get_entities_by_type(self, entity_type: EntityType) -> list[dict[str, Any]]:
+        """Get all entities of a specific type.
 
         Args:
             entity_type: Type of entities to retrieve
@@ -1322,7 +1327,6 @@ class RegistrySystem:
         # Try Supabase if available
         if self._supabase is not None:
             try:
-                from haive.dataflow.db.supabase import table
 
                 response = (
                     table(self._supabase, "registry.items")
@@ -1369,7 +1373,7 @@ class RegistrySystem:
                     return response.data
 
             except Exception as e:
-                logger.error(f"Error retrieving entities from database: {e}")
+                logger.exception(f"Error retrieving entities from database: {e}")
 
         # Fall back to local registry
         return [
@@ -1379,10 +1383,9 @@ class RegistrySystem:
         ]
 
     def get_environment_vars(
-        self, provider_name: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        """
-        Get environment variables, optionally filtered by provider.
+        self, provider_name: str | None = None
+    ) -> list[dict[str, Any]]:
+        """Get environment variables, optionally filtered by provider.
 
         Args:
             provider_name: Optional provider to filter by
@@ -1393,7 +1396,6 @@ class RegistrySystem:
         # Try Supabase if available
         if self._supabase is not None:
             try:
-                from haive.dataflow.db.supabase import table
 
                 # Try to use config.environment_variables first (new schema)
                 try:
@@ -1412,7 +1414,7 @@ class RegistrySystem:
                             if isinstance(metadata, str):
                                 try:
                                     metadata = json.loads(metadata)
-                                except:
+                                except BaseException:
                                     metadata = {}
 
                             provider = metadata.get("provider_name")
@@ -1449,7 +1451,7 @@ class RegistrySystem:
                     return response.data
 
             except Exception as e:
-                logger.error(
+                logger.exception(
                     f"Error retrieving environment variables from database: {e}"
                 )
 
@@ -1460,12 +1462,10 @@ class RegistrySystem:
                 for var in self._environment_vars.values()
                 if var["provider_name"] == provider_name
             ]
-        else:
-            return list(self._environment_vars.values())
+        return list(self._environment_vars.values())
 
     def check_environment_var(self, var_name: str) -> bool:
-        """
-        Check if an environment variable is set.
+        """Check if an environment variable is set.
 
         Args:
             var_name: Name of environment variable to check
@@ -1476,10 +1476,9 @@ class RegistrySystem:
         return os.getenv(var_name) is not None
 
     def get_available_providers(
-        self, entity_type: Optional[EntityType] = None
-    ) -> List[Dict[str, Any]]:
-        """
-        Get all available providers.
+        self, entity_type: EntityType | None = None
+    ) -> list[dict[str, Any]]:
+        """Get all available providers.
 
         Args:
             entity_type: Optional entity type to filter providers by (e.g., LLM_PROVIDER)
@@ -1494,7 +1493,6 @@ class RegistrySystem:
         # First try to get providers from the models schema (new schema)
         if self._supabase is not None:
             try:
-                from haive.dataflow.db.supabase import table
 
                 # Try to query from models.providers
                 provider_type = None
@@ -1598,11 +1596,10 @@ class RegistrySystem:
     def search_entities(
         self,
         query: str,
-        entity_type: Optional[EntityType] = None,
-        metadata_filter: Optional[Dict[str, Any]] = None,
-    ) -> List[Dict[str, Any]]:
-        """
-        Search for entities based on a query.
+        entity_type: EntityType | None = None,
+        metadata_filter: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Search for entities based on a query.
 
         Args:
             query: Search query
@@ -1619,7 +1616,6 @@ class RegistrySystem:
         # Try Supabase if available and has search capabilities
         if self._supabase is not None:
             try:
-                from haive.dataflow.db.supabase import table
 
                 # Build query
                 base_query = table(self._supabase, "registry.items").select("*")
@@ -1644,7 +1640,7 @@ class RegistrySystem:
                             if isinstance(entity_metadata, str):
                                 try:
                                     entity_metadata = json.loads(entity_metadata)
-                                except:
+                                except BaseException:
                                     entity_metadata = {}
 
                             # Check if all metadata filters match
@@ -1661,11 +1657,10 @@ class RegistrySystem:
                                 filtered_results.append(entity)
 
                         return filtered_results
-                    else:
-                        return response.data
+                    return response.data
 
             except Exception as e:
-                logger.error(f"Error searching entities in database: {e}")
+                logger.exception(f"Error searching entities in database: {e}")
 
         # Fall back to local search
         results = []
@@ -1696,5 +1691,27 @@ class RegistrySystem:
         return results
 
 
-# Create a singleton instance
-registry_system = RegistrySystem()
+# Create a lazy singleton instance
+_registry_system = None
+
+
+def get_registry_system():
+    """Get the registry system instance (lazy initialization)."""
+    global _registry_system
+    if _registry_system is None:
+        _registry_system = RegistrySystem()
+    return _registry_system
+
+
+# Create a lazy property descriptor
+class LazyRegistrySystem:
+    def __get__(self, obj, objtype=None):
+        return get_registry_system()
+
+    def __set__(self, obj, value):
+        global _registry_system
+        _registry_system = value
+
+
+# Create the lazy property
+registry_system = LazyRegistrySystem()

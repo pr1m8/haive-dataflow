@@ -1,5 +1,4 @@
-"""
-Generic game API with WebSocket support and Supabase integration.
+"""Generic game API with WebSocket support and Supabase integration.
 
 This module provides a FastAPI implementation for any agent-based game
 in the Haive framework, with support for:
@@ -16,27 +15,37 @@ allowing for easy integration of new games.
 import asyncio
 import logging
 import os
-
-# Fix imports for local development
+import platform
 import sys
 import uuid
 from datetime import datetime
-from typing import Any, Dict, Optional, Type
+from typing import Any, Optional
 
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from haive.games.chess.agent import ChessAgent
+from haive.games.chess.state import ChessState
+from haive.games.connect4.agent import Connect4Agent
+from haive.games.connect4.state import Connect4State
+from haive.games.tic_tac_toe.agent import TicTacToeAgent
+from haive.games.tic_tac_toe.state import TicTacToeState
 from pydantic import BaseModel, Field, create_model
+
+from .api.game_socket import GameSocketServer
+from .engine.agent.agent import Agent
+from .persistence.supabase_config import SupabaseCheckpointerConfig
+from .schema.state_schema import StateSchema
+
+# Fix imports for local development
+
 
 module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
 if module_path not in sys.path:
     sys.path.append(module_path)
 
-# Now import the modules
-from haive.core.engine.agent.agent import Agent
-from haive.core.persistence.supabase_config import SupabaseCheckpointerConfig
-from haive.core.schema.state_schema import StateSchema
 
-from haive.dataflow.api.game_socket import GameSocketServer
+# Now import the modules
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -46,10 +55,10 @@ logger = logging.getLogger("game-api")
 class GameRequest(BaseModel):
     """Base request model for creating a new game."""
 
-    thread_id: Optional[str] = None
+    thread_id: str | None = None
     persistence_type: str = "supabase"  # "postgres", "supabase", "memory"
-    config_overrides: Optional[Dict[str, Any]] = None
-    user_id: Optional[str] = None  # For Supabase RLS
+    config_overrides: dict[str, Any] | None = None
+    user_id: str | None = None  # For Supabase RLS
 
 
 class GameResponseBase(BaseModel):
@@ -57,12 +66,11 @@ class GameResponseBase(BaseModel):
 
     thread_id: str
     timestamp: datetime = Field(default_factory=datetime.now)
-    state: Dict[str, Any]
+    state: dict[str, Any]
 
 
 class GameAPI:
-    """
-    Generic API for agent-based games with WebSocket support.
+    """Generic API for agent-based games with WebSocket support.
 
     This class provides a complete API implementation for any game
     that follows the Haive agent pattern, with both REST endpoints
@@ -78,15 +86,14 @@ class GameAPI:
     def __init__(
         self,
         app_name: str,
-        agent_class: Type[Agent],
-        state_schema: Type[StateSchema],
-        response_model: Optional[Type[BaseModel]] = None,
-        request_model: Optional[Type[BaseModel]] = None,
+        agent_class: type[Agent],
+        state_schema: type[StateSchema],
+        response_model: type[BaseModel] | None = None,
+        request_model: type[BaseModel] | None = None,
         route_prefix: str = "/api/games",
         ws_route_prefix: str = "/ws/games",
     ):
-        """
-        Initialize the game API.
+        """Initialize the game API.
 
         Args:
             app_name: The name of the game/application
@@ -140,7 +147,7 @@ class GameAPI:
 
         @app.post(f"{self.route_prefix}/", response_model=self.response_model)
         async def create_game(request: GameRequest):
-            """Create a new game instance"""
+            """Create a new game instance."""
             try:
                 # Generate thread ID if not provided
                 thread_id = (
@@ -192,15 +199,15 @@ class GameAPI:
             except Exception as e:
                 logger.error(f"Error creating game: {e}", exc_info=True)
                 raise HTTPException(
-                    status_code=500, detail=f"Error creating game: {str(e)}"
+                    status_code=500, detail=f"Error creating game: {e!s}"
                 )
 
         @app.post(
             f"{self.route_prefix}/{{thread_id}}/move",
             response_model=self.response_model,
         )
-        async def make_move(thread_id: str, move_data: Dict[str, Any]):
-            """Make a move in a game"""
+        async def make_move(thread_id: str, move_data: dict[str, Any]):
+            """Make a move in a game."""
             try:
                 # Get agent
                 agent = self.socket_server.get_or_create_agent(thread_id)
@@ -220,16 +227,14 @@ class GameAPI:
 
             except Exception as e:
                 logger.error(f"Error making move: {e}", exc_info=True)
-                raise HTTPException(
-                    status_code=500, detail=f"Error making move: {str(e)}"
-                )
+                raise HTTPException(status_code=500, detail=f"Error making move: {e!s}")
 
         @app.get(
             f"{self.route_prefix}/{{thread_id}}/ai-move",
             response_model=self.response_model,
         )
         async def make_ai_move(thread_id: str):
-            """Let AI make a move"""
+            """Let AI make a move."""
             try:
                 # Get agent
                 agent = self.socket_server.get_or_create_agent(thread_id)
@@ -247,14 +252,14 @@ class GameAPI:
             except Exception as e:
                 logger.error(f"Error making AI move: {e}", exc_info=True)
                 raise HTTPException(
-                    status_code=500, detail=f"Error making AI move: {str(e)}"
+                    status_code=500, detail=f"Error making AI move: {e!s}"
                 )
 
         @app.get(
             f"{self.route_prefix}/{{thread_id}}", response_model=self.response_model
         )
         async def get_game(thread_id: str):
-            """Get current game state"""
+            """Get current game state."""
             try:
                 # Get agent
                 agent = self.socket_server.get_or_create_agent(thread_id)
@@ -272,12 +277,12 @@ class GameAPI:
             except Exception as e:
                 logger.error(f"Error getting game state: {e}", exc_info=True)
                 raise HTTPException(
-                    status_code=500, detail=f"Error getting game: {str(e)}"
+                    status_code=500, detail=f"Error getting game: {e!s}"
                 )
 
         @app.post(f"{self.route_prefix}/{{thread_id}}/register-user")
-        async def register_user(thread_id: str, user_data: Dict[str, Any]):
-            """Register user ID for Supabase RLS"""
+        async def register_user(thread_id: str, user_data: dict[str, Any]):
+            """Register user ID for Supabase RLS."""
             try:
                 user_id = user_data.get("user_id")
                 if not user_id:
@@ -301,11 +306,10 @@ class GameAPI:
                         persistence_config.register_thread(thread_id)
 
                         return {"status": "success", "message": "User registered"}
-                    else:
-                        return {
-                            "status": "warning",
-                            "message": "Agent is not using Supabase persistence",
-                        }
+                    return {
+                        "status": "warning",
+                        "message": "Agent is not using Supabase persistence",
+                    }
 
                 return {
                     "status": "error",
@@ -315,17 +319,13 @@ class GameAPI:
             except Exception as e:
                 logger.error(f"Error registering user: {e}", exc_info=True)
                 raise HTTPException(
-                    status_code=500, detail=f"Error registering user: {str(e)}"
+                    status_code=500, detail=f"Error registering user: {e!s}"
                 )
 
     def run(self, host: str = "0.0.0.0", port: int = 8000):
         """Run the API server."""
-        import uvicorn
-
         # Fix for Windows asyncio issues
         if __name__ == "__main__":
-            import platform
-
             if platform.system() == "Windows":
                 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
@@ -334,8 +334,7 @@ class GameAPI:
 
 
 class GameAPIFactory:
-    """
-    Factory for creating game-specific APIs.
+    """Factory for creating game-specific APIs.
 
     This class creates specialized API instances for different game types,
     with appropriate state schemas and agent classes for each game.
@@ -353,15 +352,14 @@ class GameAPIFactory:
     @staticmethod
     def create_api(
         app_name: str,
-        agent_class: Type[Agent],
-        state_schema: Type[StateSchema],
-        response_model: Optional[Type[BaseModel]] = None,
-        request_model: Optional[Type[BaseModel]] = None,
+        agent_class: type[Agent],
+        state_schema: type[StateSchema],
+        response_model: type[BaseModel] | None = None,
+        request_model: type[BaseModel] | None = None,
         route_prefix: str = "/api/games",
         ws_route_prefix: str = "/ws/games",
     ) -> GameAPI:
-        """
-        Create a game API for any agent and state schema.
+        """Create a game API for any agent and state schema.
 
         Args:
             app_name: The name of the game/application
@@ -387,15 +385,12 @@ class GameAPIFactory:
 
     @staticmethod
     def create_chess_api() -> GameAPI:
-        """
-        Create a chess-specific API.
+        """Create a chess-specific API.
 
         Returns:
             A configured GameAPI instance for chess
         """
         # Fix imports for packages directory structure
-        import os
-        import sys
 
         packages_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../../../../..")
@@ -403,15 +398,12 @@ class GameAPIFactory:
         if packages_path not in sys.path:
             sys.path.append(packages_path)
 
-        from haive.games.chess.agent import ChessAgent
-        from haive.games.chess.state import ChessState
-
         # Create a custom response model for chess
         ChessResponse = create_model(
             "ChessResponse",
             thread_id=(str, ...),
             timestamp=(datetime, Field(default_factory=datetime.now)),
-            state=(Dict[str, Any], ...),
+            state=(dict[str, Any], ...),
             board_fen=(str, None),
             current_player=(str, None),
             game_status=(str, None),
@@ -430,15 +422,11 @@ class GameAPIFactory:
 
     @staticmethod
     def create_connect4_api() -> GameAPI:
-        """
-        Create a Connect4-specific API.
+        """Create a Connect4-specific API.
 
         Returns:
             A configured GameAPI instance for Connect4
         """
-        from haive.games.connect4.agent import Connect4Agent
-        from haive.games.connect4.state import Connect4State
-
         return GameAPIFactory.create_api(
             app_name="Connect4",
             agent_class=Connect4Agent,
@@ -449,15 +437,11 @@ class GameAPIFactory:
 
     @staticmethod
     def create_tic_tac_toe_api() -> GameAPI:
-        """
-        Create a Tic Tac Toe-specific API.
+        """Create a Tic Tac Toe-specific API.
 
         Returns:
             A configured GameAPI instance for Tic Tac Toe
         """
-        from haive.games.tic_tac_toe.agent import TicTacToeAgent
-        from haive.games.tic_tac_toe.state import TicTacToeState
-
         return GameAPIFactory.create_api(
             app_name="TicTacToe",
             agent_class=TicTacToeAgent,
@@ -469,16 +453,11 @@ class GameAPIFactory:
 
 # Example usage
 if __name__ == "__main__":
-    import uvicorn
-    from fastapi import FastAPI
-
     # Create a combined API with multiple games
     app = FastAPI(title="Game API Hub")
 
     try:
         # Import chess components
-        from haive.games.chess.agent import ChessAgent
-        from haive.games.chess.state import ChessState
 
         # Create chess API routes
         chess_api = GameAPIFactory.create_api(
@@ -491,14 +470,11 @@ if __name__ == "__main__":
 
         # Mount chess app routes to main app
         app.mount("/chess", chess_api.app)
-        print("Chess API mounted successfully")
     except ImportError:
-        print("Chess game not available")
+        pass
 
     try:
         # Import Connect4 components
-        from haive.games.connect4.agent import Connect4Agent
-        from haive.games.connect4.state import Connect4State
 
         # Create Connect4 API routes
         connect4_api = GameAPIFactory.create_api(
@@ -511,9 +487,8 @@ if __name__ == "__main__":
 
         # Mount Connect4 app routes to main app
         app.mount("/connect4", connect4_api.app)
-        print("Connect4 API mounted successfully")
     except ImportError:
-        print("Connect4 game not available")
+        pass
 
     # Run the server
     uvicorn.run(app, host="0.0.0.0", port=8000)

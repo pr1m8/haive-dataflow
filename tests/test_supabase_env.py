@@ -1,15 +1,16 @@
 # check_env.py
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
 env_vars = [
-    "SUPABASE_URL", 
-    "SUPABASE_ANON_KEY", 
-    "SUPABASE_SERVICE_KEY", 
+    "SUPABASE_URL",
+    "SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_KEY",
     "SUPABASE_JWT_SECRET",
-    "TEST_SUPABASE_TOKEN"
+    "TEST_SUPABASE_TOKEN",
 ]
 
 print("Checking environment variables:")

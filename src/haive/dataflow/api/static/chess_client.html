@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chess Game WebSocket Client</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .control-panel {
+        flex: 1;
+        min-width: 300px;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .game-board {
+        flex: 2;
+        min-width: 400px;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      .chessboard {
+        width: 400px;
+        height: 400px;
+        border: 2px solid #333;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        grid-template-rows: repeat(8, 1fr);
+      }
+
+      .square {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 30px;
+        cursor: pointer;
+        position: relative;
+      }
+
+      .white {
+        background-color: #f0d9b5;
+      }
+
+      .black {
+        background-color: #b58863;
+      }
+
+      .selected {
+        background-color: rgba(173, 216, 230, 0.7);
+      }
+
+      .valid-move {
+        position: relative;
+      }
+
+      .valid-move::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background-color: rgba(0, 128, 0, 0.3);
+        border-radius: 50%;
+        z-index: 1;
+      }
+
+      .log-panel {
+        flex: 1;
+        min-width: 300px;
+        max-height: 500px;
+        overflow-y: auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .log-entry {
+        margin-bottom: 5px;
+        padding: 5px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 10px;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+
+      .game-info {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+      }
+
+      .chess-piece {
+        font-size: 32px;
+        cursor: pointer;
+      }
+
+      .status-indicator {
+        padding: 5px 10px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-top: 10px;
+        font-weight: bold;
+      }
+
+      .connected {
+        background-color: #d4edda;
+        color: #155724;
+      }
+
+      .disconnected {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+
+      .move-history {
+        margin-top: 15px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .move-item {
+        display: flex;
+        padding: 3px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .move-number {
+        width: 30px;
+        font-weight: bold;
+      }
+
+      .move-white,
+      .move-black {
+        flex: 1;
+        padding: 0 5px;
+      }
+
+      .loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+      }
+
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top: 4px solid #3498db;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Chess Game WebSocket Client</h1>
+
+    <div class="container">
+      <div class="control-panel">
+        <div class="form-group">
+          <label for="serverUrl">Server URL:</label>
+          <input
+            type="text"
+            id="serverUrl"
+            value="ws://localhost:8000/ws/chess/"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="threadId">Game ID (leave empty for new game):</label>
+          <input
+            type="text"
+            id="threadId"
+            placeholder="Auto-generated if empty"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="persistenceType">Persistence Type:</label>
+          <select id="persistenceType">
+            <option value="memory">Memory</option>
+            <option value="postgres">PostgreSQL</option>
+            <option value="supabase" selected>Supabase</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="supabaseUserIdGroup">
+          <label for="userId">Supabase User ID:</label>
+          <input
+            type="text"
+            id="userId"
+            placeholder="User ID for Supabase RLS"
+          />
+        </div>
+
+        <button id="connectBtn">Connect</button>
+        <button id="disconnectBtn" disabled>Disconnect</button>
+
+        <div class="status-indicator disconnected" id="statusIndicator">
+          Disconnected
+        </div>
+
+        <div class="game-info">
+          <div>
+            <strong>Current Player:</strong> <span id="currentPlayer">-</span>
+          </div>
+          <div>
+            <strong>Game Status:</strong> <span id="gameStatus">-</span>
+          </div>
+          <div><strong>Move Count:</strong> <span id="moveCount">0</span></div>
+        </div>
+
+        <button id="aiMoveBtn" disabled>Request AI Move</button>
+        <button id="resetBtn" disabled>Reset Selection</button>
+        <button id="newGameBtn">New Game</button>
+      </div>
+
+      <div class="game-board">
+        <div id="loadingIndicator" class="loading" style="display: none">
+          <div class="spinner"></div>
+        </div>
+        <div class="chessboard" id="chessboard"></div>
+
+        <div class="move-history">
+          <h3>Move History</h3>
+          <div id="moveHistoryList"></div>
+        </div>
+      </div>
+
+      <div class="log-panel">
+        <h3>WebSocket Log</h3>
+        <button id="clearLogBtn">Clear Log</button>
+        <div id="logContainer"></div>
+      </div>
+    </div>
+
+    <script>
+      // Global variables
+      let socket = null;
+      let gameState = null;
+      let selectedSquare = null;
+      let validMoves = [];
+      let pieceMap = {
+        K: "♔",
+        Q: "♕",
+        R: "♖",
+        B: "♗",
+        N: "♘",
+        P: "♙", // White pieces
+        k: "♚",
+        q: "♛",
+        r: "♜",
+        b: "♝",
+        n: "♞",
+        p: "♟", // Black pieces
+      };
+
+      // DOM elements
+      const serverUrlInput = document.getElementById("serverUrl");
+      const threadIdInput = document.getElementById("threadId");
+      const persistenceTypeSelect = document.getElementById("persistenceType");
+      const userIdInput = document.getElementById("userId");
+      const supabaseUserIdGroup = document.getElementById(
+        "supabaseUserIdGroup",
+      );
+      const connectBtn = document.getElementById("connectBtn");
+      const disconnectBtn = document.getElementById("disconnectBtn");
+      const statusIndicator = document.getElementById("statusIndicator");
+      const chessboard = document.getElementById("chessboard");
+      const currentPlayerDisplay = document.getElementById("currentPlayer");
+      const gameStatusDisplay = document.getElementById("gameStatus");
+      const moveCountDisplay = document.getElementById("moveCount");
+      const aiMoveBtn = document.getElementById("aiMoveBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const newGameBtn = document.getElementById("newGameBtn");
+      const loadingIndicator = document.getElementById("loadingIndicator");
+      const moveHistoryList = document.getElementById("moveHistoryList");
+      const logContainer = document.getElementById("logContainer");
+      const clearLogBtn = document.getElementById("clearLogBtn");
+
+      // Initialize the chessboard
+      function initializeChessboard() {
+        chessboard.innerHTML = "";
+
+        for (let row = 0; row < 8; row++) {
+          for (let col = 0; col < 8; col++) {
+            const square = document.createElement("div");
+            square.className = `square ${(row + col) % 2 === 0 ? "white" : "black"}`;
+            square.dataset.row = 7 - row; // Flip row index for chess notation (0 at bottom)
+            square.dataset.col = col;
+            square.addEventListener("click", handleSquareClick);
+            chessboard.appendChild(square);
+          }
+        }
+      }
+
+      // Update the chessboard based on FEN notation
+      function updateChessboard(fen) {
+        if (!fen) return;
+
+        // Extract board position from FEN
+        const boardFen = fen.split(" ")[0];
+        const rows = boardFen.split("/");
+
+        // Reset all squares
+        document.querySelectorAll(".square").forEach((square) => {
+          square.textContent = "";
+          square.classList.remove("selected", "valid-move");
+        });
+
+        // Place pieces according to FEN
+        rows.forEach((row, rowIndex) => {
+          let colIndex = 0;
+
+          for (let i = 0; i < row.length; i++) {
+            const char = row[i];
+
+            if (isNaN(char)) {
+              // It's a piece
+              const square = document.querySelector(
+                `.square[data-row="${rowIndex}"][data-col="${colIndex}"]`,
+              );
+              if (square) {
+                square.textContent = pieceMap[char] || char;
+              }
+              colIndex++;
+            } else {
+              // It's a number of empty squares
+              colIndex += parseInt(char);
+            }
+          }
+        });
+      }
+
+      // Handle square click for move selection
+      function handleSquareClick(event) {
+        if (!gameState || gameState.game_status !== "ongoing") return;
+
+        const square = event.currentTarget;
+        const row = parseInt(square.dataset.row);
+        const col = parseInt(square.dataset.col);
+
+        // If a piece is already selected
+        if (selectedSquare) {
+          const fromRow = parseInt(selectedSquare.dataset.row);
+          const fromCol = parseInt(selectedSquare.dataset.col);
+
+          // Convert to algebraic notation
+          const fromSquare = String.fromCharCode(97 + fromCol) + (fromRow + 1);
+          const toSquare = String.fromCharCode(97 + col) + (row + 1);
+          const moveUci = fromSquare + toSquare;
+
+          // Check if this is a valid move
+          if (square.classList.contains("valid-move")) {
+            // Make the move
+            makeMove(moveUci);
+          } else {
+            // If clicking on another own piece, select it instead
+            if (square.textContent !== "") {
+              selectSquare(square);
+            } else {
+              // Otherwise, clear selection
+              clearSelection();
+            }
+          }
+        } else if (square.textContent !== "") {
+          // Select this piece if it belongs to the current player
+          const isPieceWhite = /[KQRBNP]/.test(square.textContent);
+          const isWhiteTurn = gameState.current_player === "white";
+
+          if (
+            (isPieceWhite && isWhiteTurn) ||
+            (!isPieceWhite && !isWhiteTurn)
+          ) {
+            selectSquare(square);
+          }
+        }
+      }
+
+      // Select a square and highlight valid moves
+      function selectSquare(square) {
+        // Clear previous selection
+        clearSelection();
+
+        // Set new selection
+        selectedSquare = square;
+        square.classList.add("selected");
+
+        // Highlight valid moves (this would require more logic with an actual chess engine)
+        // For demo purposes, we'll just highlight empty squares or opponent pieces
+        const isPieceWhite = /[KQRBNP♔♕♖♗♘♙]/.test(square.textContent);
+
+        document.querySelectorAll(".square").forEach((s) => {
+          const hasPiece = s.textContent !== "";
+          const isPieceWhiteOnSquare =
+            hasPiece && /[KQRBNP♔♕♖♗♘♙]/.test(s.textContent);
+
+          // Valid move if empty or contains opponent piece
+          if (!hasPiece || isPieceWhite !== isPieceWhiteOnSquare) {
+            s.classList.add("valid-move");
+            validMoves.push(s);
+          }
+        });
+      }
+
+      // Clear square selection and highlights
+      function clearSelection() {
+        if (selectedSquare) {
+          selectedSquare.classList.remove("selected");
+          selectedSquare = null;
+        }
+
+        validMoves.forEach((square) => {
+          square.classList.remove("valid-move");
+        });
+        validMoves = [];
+      }
+
+      // Make a move on the board
+      function makeMove(moveUci) {
+        if (!socket || !gameState) return;
+
+        showLoading(true);
+
+        // Send move via WebSocket
+        socket.send(
+          JSON.stringify({
+            type: "make_move",
+            move: {
+              move: moveUci,
+            },
+            auto_response: true, // Automatically make AI response move
+          }),
+        );
+
+        // Clear selection
+        clearSelection();
+      }
+
+      // Request an AI move
+      function requestAiMove() {
+        if (!socket || !gameState) return;
+
+        showLoading(true);
+
+        // Send AI move request
+        socket.send(
+          JSON.stringify({
+            type: "ai_move",
+          }),
+        );
+      }
+
+      // Update game info displays
+      function updateGameInfo() {
+        if (!gameState) return;
+
+        currentPlayerDisplay.textContent = gameState.current_player || "-";
+        gameStatusDisplay.textContent = gameState.game_status || "-";
+
+        if (gameState.move_history) {
+          moveCountDisplay.textContent = gameState.move_history.length;
+          updateMoveHistory(gameState.move_history);
+        }
+
+        // Enable/disable buttons based on game state
+        aiMoveBtn.disabled = !gameState || gameState.game_status !== "ongoing";
+        resetBtn.disabled = !gameState || gameState.game_status !== "ongoing";
+      }
+
+      // Update move history display
+      function updateMoveHistory(moveHistory) {
+        moveHistoryList.innerHTML = "";
+
+        for (let i = 0; i < moveHistory.length; i += 2) {
+          const moveNumber = Math.floor(i / 2) + 1;
+          const whiteMove = moveHistory[i] ? moveHistory[i][1] : "";
+          const blackMove = moveHistory[i + 1] ? moveHistory[i + 1][1] : "";
+
+          const moveItem = document.createElement("div");
+          moveItem.className = "move-item";
+          moveItem.innerHTML = `
+                    <div class="move-number">${moveNumber}.</div>
+                    <div class="move-white">${whiteMove}</div>
+                    <div class="move-black">${blackMove}</div>
+                `;
+
+          moveHistoryList.appendChild(moveItem);
+        }
+
+        // Scroll to bottom
+        moveHistoryList.scrollTop = moveHistoryList.scrollHeight;
+      }
+
+      // Show/hide loading indicator
+      function showLoading(show) {
+        loadingIndicator.style.display = show ? "flex" : "none";
+      }
+
+      // Connect to WebSocket server
+      function connectWebSocket() {
+        const serverUrl = serverUrlInput.value.trim();
+        let gameId = threadIdInput.value.trim();
+
+        // Generate a game ID if not provided
+        if (!gameId) {
+          gameId = "chess_" + Math.random().toString(36).substring(2, 10);
+          threadIdInput.value = gameId;
+        }
+
+        // Construct WebSocket URL
+        const wsUrl = `${serverUrl}${gameId}`;
+
+        // Close existing connection if any
+        if (socket) {
+          socket.close();
+        }
+
+        // Show loading indicator
+        showLoading(true);
+
+        // Create new WebSocket connection
+        try {
+          socket = new WebSocket(wsUrl);
+
+          // Connection opened
+          socket.addEventListener("open", (event) => {
+            log("Connection established");
+            statusIndicator.textContent = "Connected";
+            statusIndicator.className = "status-indicator connected";
+
+            // Enable/disable buttons
+            connectBtn.disabled = true;
+            disconnectBtn.disabled = false;
+            aiMoveBtn.disabled = false;
+            resetBtn.disabled = false;
+
+            // Register user ID if using Supabase
+            const persistenceType = persistenceTypeSelect.value;
+            const userId = userIdInput.value.trim();
+
+            if (persistenceType === "supabase" && userId) {
+              socket.send(
+                JSON.stringify({
+                  type: "register_user",
+                  user_id: userId,
+                }),
+              );
+            }
+          });
+
+          // Listen for messages
+          socket.addEventListener("message", (event) => {
+            try {
+              const message = JSON.parse(event.data);
+              log("Received: " + JSON.stringify(message, null, 2));
+
+              // Handle message based on type
+              if (message.type === "state_update") {
+                gameState = message.state;
+                updateChessboard(gameState.board_fen);
+                updateGameInfo();
+                showLoading(false);
+              } else if (message.type === "error") {
+                console.error("Error:", message.message);
+                log("ERROR: " + message.message);
+                showLoading(false);
+              } else if (message.type === "user_registered") {
+                log("User registered successfully: " + message.user_id);
+              }
+            } catch (error) {
+              console.error("Error parsing message:", error);
+              log("Error parsing message: " + error.message);
+            }
+          });
+
+          // Connection closed
+          socket.addEventListener("close", (event) => {
+            log("Connection closed");
+            statusIndicator.textContent = "Disconnected";
+            statusIndicator.className = "status-indicator disconnected";
+
+            // Enable/disable buttons
+            connectBtn.disabled = false;
+            disconnectBtn.disabled = true;
+            aiMoveBtn.disabled = true;
+            resetBtn.disabled = true;
+
+            // Clear selection
+            clearSelection();
+            showLoading(false);
+          });
+
+          // Connection error
+          socket.addEventListener("error", (event) => {
+            log("WebSocket error");
+            statusIndicator.textContent = "Error";
+            statusIndicator.className = "status-indicator disconnected";
+            showLoading(false);
+          });
+        } catch (error) {
+          console.error("Error creating WebSocket:", error);
+          log("Error creating WebSocket: " + error.message);
+          showLoading(false);
+        }
+      }
+
+      // Disconnect from WebSocket server
+      function disconnectWebSocket() {
+        if (socket) {
+          socket.close();
+          socket = null;
+        }
+      }
+
+      // Create a new game
+      function createNewGame() {
+        // Generate a new game ID
+        threadIdInput.value =
+          "chess_" + Math.random().toString(36).substring(2, 10);
+
+        // Connect to the new game
+        if (socket) {
+          disconnectWebSocket();
+        }
+        connectWebSocket();
+      }
+
+      // Log message to the log panel
+      function log(message) {
+        const logEntry = document.createElement("div");
+        logEntry.className = "log-entry";
+
+        const timestamp = new Date().toLocaleTimeString();
+        logEntry.textContent = `[${timestamp}] ${message}`;
+
+        logContainer.appendChild(logEntry);
+        logContainer.scrollTop = logContainer.scrollHeight;
+      }
+
+      // Clear the log panel
+      function clearLog() {
+        logContainer.innerHTML = "";
+      }
+
+      // Add event listeners
+      connectBtn.addEventListener("click", connectWebSocket);
+      disconnectBtn.addEventListener("click", disconnectWebSocket);
+      aiMoveBtn.addEventListener("click", requestAiMove);
+      resetBtn.addEventListener("click", clearSelection);
+      newGameBtn.addEventListener("click", createNewGame);
+      clearLogBtn.addEventListener("click", clearLog);
+
+      // Show/hide Supabase user ID field based on persistence type
+      persistenceTypeSelect.addEventListener("change", () => {
+        supabaseUserIdGroup.style.display =
+          persistenceTypeSelect.value === "supabase" ? "block" : "none";
+      });
+
+      // Initialize the UI
+      initializeChessboard();
+      supabaseUserIdGroup.style.display =
+        persistenceTypeSelect.value === "supabase" ? "block" : "none";
+    </script>
+  </body>
+</html>

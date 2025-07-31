@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Simple HTTP server to serve the chess client HTML/JS interface.
+"""Simple HTTP server to serve the chess client HTML/JS interface.
 
 This script starts a simple HTTP server to serve the chess client
 interface that connects to the WebSocket API.
@@ -15,6 +14,7 @@ Note:
 import argparse
 import http.server
 import logging
+import os
 import socketserver
 import sys
 import webbrowser
@@ -32,7 +32,6 @@ logger = logging.getLogger("chess-client-server")
 def get_static_dir():
     """Get the directory containing the static files."""
     # Fix imports for local development
-    import sys
 
     sys.path.append(
         os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))

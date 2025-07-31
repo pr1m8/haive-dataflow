@@ -23,7 +23,7 @@ Typical usage example:
 """
 
 import os
-from typing import Any, Optional, Tuple
+from typing import Any
 
 from dotenv import load_dotenv
 from supabase import Client, ClientOptions, create_client
@@ -99,7 +99,7 @@ DEFAULT_SCHEMA_MAP = {
 }
 
 
-def get_supabase_client(schema: Optional[str] = None) -> Client:
+def get_supabase_client(schema: str | None = None) -> Client:
     """Get a configured Supabase client instance.
 
     Creates and returns a Supabase client configured with the specified schema.
@@ -123,7 +123,7 @@ def get_supabase_client(schema: Optional[str] = None) -> Client:
         >>> registry_client = get_supabase_client("registry")
     """
     if not SUPABASE_URL or not SUPABASE_KEY:
-        raise EnvironmentError("Supabase URL or KEY not set in environment.")
+        raise OSError("Supabase URL or KEY not set in environment.")
 
     options = ClientOptions(
         schema=schema or "public",
@@ -133,7 +133,7 @@ def get_supabase_client(schema: Optional[str] = None) -> Client:
     return create_client(SUPABASE_URL, SUPABASE_KEY, options=options)
 
 
-def parse_table_reference(table_ref: str) -> Tuple[str, Optional[str]]:
+def parse_table_reference(table_ref: str) -> tuple[str, str | None]:
     """Parse a table reference to extract table name and schema.
 
     This function parses table references in various formats and extracts
@@ -163,17 +163,15 @@ def parse_table_reference(table_ref: str) -> Tuple[str, Optional[str]]:
         table_name = parts[0]
         schema = DEFAULT_SCHEMA_MAP.get(table_name)
         return table_name, schema
-    elif len(parts) == 2:
+    if len(parts) == 2:
         # Schema explicitly specified
         schema, table_name = parts
         return table_name, schema
-    else:
-        raise ValueError(f"Invalid table reference: {table_ref}")
+    raise ValueError(f"Invalid table reference: {table_ref}")
 
 
-def table(client: Client, table_ref: str, schema_override: Optional[str] = None) -> Any:
-    """
-    Get a table reference with appropriate schema handling.
+def table(client: Client, table_ref: str, schema_override: str | None = None) -> Any:
+    """Get a table reference with appropriate schema handling.
 
     Args:
         client: Supabase client
@@ -201,16 +199,12 @@ def table(client: Client, table_ref: str, schema_override: Optional[str] = None)
 
 
 def sanitize_sql(sql: str) -> str:
-    """
-    Remove trailing semicolons and whitespace for safe RPC use.
-    """
+    """Remove trailing semicolons and whitespace for safe RPC use."""
     return sql.strip().rstrip(";").strip()
 
 
 def fetch_all_schemas_and_tables(client: Client) -> list[dict]:
-    """
-    Return all non-system tables grouped by schema using raw SQL.
-    """
+    """Return all non-system tables grouped by schema using raw SQL."""
     sql = """
         SELECT
             table_schema,
@@ -228,9 +222,7 @@ def fetch_all_schemas_and_tables(client: Client) -> list[dict]:
 
 
 def fetch_foreign_key_relations(client: Client) -> list[dict]:
-    """
-    Return foreign key relationships between tables using raw SQL.
-    """
+    """Return foreign key relationships between tables using raw SQL."""
     sql = """
         SELECT
             tc.table_schema,
@@ -239,13 +231,13 @@ def fetch_foreign_key_relations(client: Client) -> list[dict]:
             ccu.table_schema AS foreign_table_schema,
             ccu.table_name AS foreign_table_name,
             ccu.column_name AS foreign_column_name
-        FROM 
-            information_schema.table_constraints AS tc 
+        FROM
+            information_schema.table_constraints AS tc
             JOIN information_schema.key_column_usage AS kcu
               ON tc.constraint_name = kcu.constraint_name
             JOIN information_schema.constraint_column_usage AS ccu
               ON ccu.constraint_name = tc.constraint_name
-        WHERE 
+        WHERE
             tc.constraint_type = 'FOREIGN KEY'
         ORDER BY
             tc.table_schema, tc.table_name
@@ -255,11 +247,11 @@ def fetch_foreign_key_relations(client: Client) -> list[dict]:
 
 
 def fetch_table_columns(client: Client) -> list[dict]:
-    """
-    Get all columns, types, and constraints from information_schema.columns.
+    """Get all columns, types, and constraints from
+    information_schema.columns.
     """
     sql = """
-        SELECT 
+        SELECT
             table_schema,
             table_name,
             column_name,
@@ -269,11 +261,11 @@ def fetch_table_columns(client: Client) -> list[dict]:
             character_maximum_length,
             numeric_precision,
             numeric_scale
-        FROM 
+        FROM
             information_schema.columns
-        WHERE 
+        WHERE
             table_schema NOT IN ('information_schema', 'pg_catalog')
-        ORDER BY 
+        ORDER BY
             table_schema, table_name, ordinal_position
     """
     sql = sanitize_sql(sql)
@@ -281,22 +273,20 @@ def fetch_table_columns(client: Client) -> list[dict]:
 
 
 def fetch_primary_keys(client: Client) -> list[dict]:
-    """
-    Get all primary keys per table.
-    """
+    """Get all primary keys per table."""
     sql = """
         SELECT
             kcu.table_schema,
             kcu.table_name,
             tco.constraint_name,
             kcu.column_name
-        FROM 
+        FROM
             information_schema.table_constraints tco
-            JOIN information_schema.key_column_usage kcu 
+            JOIN information_schema.key_column_usage kcu
               ON kcu.constraint_name = tco.constraint_name
-        WHERE 
+        WHERE
             tco.constraint_type = 'PRIMARY KEY'
-        ORDER BY 
+        ORDER BY
             kcu.table_schema, kcu.table_name, kcu.ordinal_position
     """
     sql = sanitize_sql(sql)

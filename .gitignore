@@ -10,7 +10,7 @@ summary_agent/
 test_simple_agent/
 output_file.json
 retrievers_output.json
-
+scripts/migration/data_dump.sql
 # === 🔬 Cache / experiment outputs ===
 .cache/
 .lc_cache/
@@ -144,5 +144,17 @@ poetry.lock
 # === 📦 Extra files ===
 .history/
 
+# === 🗄️ Large data files ===
+data/exports/
+scripts/migration/data_dump.sql
+*.sql
+data/
+exports/
+
+# === 🤖 ML model cache and embeddings ===
+resources/embeddings_cache/
+.langchain_cache.db
+models--*/
 
 **/.claude/settings.local.json
+poetry.lock
