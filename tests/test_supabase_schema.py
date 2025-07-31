@@ -19,25 +19,22 @@ async def check_schema():
         "pg_catalog.pg_tables", {"schemaname": "public"}
     ).execute()
 
-    print("Public schema tables:")
-    for table in response.data:
-        print(f"- {table['tablename']}")
+    for _table in response.data:
+        pass
 
     # Try to list tables in user_data schema (if exists)
     response = await client.rpc(
         "pg_catalog.pg_tables", {"schemaname": "user_data"}
     ).execute()
 
-    print("\nUser_data schema tables:")
-    for table in response.data:
-        print(f"- {table['tablename']}")
+    for _table in response.data:
+        pass
 
     # Check RLS policies
     response = await client.from_("pg_catalog.pg_policies").select("*").execute()
 
-    print("\nRLS policies:")
-    for policy in response.data:
-        print(f"- {policy['schemaname']}.{policy['tablename']}: {policy['policyname']}")
+    for _policy in response.data:
+        pass
 
 
 asyncio.run(check_schema())

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test enhanced streaming modes with Haive agents"""
+"""Test enhanced streaming modes with Haive agents."""
 
 import asyncio
 import json
@@ -13,12 +13,7 @@ AGENT_NAME = "TextAnalyzer"  # Change to your agent name
 
 
 async def test_streaming_mode(token, mode, format_type="auto"):
-    """Test a specific streaming mode"""
-
-    print(f"\n{'='*50}")
-    print(f"Testing stream_mode='{mode}', stream_format='{format_type}'")
-    print(f"{'='*50}")
-
+    """Test a specific streaming mode."""
     # Connect to WebSocket
     uri = f"{BASE_URL}/api/ws/chat/{AGENT_NAME}?token={token}"
 
@@ -36,12 +31,9 @@ async def test_streaming_mode(token, mode, format_type="auto"):
     # Add config to URL
     uri += f"&config={json.dumps(config)}"
 
-    print(f"Connecting to {AGENT_NAME} with mode={mode}, format={format_type}")
-
     async with websockets.connect(uri) as websocket:
         # Wait for welcome message
-        welcome = json.loads(await websocket.recv())
-        print(f"Connected: Thread {welcome['content']['thread_id']}")
+        json.loads(await websocket.recv())
 
         # Send a test message
         message = {
@@ -49,11 +41,9 @@ async def test_streaming_mode(token, mode, format_type="auto"):
             "content": "Analyze this text: 'Artificial intelligence is transforming how we work.' Extract entities and sentiment.",
         }
 
-        print(f"\nSending: {message['content'][:50]}...")
         await websocket.send(json.dumps(message))
 
         # Receive streaming responses
-        print("\nStreaming responses:")
         stream_complete = False
         chunk_count = 0
 
@@ -62,30 +52,22 @@ async def test_streaming_mode(token, mode, format_type="auto"):
 
             if response["type"] == "status":
                 if response["content"]["status"] == "streaming":
-                    print(
-                        f"--- Stream started (mode: {response['content'].get('mode', 'unknown')}) ---"
-                    )
+                    pass
                 elif response["content"]["status"] == "complete":
-                    print(f"--- Stream complete ({chunk_count} chunks) ---")
                     stream_complete = True
             elif response["type"] == "response":
                 chunk_count += 1
                 # Display based on format
-                if format_type == "json" or format_type == "structured":
-                    print(
-                        f"Chunk {chunk_count}: {json.dumps(response['content'], indent=2)[:200]}..."
-                    )
+                if format_type in {"json", "structured"}:
+                    pass
                 else:
-                    print(f"Chunk {chunk_count}: {str(response['content'])[:100]}...")
+                    pass
             else:
-                print(
-                    f"Other: {response['type']} - {str(response.get('content', ''))[:100]}"
-                )
+                pass
 
 
 async def test_all_modes(token):
-    """Test different streaming mode combinations"""
-
+    """Test different streaming mode combinations."""
     # Test different mode/format combinations
     test_cases = [
         ("messages", "text"),  # Chat-like text streaming
@@ -99,17 +81,12 @@ async def test_all_modes(token):
         try:
             await test_streaming_mode(token, mode, format_type)
             await asyncio.sleep(1)  # Small delay between tests
-        except Exception as e:
-            print(f"Error testing {mode}/{format_type}: {e}")
+        except Exception:
+            pass
 
 
 async def test_progressive_updates(token):
-    """Test progressive schema updates"""
-
-    print(f"\n{'='*50}")
-    print("Testing Progressive Updates")
-    print(f"{'='*50}")
-
+    """Test progressive schema updates."""
     uri = f"{BASE_URL}/api/ws/chat/{AGENT_NAME}?token={token}"
 
     config = {
@@ -127,7 +104,6 @@ async def test_progressive_updates(token):
 
     async with websockets.connect(uri) as websocket:
         json.loads(await websocket.recv())
-        print("Connected for progressive updates")
 
         message = {
             "type": "message",
@@ -136,7 +112,6 @@ async def test_progressive_updates(token):
 
         await websocket.send(json.dumps(message))
 
-        print("\nProgressive updates:")
         complete = False
 
         while not complete:
@@ -150,19 +125,13 @@ async def test_progressive_updates(token):
             elif response["type"] == "response":
                 content = response["content"]
                 if isinstance(content, dict) and "data" in content:
-                    print(f"Update - Type: {content.get('type', 'unknown')}")
-                    print(
-                        f"  Data keys: {list(content['data'].keys()) if isinstance(content['data'], dict) else 'N/A'}"
-                    )
+                    pass
 
 
 async def main():
-    """Main test function"""
+    """Main test function."""
     # Get token from command line or use test token
     token = sys.argv[1] if len(sys.argv) > 1 else "test"
-
-    print("=== Enhanced Haive Agent Streaming Test ===")
-    print(f"Using token: {token[:10]}...")
 
     try:
         # Test all streaming modes
@@ -171,8 +140,8 @@ async def main():
         # Test progressive updates
         await test_progressive_updates(token)
 
-    except Exception as e:
-        print(f"Error: {e}")
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":

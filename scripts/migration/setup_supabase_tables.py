@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""
-Set up Supabase tables using the Supabase Python client
-"""
+"""Set up Supabase tables using the Supabase Python client."""
 
+import contextlib
 import os
 import sys
 from pathlib import Path
@@ -10,7 +9,6 @@ from pathlib import Path
 try:
     from supabase import Client, create_client
 except ImportError:
-    print("Installing supabase client...")
     import subprocess
 
     subprocess.check_call([sys.executable, "-m", "pip", "install", "supabase"])
@@ -22,8 +20,7 @@ sys.path.insert(0, str(project_root / "packages/haive-dataflow/src"))
 
 
 def create_supabase_client() -> Client:
-    """Create Supabase client"""
-
+    """Create Supabase client."""
     url = os.getenv("SUPABASE_URL")
     key = os.getenv("SUPABASE_SERVICE_KEY")
 
@@ -34,10 +31,7 @@ def create_supabase_client() -> Client:
 
 
 def setup_tables():
-    """Set up the agent state tables"""
-
-    print("=== Setting up Supabase Tables ===")
-
+    """Set up the agent state tables."""
     supabase = create_supabase_client()
 
     # SQL commands to create tables
@@ -82,39 +76,39 @@ def setup_tables():
     rls_policies = [
         # Threads policies
         """
-        CREATE POLICY IF NOT EXISTS "Users can view their own threads" 
-        ON agent_state.threads FOR SELECT 
+        CREATE POLICY IF NOT EXISTS "Users can view their own threads"
+        ON agent_state.threads FOR SELECT
         USING (auth.uid() = user_id);
         """,
         """
-        CREATE POLICY IF NOT EXISTS "Users can create their own threads" 
-        ON agent_state.threads FOR INSERT 
+        CREATE POLICY IF NOT EXISTS "Users can create their own threads"
+        ON agent_state.threads FOR INSERT
         WITH CHECK (auth.uid() = user_id);
         """,
         """
-        CREATE POLICY IF NOT EXISTS "Users can update their own threads" 
-        ON agent_state.threads FOR UPDATE 
+        CREATE POLICY IF NOT EXISTS "Users can update their own threads"
+        ON agent_state.threads FOR UPDATE
         USING (auth.uid() = user_id);
         """,
         # Checkpoints policies
         """
-        CREATE POLICY IF NOT EXISTS "Users can view their own checkpoints" 
-        ON agent_state.checkpoints FOR SELECT 
+        CREATE POLICY IF NOT EXISTS "Users can view their own checkpoints"
+        ON agent_state.checkpoints FOR SELECT
         USING (
             EXISTS (
-                SELECT 1 FROM agent_state.threads 
-                WHERE threads.thread_id = checkpoints.thread_id 
+                SELECT 1 FROM agent_state.threads
+                WHERE threads.thread_id = checkpoints.thread_id
                 AND threads.user_id = auth.uid()
             )
         );
         """,
         """
-        CREATE POLICY IF NOT EXISTS "Users can create checkpoints for their threads" 
-        ON agent_state.checkpoints FOR INSERT 
+        CREATE POLICY IF NOT EXISTS "Users can create checkpoints for their threads"
+        ON agent_state.checkpoints FOR INSERT
         WITH CHECK (
             EXISTS (
-                SELECT 1 FROM agent_state.threads 
-                WHERE threads.thread_id = checkpoints.thread_id 
+                SELECT 1 FROM agent_state.threads
+                WHERE threads.thread_id = checkpoints.thread_id
                 AND threads.user_id = auth.uid()
             )
         );
@@ -123,43 +117,28 @@ def setup_tables():
 
     try:
         # Execute table creation
-        for i, sql in enumerate(sql_commands):
-            print(f"Executing command {i+1}/{len(sql_commands)}")
+        for _i, sql in enumerate(sql_commands):
             supabase.rpc("exec_sql", {"sql": sql})
 
-        print("✓ Tables created successfully")
-
         # Execute RLS policies
-        for i, policy in enumerate(rls_policies):
-            print(f"Creating RLS policy {i+1}/{len(rls_policies)}")
-            try:
+        for _i, policy in enumerate(rls_policies):
+            with contextlib.suppress(Exception):
                 supabase.rpc("exec_sql", {"sql": policy})
-            except Exception as e:
-                print(f"Policy {i+1} might already exist: {e}")
-
-        print("✓ RLS policies configured")
 
         return True
 
-    except Exception as e:
-        print(f"✗ Error setting up tables: {e}")
+    except Exception:
 
         # Try a simpler approach - just test if we can query
         try:
-            print("Testing basic Supabase connection...")
             supabase.table("threads").select("*").limit(1).execute()
-            print("✓ Basic connection works, tables might already exist")
             return True
-        except Exception as e2:
-            print(f"✗ Basic connection also failed: {e2}")
+        except Exception:
             return False
 
 
 def test_tables():
-    """Test that tables are working"""
-
-    print("\n=== Testing Tables ===")
-
+    """Test that tables are working."""
     try:
         supabase = create_supabase_client()
 
@@ -175,7 +154,6 @@ def test_tables():
         result = supabase.table("agent_state.threads").insert(test_data).execute()
 
         if result.data:
-            print("✓ Successfully created test thread")
 
             # Try to read it back
             read_result = (
@@ -186,35 +164,25 @@ def test_tables():
             )
 
             if read_result.data:
-                print("✓ Successfully read test thread")
 
                 # Clean up
                 supabase.table("agent_state.threads").delete().eq(
                     "thread_id", "test-thread-123"
                 ).execute()
-                print("✓ Test data cleaned up")
 
                 return True
 
         return False
 
-    except Exception as e:
-        print(f"✗ Table test failed: {e}")
+    except Exception:
         return False
 
 
 def main():
-    """Main function"""
-
-    print("🔧 Supabase Table Setup")
-    print("=" * 30)
-
+    """Main function."""
     # Check environment
     if not os.getenv("SUPABASE_URL") or not os.getenv("SUPABASE_SERVICE_KEY"):
-        print("✗ Missing SUPABASE_URL or SUPABASE_SERVICE_KEY")
         return False
-
-    print(f"✓ Supabase URL: {os.getenv('SUPABASE_URL')}")
 
     # Set up tables
     if not setup_tables():
@@ -222,10 +190,7 @@ def main():
 
     # Test tables
     if not test_tables():
-        print("⚠️  Tables created but testing failed - this might be OK")
-
-    print("\n🎉 Setup Complete!")
-    print("Your Supabase is ready for agent persistence!")
+        pass
 
     return True
 

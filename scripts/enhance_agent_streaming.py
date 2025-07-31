@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Enhanced streaming support for agent routes
+"""Enhanced streaming support for agent routes.
 
 This shows how to modify the agent_routes.py to support:
 1. Multiple streaming modes
@@ -11,14 +10,22 @@ This shows how to modify the agent_routes.py to support:
 
 # Key changes to make in agent_routes.py:
 
+from collections.abc import AsyncGenerator
 from typing import Any, Literal
 
 # 1. Update AgentChatConfig to include streaming options
 from pydantic import BaseModel
 
+# WebSocket for type hints (this is a demonstration script)
+try:
+    from fastapi import WebSocket
+except ImportError:
+    # For demonstration purposes, create a placeholder
+    WebSocket = Any
+
 
 class EnhancedAgentChatConfig(BaseModel):
-    """Enhanced chat configuration with streaming options"""
+    """Enhanced chat configuration with streaming options."""
 
     agent_name: str
     provider: str = "azure"
@@ -48,8 +55,7 @@ async def enhanced_websocket_handler(
     chat_config: EnhancedAgentChatConfig,
     execution_context: dict,
 ):
-    """Enhanced WebSocket handler with flexible streaming"""
-
+    """Enhanced WebSocket handler with flexible streaming."""
     if chat_config.stream:
         stream_index = 0
         buffer = []
@@ -127,8 +133,7 @@ async def enhanced_websocket_handler(
 async def format_stream_chunk(
     chunk: Any, config: EnhancedAgentChatConfig, output_schema: Any = None
 ) -> Any:
-    """Format stream chunk based on configuration"""
-
+    """Format stream chunk based on configuration."""
     if config.stream_format == "structured" and output_schema:
         # Try to validate against schema
         try:
@@ -151,12 +156,12 @@ async def format_stream_chunk(
     elif config.stream_format == "text":
         # Extract text content only
         if isinstance(chunk, dict):
-            if "messages" in chunk and chunk["messages"]:
+            if chunk.get("messages"):
                 last_msg = chunk["messages"][-1]
                 return getattr(last_msg, "content", str(last_msg))
-            elif "content" in chunk:
+            if "content" in chunk:
                 return chunk["content"]
-            elif "text" in chunk:
+            if "text" in chunk:
                 return chunk["text"]
         return str(chunk)
 
@@ -164,7 +169,7 @@ async def format_stream_chunk(
         # Ensure JSON serializable
         if hasattr(chunk, "dict"):
             return chunk.dict()
-        elif hasattr(chunk, "__dict__"):
+        if hasattr(chunk, "__dict__"):
             return chunk.__dict__
         return chunk
 
@@ -174,7 +179,7 @@ async def format_stream_chunk(
 
 # 3. Schema-aware streaming example
 class SchemaAwareStreamProcessor:
-    """Process streams based on agent output schema"""
+    """Process streams based on agent output schema."""
 
     def __init__(self, agent):
         self.agent = agent
@@ -184,8 +189,7 @@ class SchemaAwareStreamProcessor:
     async def process_stream(
         self, stream_generator: AsyncGenerator, progressive: bool = True
     ) -> AsyncGenerator[dict, None]:
-        """Process stream with schema awareness"""
-
+        """Process stream with schema awareness."""
         async for chunk in stream_generator:
             if self.output_schema and progressive:
                 # Build partial results progressively
@@ -205,14 +209,14 @@ class SchemaAwareStreamProcessor:
                 yield chunk
 
     def update_partial_data(self, chunk: dict):
-        """Update partial data with new chunk"""
+        """Update partial data with new chunk."""
         if isinstance(chunk, dict):
             for key, value in chunk.items():
                 if value is not None:
                     self.partial_data[key] = value
 
     def validate_partial(self) -> bool:
-        """Check if partial data is valid so far"""
+        """Check if partial data is valid so far."""
         if not self.output_schema:
             return True
 
@@ -236,7 +240,7 @@ class SchemaAwareStreamProcessor:
             return False
 
     def get_complete_fields(self) -> list[str]:
-        """Get list of fields that have been populated"""
+        """Get list of fields that have been populated."""
         return list(self.partial_data.keys())
 
 
@@ -247,7 +251,7 @@ class SchemaAwareStreamProcessor:
 if chat_config.stream:
     # Create schema-aware processor
     processor = SchemaAwareStreamProcessor(agent)
-    
+
     # Stream with processing
     stream_gen = agent.astream(
         message_content,
@@ -255,7 +259,7 @@ if chat_config.stream:
         stream_mode=chat_config.stream_mode,
         config=execution_context,
     )
-    
+
     async for processed_chunk in processor.process_stream(
         stream_gen,
         progressive=chat_config.progressive_updates

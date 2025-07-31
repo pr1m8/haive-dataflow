@@ -1,5 +1,6 @@
 """Tests for the fixed discovery API routes."""
 
+import contextlib
 from unittest.mock import Mock, patch
 
 import pytest
@@ -224,14 +225,8 @@ class TestGameDiscoveryFixed:
 
 if __name__ == "__main__":
     # Run basic smoke tests
-    print("🧪 Testing Fixed Discovery APIs\n")
 
     # Test imports
-    print("1. Testing imports...")
-    try:
+    with contextlib.suppress(Exception):
 
-        print("✅ All imports successful")
-    except Exception as e:
-        print(f"❌ Import failed: {e}")
-
-    print("\n✅ Basic tests complete. Run with pytest for full test suite.")
+        pass

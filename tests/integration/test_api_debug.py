@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""API debugging script to test agent and LLM endpoints"""
+"""API debugging script to test agent and LLM endpoints."""
 
+import contextlib
 import sys
 
 import requests
@@ -10,19 +11,13 @@ BASE_URL = "http://localhost:8000"
 
 
 def test_health():
-    """Test health endpoint"""
-    print("\n=== Testing Health Endpoint ===")
-    try:
-        response = requests.get(f"{BASE_URL}/api/health")
-        print(f"Status: {response.status_code}")
-        print(f"Response: {response.json()}")
-    except Exception as e:
-        print(f"Error: {e}")
+    """Test health endpoint."""
+    with contextlib.suppress(Exception):
+        requests.get(f"{BASE_URL}/api/health")
 
 
 def test_llm_generate(token=None):
-    """Test LLM generate endpoint"""
-    print("\n=== Testing LLM Generate Endpoint ===")
+    """Test LLM generate endpoint."""
     headers = {}
     if token:
         headers["Authorization"] = f"Bearer {token}"
@@ -38,20 +33,14 @@ def test_llm_generate(token=None):
     # Test with query parameter
     params = {"query": "Hello, how are you?"}
 
-    try:
-        response = requests.post(
+    with contextlib.suppress(Exception):
+        requests.post(
             f"{BASE_URL}/api/llm/generate", json=data, params=params, headers=headers
         )
-        print(f"Status: {response.status_code}")
-        print(f"Response: {response.text[:500]}")
-    except Exception as e:
-        print(f"Error: {e}")
 
 
 def test_routes_discovery():
-    """Try to discover available routes"""
-    print("\n=== Testing Route Discovery ===")
-
+    """Try to discover available routes."""
     # Common endpoints to test
     endpoints = [
         "/api/health",
@@ -63,21 +52,16 @@ def test_routes_discovery():
     ]
 
     for endpoint in endpoints:
-        try:
-            response = requests.get(f"{BASE_URL}{endpoint}")
-            print(f"{endpoint}: {response.status_code}")
-        except Exception as e:
-            print(f"{endpoint}: Error - {e}")
+        with contextlib.suppress(Exception):
+            requests.get(f"{BASE_URL}{endpoint}")
 
 
 def main():
-    """Main function"""
-    print(f"Testing API at {BASE_URL}")
-
+    """Main function."""
     # Get token from command line if provided
     token = sys.argv[1] if len(sys.argv) > 1 else None
     if token:
-        print(f"Using token: {token[:10]}...")
+        pass
 
     # Run tests
     test_health()

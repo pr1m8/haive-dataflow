@@ -13,11 +13,10 @@ env_vars = [
     "TEST_SUPABASE_TOKEN",
 ]
 
-print("Checking environment variables:")
 for var in env_vars:
     value = os.getenv(var)
     if value:
         # Only show first few characters for security
-        print(f"{var}: {value[:5]}...")
+        pass
     else:
-        print(f"{var}: NOT SET")
+        pass

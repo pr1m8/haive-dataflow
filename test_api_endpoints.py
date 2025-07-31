@@ -1,4 +1,4 @@
-"""Test Api Endpoints - Utility functions for test api endpoints
+"""Test Api Endpoints - Utility functions for test api endpoints.
 
 TODO: Add comprehensive description of test api endpoints functionality.
 
@@ -97,9 +97,6 @@ async def test_endpoint(session, endpoint, method="GET", data=None):
 
 async def test_api_endpoints():
     """Test various API endpoints."""
-    print("🧪 Testing Haive DataFlow API Endpoints")
-    print("=" * 50)
-
     # List of endpoints to test
     endpoints = [
         "/",
@@ -117,44 +114,26 @@ async def test_api_endpoints():
         results = []
 
         for endpoint in endpoints:
-            print(f"Testing {endpoint}...", end=" ")
             result = await test_endpoint(session, endpoint)
             results.append(result)
 
-            if result["success"]:
-                print("✅ SUCCESS")
-            else:
-                print(f"❌ FAILED ({result.get('status', 'ERROR')})")
-                if "error" in result:
-                    print(f"   Error: {result['error']}")
-
-        print("\n" + "=" * 50)
-        print("📊 SUMMARY")
-        print("=" * 50)
+            if result["success"] or "error" in result:
+                pass
 
         success_count = sum(1 for r in results if r["success"])
         total_count = len(results)
 
-        print(f"Successful endpoints: {success_count}/{total_count}")
-        print(f"Success rate: {success_count/total_count*100:.1f}%")
-
-        print("\n📋 DETAILED RESULTS:")
         for result in results:
-            print(f"\n{result['endpoint']}:")
-            print(f"  Status: {result['status']}")
-            print(f"  Success: {result['success']}")
             if "sample_data" in result:
-                print(f"  Sample: {result['sample_data']}")
+                pass
             if "error" in result:
-                print(f"  Error: {result['error']}")
+                pass
 
         return success_count, total_count
 
 
 def start_api_server():
     """Start the API server in background."""
-    print("🚀 Starting API server...")
-
     # Start server
     cmd = [
         "poetry",
@@ -174,7 +153,6 @@ def start_api_server():
     )
 
     # Wait a bit for server to start
-    print("⏳ Waiting for server to start...")
     time.sleep(8)
 
     return process
@@ -193,18 +171,16 @@ async def main():
             try:
                 async with session.get(f"{API_BASE}/api/health", timeout=5) as response:
                     if response.status == 200:
-                        print("✅ Server is running!")
+                        pass
                     else:
-                        print(f"⚠️ Server responded with status {response.status}")
-            except Exception as e:
-                print(f"❌ Server is not responding: {e}")
-                return
+                        pass
+            except Exception:
+                return None
 
         # Run endpoint tests
         success_count, total_count = await test_api_endpoints()
 
         # Test a simple game creation (if games API is available)
-        print("\n🎮 Testing Game API...")
         async with aiohttp.ClientSession() as session:
             # Test tic-tac-toe creation
             game_data = {
@@ -217,37 +193,26 @@ async def main():
                 session, "/api/games/create", method="POST", data=game_data
             )
             if result["success"]:
-                print("✅ Game creation endpoint works!")
+                pass
             else:
-                print(
-                    f"❌ Game creation failed: {result.get('error', 'Unknown error')}"
-                )
-
-        print(f"\n🎯 FINAL RESULT: {success_count}/{total_count} endpoints working")
+                pass
 
         if success_count >= total_count * 0.8:  # 80% success rate
-            print("🎉 API is working well!")
             return True
-        else:
-            print("⚠️ Some API endpoints have issues")
-            return False
+        return False
 
     except KeyboardInterrupt:
-        print("\n🛑 Test interrupted by user")
         return False
-    except Exception as e:
-        print(f"\n💥 Test failed with error: {e}")
+    except Exception:
         return False
     finally:
         # Clean up server process
         if server_process:
-            print("\n🧹 Stopping API server...")
             server_process.terminate()
             try:
                 server_process.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 server_process.kill()
-            print("✅ Server stopped")
 
 
 if __name__ == "__main__":
@@ -255,5 +220,4 @@ if __name__ == "__main__":
         result = asyncio.run(main())
         sys.exit(0 if result else 1)
     except KeyboardInterrupt:
-        print("\n🛑 Interrupted")
         sys.exit(1)

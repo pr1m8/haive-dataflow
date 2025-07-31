@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Supabase Checkpointer Configuration for Haive Agents
+"""Supabase Checkpointer Configuration for Haive Agents.
 
 This module provides configuration and setup for using Supabase as the
 checkpointer backend for Haive agents. It replaces local storage with
@@ -9,19 +8,19 @@ cloud-based persistence.
 
 import logging
 import os
-from typing import Any, Dict
+from typing import Any
 
+from haive.core.engine.agent.config import AgentConfig
+from haive.core.persistence.supabase_config import SupabaseSaver
 from pydantic import BaseModel, Field
 
-from .config.environment import get_supabase_server_config
-from .engine.agent.config import AgentConfig
-from .persistence.supabase_config import SupabaseSaver
+from haive.dataflow.config.environment import get_supabase_server_config
 
 logger = logging.getLogger(__name__)
 
 
 class SupabaseCheckpointerConfig(BaseModel):
-    """Configuration for Supabase-based agent checkpointing"""
+    """Configuration for Supabase-based agent checkpointing."""
 
     use_supabase: bool = Field(
         default=True, description="Enable Supabase checkpointing"
@@ -37,9 +36,8 @@ class SupabaseCheckpointerConfig(BaseModel):
     batch_size: int = Field(default=100, description="Batch size for operations")
 
 
-def create_supabase_checkpointer(user_id: str = None) -> SupabaseSaver:
-    """Create a Supabase checkpointer instance"""
-
+def create_supabase_checkpointer(user_id: str | None = None) -> SupabaseSaver:
+    """Create a Supabase checkpointer instance."""
     # Get Supabase configuration
     supabase_config = get_supabase_server_config()
 
@@ -56,10 +54,9 @@ def create_supabase_checkpointer(user_id: str = None) -> SupabaseSaver:
 
 
 def configure_agent_for_supabase(
-    agent_config: AgentConfig, user_id: str, thread_id: str = None
+    agent_config: AgentConfig, user_id: str, thread_id: str | None = None
 ) -> AgentConfig:
-    """Configure an agent to use Supabase checkpointing"""
-
+    """Configure an agent to use Supabase checkpointing."""
     # Create Supabase checkpointer
     checkpointer = create_supabase_checkpointer(user_id)
 
@@ -88,17 +85,16 @@ def configure_agent_for_supabase(
 
 # Migration utilities
 class SupabaseMigrator:
-    """Utility class for migrating existing agent data to Supabase"""
+    """Utility class for migrating existing agent data to Supabase."""
 
     def __init__(self, user_id: str):
         self.user_id = user_id
         self.checkpointer = create_supabase_checkpointer(user_id)
 
     async def migrate_thread_data(
-        self, thread_id: str, old_checkpoints: Dict[str, Any]
+        self, thread_id: str, old_checkpoints: dict[str, Any]
     ):
-        """Migrate checkpoint data from old storage to Supabase"""
-
+        """Migrate checkpoint data from old storage to Supabase."""
         try:
             # Register thread in Supabase
             await self.checkpointer.aput_thread(
@@ -129,12 +125,11 @@ class SupabaseMigrator:
             return migrated_count
 
         except Exception as e:
-            logger.error(f"Error migrating thread {thread_id}: {e}")
+            logger.exception(f"Error migrating thread {thread_id}: {e}")
             raise
 
     async def cleanup_old_data(self, confirm: bool = False):
-        """Clean up old checkpoint data (use with caution)"""
-
+        """Clean up old checkpoint data (use with caution)."""
         if not confirm:
             logger.warning("cleanup_old_data called without confirmation - skipping")
             return
@@ -145,9 +140,8 @@ class SupabaseMigrator:
 
 
 # Example usage functions
-def setup_supabase_for_agent(agent_name: str, user_id: str) -> Dict[str, Any]:
-    """Set up Supabase configuration for a specific agent"""
-
+def setup_supabase_for_agent(agent_name: str, user_id: str) -> dict[str, Any]:
+    """Set up Supabase configuration for a specific agent."""
     config = {
         "checkpointer_type": "supabase",
         "checkpointer_config": {
@@ -166,8 +160,7 @@ def setup_supabase_for_agent(agent_name: str, user_id: str) -> Dict[str, Any]:
 
 
 def get_supabase_connection_info():
-    """Get Supabase connection information for debugging"""
-
+    """Get Supabase connection information for debugging."""
     supabase_config = get_supabase_server_config()
 
     return {
@@ -180,21 +173,16 @@ def get_supabase_connection_info():
 
 # Test function
 async def test_supabase_checkpointer(user_id: str = "test-user"):
-    """Test the Supabase checkpointer functionality"""
-
-    print("=== Testing Supabase Checkpointer ===")
-
+    """Test the Supabase checkpointer functionality."""
     try:
         # Create checkpointer
         checkpointer = create_supabase_checkpointer(user_id)
-        print(f"✓ Created checkpointer for user: {user_id}")
 
         # Test thread registration
         thread_id = "test-thread-123"
         await checkpointer.aput_thread(
             thread_id=thread_id, metadata={"test": True, "created_by": "test_function"}
         )
-        print(f"✓ Registered thread: {thread_id}")
 
         # Test checkpoint storage
         test_checkpoint = {
@@ -212,7 +200,6 @@ async def test_supabase_checkpointer(user_id: str = "test-user"):
             checkpoint=test_checkpoint,
             metadata={"test": True},
         )
-        print("✓ Stored test checkpoint"t")
 
         # Test checkpoint retrieval
         retrieved = await checkpointer.aget(
@@ -225,14 +212,11 @@ async def test_supabase_checkpointer(user_id: str = "test-user"):
         )
 
         if retrieved:
-            print("✓ Retrieved checkpoint successfully"y")
+            pass
         else:
-            print("✗ Failed to retrieve checkpoint"t")
+            pass
 
-        print("=== Supabase Checkpointer Test Complete ===")
-
-    except Exception as e:
-        print(f"✗ Test failed: {e}")
+    except Exception:
         raise
 
 
@@ -240,7 +224,5 @@ if __name__ == "__main__":
     import asyncio
 
     # Test the configuration
-    print("Supabase connection info:", get_supabase_connection_info())
-
     # Run test
     asyncio.run(test_supabase_checkpointer())

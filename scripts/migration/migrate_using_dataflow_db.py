@@ -19,15 +19,9 @@ logger = logging.getLogger(__name__)
 
 async def migrate_with_dataflow_db():
     """Use haive.dataflow.db to migrate from local to Supabase."""
-
-    print("🚀 Migration using haive.dataflow.db")
-    print("=" * 50)
-
     try:
         # Import the DatabaseManager
         from haive.dataflow.api.db import DatabaseManager
-
-        print("✓ Imported DatabaseManager")
 
         # Local PostgreSQL connection parameters
         local_params = {
@@ -49,32 +43,19 @@ async def migrate_with_dataflow_db():
             "sslmode": "require",
         }
 
-        print(
-            f"Local:    {local_params['user']}@{local_params['host']}:{local_params['port']}/{local_params['dbname']}"
-        )
-        print(
-            f"Supabase: {supabase_params['user']}@{supabase_params['host']}:{supabase_params['port']}/{supabase_params['dbname']}"
-        )
-
         # Create database managers
         local_db = DatabaseManager(local_params)
         supabase_db = DatabaseManager(supabase_params)
 
         # Test connections
-        print("\n🔌 Testing connections...")
 
         if not local_db.connect():
-            print("❌ Failed to connect to local PostgreSQL")
             return False
-        print("✓ Connected to local PostgreSQL")
 
         if not supabase_db.connect():
-            print("❌ Failed to connect to Supabase")
             return False
-        print("✓ Connected to Supabase")
 
         # Set up Supabase schema
-        print("\n🔧 Setting up Supabase schema...")
 
         # First, let's create the proper threads table structure
         with supabase_db.connection.cursor() as cursor:
@@ -115,7 +96,7 @@ async def migrate_with_dataflow_db():
 
             cursor.execute(
                 """
-                INSERT INTO public.checkpoint_migrations (v) 
+                INSERT INTO public.checkpoint_migrations (v)
                 VALUES (0), (1), (2), (3), (4)
             """
             )
@@ -181,10 +162,8 @@ async def migrate_with_dataflow_db():
             )
 
             supabase_db.connection.commit()
-            print("✓ Supabase schema created")
 
         # Migrate data
-        print("\n📦 Migrating data...")
 
         # Get data from local database
         with local_db.connection.cursor() as local_cursor:
@@ -204,18 +183,13 @@ async def migrate_with_dataflow_db():
             local_blobs = local_cursor.fetchall()
             local_blob_columns = [desc[0] for desc in local_cursor.description]
 
-        print(
-            f"Found {len(local_threads)} threads, {len(local_checkpoints)} checkpoints"
-        )
-        print(f"Found {len(local_writes)} writes, {len(local_blobs)} blobs")
-
         # Migrate threads with UUID mapping
         thread_mapping = {}
         migrated_threads = 0
 
         with supabase_db.connection.cursor() as supabase_cursor:
             for thread_row in local_threads:
-                thread_dict = dict(zip(local_thread_columns, thread_row))
+                thread_dict = dict(zip(local_thread_columns, thread_row, strict=False))
 
                 # Generate new UUID and create mapping
                 supabase_cursor.execute("SELECT uuid_generate_v4()")
@@ -242,13 +216,14 @@ async def migrate_with_dataflow_db():
                 migrated_threads += 1
 
             supabase_db.connection.commit()
-            print(f"✓ Migrated {migrated_threads} threads")
 
         # Migrate checkpoints
         migrated_checkpoints = 0
         with supabase_db.connection.cursor() as supabase_cursor:
             for checkpoint_row in local_checkpoints:
-                checkpoint_dict = dict(zip(local_checkpoint_columns, checkpoint_row))
+                checkpoint_dict = dict(
+                    zip(local_checkpoint_columns, checkpoint_row, strict=False)
+                )
                 old_thread_id = checkpoint_dict["thread_id"]
                 new_thread_id = thread_mapping.get(old_thread_id)
 
@@ -271,13 +246,12 @@ async def migrate_with_dataflow_db():
                     migrated_checkpoints += 1
 
             supabase_db.connection.commit()
-            print(f"✓ Migrated {migrated_checkpoints} checkpoints")
 
         # Migrate writes
         migrated_writes = 0
         with supabase_db.connection.cursor() as supabase_cursor:
             for write_row in local_writes:
-                write_dict = dict(zip(local_write_columns, write_row))
+                write_dict = dict(zip(local_write_columns, write_row, strict=False))
                 old_thread_id = write_dict["thread_id"]
                 new_thread_id = thread_mapping.get(old_thread_id)
 
@@ -302,13 +276,12 @@ async def migrate_with_dataflow_db():
                     migrated_writes += 1
 
             supabase_db.connection.commit()
-            print(f"✓ Migrated {migrated_writes} writes")
 
         # Migrate blobs
         migrated_blobs = 0
         with supabase_db.connection.cursor() as supabase_cursor:
             for blob_row in local_blobs:
-                blob_dict = dict(zip(local_blob_columns, blob_row))
+                blob_dict = dict(zip(local_blob_columns, blob_row, strict=False))
                 old_thread_id = blob_dict["thread_id"]
                 new_thread_id = thread_mapping.get(old_thread_id)
 
@@ -330,31 +303,22 @@ async def migrate_with_dataflow_db():
                     migrated_blobs += 1
 
             supabase_db.connection.commit()
-            print(f"✓ Migrated {migrated_blobs} blobs")
 
         # Verify migration
-        print("\n🔍 Verifying migration...")
         with supabase_db.connection.cursor() as cursor:
             cursor.execute("SELECT COUNT(*) FROM public.threads")
-            thread_count = cursor.fetchone()[0]
+            cursor.fetchone()[0]
 
             cursor.execute("SELECT COUNT(*) FROM public.checkpoints")
-            checkpoint_count = cursor.fetchone()[0]
-
-            print(
-                f"Final counts - Threads: {thread_count}, Checkpoints: {checkpoint_count}"
-            )
+            cursor.fetchone()[0]
 
         # Close connections
         local_db.close()
         supabase_db.close()
 
-        print("\n🎉 Migration completed successfully!")
-        print("Your persistence adapter is now configured to use Supabase!")
         return True
 
-    except Exception as e:
-        print(f"❌ Migration failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -364,7 +328,6 @@ async def migrate_with_dataflow_db():
 if __name__ == "__main__":
     success = asyncio.run(migrate_with_dataflow_db())
     if success:
-        print("\n✅ SUCCESS: Local PostgreSQL data migrated to Supabase")
-        print("The haive persistence system now uses Supabase instead of localhost")
+        pass
     else:
-        print("\n❌ FAILED: Migration did not complete")
+        pass

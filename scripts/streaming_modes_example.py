@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Different streaming modes for Haive agents
+"""Different streaming modes for Haive agents.
 
 Available stream modes:
 1. "values" - Stream full state values
@@ -10,7 +9,9 @@ Available stream modes:
 5. "custom" - Raw stream data without processing
 """
 
-from typing import Any, AsyncGenerator
+from collections.abc import AsyncGenerator
+from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -18,17 +19,16 @@ from .base.agent import Agent
 
 
 class StreamingAgent(Agent):
-    """Example agent showing different streaming modes"""
+    """Example agent showing different streaming modes."""
 
     def build_graph(self):
         # Your graph building logic
         pass
 
     async def stream_with_mode(
-        self, input_data: Any, mode: str = "messages", thread_id: str = None
+        self, input_data: Any, mode: str = "messages", thread_id: str | None = None
     ) -> AsyncGenerator[dict, None]:
-        """Stream with different modes based on use case"""
-
+        """Stream with different modes based on use case."""
         # Stream with specified mode
         async for chunk in self.astream(
             input_data, thread_id=thread_id, stream_mode=mode
@@ -38,7 +38,7 @@ class StreamingAgent(Agent):
 
 # Example schemas for different output types
 class ChatMessage(BaseModel):
-    """Schema for chat messages"""
+    """Schema for chat messages."""
 
     content: str
     role: str = "assistant"
@@ -46,7 +46,7 @@ class ChatMessage(BaseModel):
 
 
 class AnalysisResult(BaseModel):
-    """Schema for analysis results"""
+    """Schema for analysis results."""
 
     summary: str
     entities: list[str] = []
@@ -55,7 +55,7 @@ class AnalysisResult(BaseModel):
 
 
 class StreamUpdate(BaseModel):
-    """Schema for streaming updates"""
+    """Schema for streaming updates."""
 
     update_type: str  # "text", "data", "status", "error"
     content: Any
@@ -67,8 +67,7 @@ class StreamUpdate(BaseModel):
 async def handle_stream_request(
     agent: Agent, message: dict, websocket: Any, thread_id: str
 ):
-    """Handle different streaming modes based on request"""
-
+    """Handle different streaming modes based on request."""
     # Extract streaming preferences
     stream_config = message.get("stream_config", {})
     mode = stream_config.get("mode", "messages")
@@ -100,7 +99,7 @@ async def handle_stream_request(
         async for chunk in agent.astream(
             message["content"], thread_id=thread_id, stream_mode="messages"
         ):
-            if "messages" in chunk and chunk["messages"]:
+            if chunk.get("messages"):
                 last_msg = chunk["messages"][-1]
                 await websocket.send_json(
                     {
@@ -167,7 +166,7 @@ async def handle_stream_request(
 
 # Enhanced WebSocket configuration
 class EnhancedAgentChatConfig(BaseModel):
-    """Enhanced configuration for agent chat with streaming options"""
+    """Enhanced configuration for agent chat with streaming options."""
 
     agent_name: str
     provider: str = "azure"

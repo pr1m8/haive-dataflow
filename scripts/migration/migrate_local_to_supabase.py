@@ -10,10 +10,6 @@ import asyncpg
 
 async def migrate_local_to_supabase():
     """Migrate threads and checkpoint data from local PostgreSQL to Supabase."""
-
-    print("🔄 Migrating Local PostgreSQL to Supabase")
-    print("=" * 60)
-
     # Local PostgreSQL config
     local_config = {
         "host": "localhost",
@@ -29,20 +25,15 @@ async def migrate_local_to_supabase():
     )
 
     if not supabase_uri:
-        print("❌ No Supabase connection string found in environment variables")
         return False
 
     try:
         # Connect to both databases
-        print("📡 Connecting to databases...")
         local_conn = await asyncpg.connect(**local_config)
-        print("✓ Connected to local PostgreSQL")
 
         supabase_conn = await asyncpg.connect(supabase_uri)
-        print("✓ Connected to Supabase")
 
         # 1. Create proper threads table structure in Supabase
-        print("\n🔧 Setting up Supabase threads table...")
         await supabase_conn.execute(
             """
             CREATE TABLE IF NOT EXISTS public.threads (
@@ -74,15 +65,10 @@ async def migrate_local_to_supabase():
         """
         )
 
-        print("✓ Supabase threads table ready")
-
         # 2. Get local threads data
-        print("\n📥 Reading local threads data...")
         local_threads = await local_conn.fetch("SELECT * FROM public.threads")
-        print(f"✓ Found {len(local_threads)} threads in local database")
 
         # 3. Migrate threads data
-        print("\n📤 Migrating threads to Supabase...")
         migrated_threads = 0
         thread_mapping = {}  # old_thread_id -> new_uuid
 
@@ -112,23 +98,15 @@ async def migrate_local_to_supabase():
 
                 migrated_threads += 1
 
-            except Exception as e:
-                print(f"⚠️  Error migrating thread {thread['thread_id']}: {e}")
-
-        print(f"✓ Migrated {migrated_threads} threads")
+            except Exception:
+                pass
 
         # 4. Get local checkpoint data
-        print("\n📥 Reading local checkpoint data...")
         local_checkpoints = await local_conn.fetch("SELECT * FROM public.checkpoints")
         local_writes = await local_conn.fetch("SELECT * FROM public.checkpoint_writes")
         local_blobs = await local_conn.fetch("SELECT * FROM public.checkpoint_blobs")
 
-        print(f"✓ Found {len(local_checkpoints)} checkpoints")
-        print(f"✓ Found {len(local_writes)} checkpoint writes")
-        print(f"✓ Found {len(local_blobs)} checkpoint blobs")
-
         # 5. Migrate checkpoints
-        print("\n📤 Migrating checkpoints to Supabase...")
         migrated_checkpoints = 0
 
         for checkpoint in local_checkpoints:
@@ -152,15 +130,10 @@ async def migrate_local_to_supabase():
                     )
                     migrated_checkpoints += 1
 
-                except Exception as e:
-                    print(
-                        f"⚠️  Error migrating checkpoint {checkpoint['checkpoint_id']}: {e}"
-                    )
-
-        print(f"✓ Migrated {migrated_checkpoints} checkpoints")
+                except Exception:
+                    pass
 
         # 6. Migrate checkpoint writes
-        print("\n📤 Migrating checkpoint writes...")
         migrated_writes = 0
 
         for write in local_writes:
@@ -186,13 +159,10 @@ async def migrate_local_to_supabase():
                     )
                     migrated_writes += 1
 
-                except Exception as e:
-                    print(f"⚠️  Error migrating write: {e}")
-
-        print(f"✓ Migrated {migrated_writes} checkpoint writes")
+                except Exception:
+                    pass
 
         # 7. Migrate checkpoint blobs
-        print("\n📤 Migrating checkpoint blobs...")
         migrated_blobs = 0
 
         for blob in local_blobs:
@@ -215,13 +185,10 @@ async def migrate_local_to_supabase():
                     )
                     migrated_blobs += 1
 
-                except Exception as e:
-                    print(f"⚠️  Error migrating blob: {e}")
-
-        print(f"✓ Migrated {migrated_blobs} checkpoint blobs")
+                except Exception:
+                    pass
 
         # 8. Create indexes in Supabase
-        print("\n📊 Creating indexes...")
         await supabase_conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_threads_user_id ON public.threads(user_id)"
         )
@@ -231,30 +198,21 @@ async def migrate_local_to_supabase():
         await supabase_conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_checkpoints_thread_id ON public.checkpoints(thread_id)"
         )
-        print("✓ Indexes created")
 
         # 9. Summary
-        print("\n📋 Migration Summary:"y:")
-        print(f"  - Threads: {migrated_threads}/{len(local_threads)}")
-        print(f"  - Checkpoints: {migrated_checkpoints}/{len(local_checkpoints)}")
-        print(f"  - Writes: {migrated_writes}/{len(local_writes)}")
-        print(f"  - Blobs: {migrated_blobs}/{len(local_blobs)}")
 
         # 10. Show thread mapping for reference
-        print("\n🗂️  Thread ID Mapping (first 5):" 5):")
-        for _i, (old_id, new_id) in enumerate(list(thread_mapping.items())[:5]):
-            print(f"  {old_id} → {new_id}")
+        for _i, (_old_id, _new_id) in enumerate(list(thread_mapping.items())[:5]):
+            pass
         if len(thread_mapping) > 5:
-            print(f"  ... and {len(thread_mapping) - 5} more")
+            pass
 
         await local_conn.close()
         await supabase_conn.close()
 
-        print("\n🎉 Migration completed successfully!"y!")
         return True
 
-    except Exception as e:
-        print(f"❌ Migration failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -263,10 +221,6 @@ async def migrate_local_to_supabase():
 
 async def verify_migration():
     """Verify the migration worked."""
-
-    print("\n🔍 Verifying Migration"on")
-    print("=" * 50)
-
     supabase_uri = os.getenv("SUPABASE_DATABASE_URI_SSL") or os.getenv(
         "SUPABASE_DATABASE_URI"
     )
@@ -275,45 +229,25 @@ async def verify_migration():
         conn = await asyncpg.connect(supabase_uri)
 
         # Count migrated data
-        thread_count = await conn.fetchval("SELECT COUNT(*) FROM public.threads")
-        checkpoint_count = await conn.fetchval(
-            "SELECT COUNT(*) FROM public.checkpoints"
-        )
-        writes_count = await conn.fetchval(
-            "SELECT COUNT(*) FROM public.checkpoint_writes"
-        )
-        blobs_count = await conn.fetchval(
-            "SELECT COUNT(*) FROM public.checkpoint_blobs"
-        )
-
-        print("📊 Supabase data counts:"s:")
-        print(f"  - Threads: {thread_count}")
-        print(f"  - Checkpoints: {checkpoint_count}")
-        print(f"  - Writes: {writes_count}")
-        print(f"  - Blobs: {blobs_count}")
+        await conn.fetchval("SELECT COUNT(*) FROM public.threads")
+        await conn.fetchval("SELECT COUNT(*) FROM public.checkpoints")
+        await conn.fetchval("SELECT COUNT(*) FROM public.checkpoint_writes")
+        await conn.fetchval("SELECT COUNT(*) FROM public.checkpoint_blobs")
 
         # Show sample thread
         sample_thread = await conn.fetchrow("SELECT * FROM public.threads LIMIT 1")
         if sample_thread:
-            print("\n📝 Sample migrated thread:"d:")
-            print(f"  ID: {sample_thread['id']}")
-            print(f"  Agent: {sample_thread['agent_name']}")
-            print(f"  Created: {sample_thread['created_at']}")
+            pass
 
         await conn.close()
         return True
 
-    except Exception as e:
-        print(f"❌ Verification failed: {e}")
+    except Exception:
         return False
 
 
 async def main():
     """Run the migration."""
-
-    print("🚀 Local PostgreSQL → Supabase Migration")
-    print("=" * 70)
-
     # Run migration
     migration_success = await migrate_local_to_supabase()
 
@@ -322,16 +256,11 @@ async def main():
         verification_success = await verify_migration()
 
         if verification_success:
-            print("\n🎊 SUCCESS: Migration completed and verified!"d!")
-            print(
-                "Your local PostgreSQL data is now in Supabase with proper UUID structure."
-            )
+            pass
         else:
-            print("\n⚠️  WARNING: Migration completed but verification failed"led")
+            pass
     else:
-        print("\n❌ FAILED: Migration failed"d")
-
-    print("\n" + "=" * 70)
+        pass
 
 
 if __name__ == "__main__":

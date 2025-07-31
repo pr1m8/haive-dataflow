@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Final test for enhanced streaming functionality"""
+"""Final test for enhanced streaming functionality."""
 
 import asyncio
 import json
@@ -12,10 +12,8 @@ BASE_URL = "ws://192.168.2.13:8000"
 
 
 async def test_enhanced_streaming():
-    """Test the enhanced streaming functionality"""
-
+    """Test the enhanced streaming functionality."""
     token = sys.argv[1] if len(sys.argv) > 1 else "test"
-    print(f"Using token: {token[:20]}...")
 
     # Test different streaming configurations
     test_configs = [
@@ -59,9 +57,6 @@ async def test_enhanced_streaming():
     ]
 
     for test_case in test_configs:
-        print(f"\n{'='*50}")
-        print(f"Testing: {test_case['name']}")
-        print(f"{'='*50}")
 
         try:
             config = test_case["config"]
@@ -69,9 +64,6 @@ async def test_enhanced_streaming():
 
             # Build WebSocket URL
             uri = f"{BASE_URL}/api/ws/chat/{agent_name}?token={token}&config={json.dumps(config)}"
-
-            print(f"Mode: {config['stream_mode']}, Format: {config['stream_format']}")
-            print("Connecting...")
 
             # Connect with simpler syntax
             websocket = await websockets.connect(uri)
@@ -85,7 +77,6 @@ async def test_enhanced_streaming():
                     welcome.get("type") == "status"
                     and welcome.get("content", {}).get("status") == "connected"
                 ):
-                    print(f"✓ Connected! Thread: {welcome['content']['thread_id']}")
 
                     # Send test message
                     test_message = {
@@ -93,7 +84,6 @@ async def test_enhanced_streaming():
                         "content": "Analyze this text: 'The weather is beautiful today!' Extract sentiment and key phrases.",
                     }
 
-                    print("Sending test message...")
                     await websocket.send(json.dumps(test_message))
 
                     # Collect streaming responses
@@ -109,47 +99,35 @@ async def test_enhanced_streaming():
                             response = json.loads(response_raw)
                             responses.append(response)
 
-                            print(f"Received: {response.get('type', 'unknown')}")
-
                             if response.get("type") == "status":
                                 status = response.get("content", {}).get("status")
                                 if status == "complete":
                                     stream_complete = True
-                                    print("✓ Stream completed successfully")
                                 elif status == "streaming":
-                                    print("✓ Streaming started")
+                                    pass
                             elif response.get("type") == "response":
                                 content = response.get("content")
                                 if isinstance(content, str):
-                                    print(f"Content preview: {content[:100]}...")
+                                    pass
                                 else:
-                                    print(f"Content type: {type(content).__name__}")
+                                    pass
 
-                        except asyncio.TimeoutError:
+                        except TimeoutError:
                             timeout_count += 1
-                            print(f"Timeout {timeout_count}/3 waiting for response...")
                             if timeout_count >= 3:
                                 break
 
-                    print(f"✓ Test completed - received {len(responses)} responses")
-
                     # Show summary
-                    response_types = [r.get("type", "unknown") for r in responses]
-                    print(f"Response types: {response_types}")
+                    [r.get("type", "unknown") for r in responses]
 
                 else:
-                    print(f"✗ Unexpected welcome message: {welcome}")
+                    pass
 
             finally:
                 await websocket.close()
 
-        except Exception as e:
-            print(f"✗ Test failed: {e}")
+        except Exception:
             traceback.print_exc()
-
-    print(f"\n{'='*50}")
-    print("Enhanced Streaming Test Complete")
-    print(f"{'='*50}")
 
 
 if __name__ == "__main__":

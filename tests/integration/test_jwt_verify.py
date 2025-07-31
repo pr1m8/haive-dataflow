@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Test JWT verification with your token"""
+"""Test JWT verification with your token."""
 
 import base64
+import contextlib
 import json
 import os
 import sys
@@ -17,31 +18,21 @@ os.environ["SUPABASE_JWT_SECRET"] = (
     "J89XqGf7hDkKejOK1n02TKVT78TtncD3gP0TH68N4AV1H87viAt9EhQxVp0mfUxkBNHowVCng2okkmPHYZpiKA=="
 )
 
-print("=== JWT Verification Test ===\n")
 
 # Decode without verification first
 parts = token.split(".")
 header = json.loads(base64.urlsafe_b64decode(parts[0] + "=="))
 payload = json.loads(base64.urlsafe_b64decode(parts[1] + "=="))
 
-print("Token Header:", json.dumps(header, indent=2))
-print("\nToken Payload (excerpt):")
-print(f"  iss: {payload.get('iss')}")
-print(f"  sub: {payload.get('sub')}")
-print(f"  aud: {payload.get('aud')}")
-print(f"  email: {payload.get('email')}")
-print(f"  role: {payload.get('role')}")
 
 # Try to verify
-print("\n=== Verification Attempts ===")
 
 # Method 1: Direct verification
 try:
     secret = os.environ["SUPABASE_JWT_SECRET"]
     verified = jwt.decode(token, secret, algorithms=["HS256"], audience="authenticated")
-    print("✓ Method 1 (Direct): Success!")
-except Exception as e:
-    print(f"✗ Method 1 (Direct): {e}")
+except Exception:
+    pass
 
 # Method 2: Using the Supabase auth class
 try:
@@ -50,18 +41,14 @@ try:
     auth = SupabaseAuth()
     result = auth.verify_token(token)
     if result:
-        print("✓ Method 2 (SupabaseAuth): Success!")
-        print(f"  User ID: {result.get('sub')}")
+        pass
     else:
-        print("✗ Method 2 (SupabaseAuth): Failed")
-except Exception as e:
-    print(f"✗ Method 2 (SupabaseAuth): {e}")
+        pass
+except Exception:
+    pass
 
 # Method 3: Try without audience check
-try:
+with contextlib.suppress(Exception):
     verified = jwt.decode(
         token, secret, algorithms=["HS256"], options={"verify_aud": False}
     )
-    print("✓ Method 3 (No audience): Success!")
-except Exception as e:
-    print(f"✗ Method 3 (No audience): {e}")

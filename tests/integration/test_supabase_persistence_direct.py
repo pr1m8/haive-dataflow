@@ -14,64 +14,47 @@ from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
 
 async def test_persistence():
     """Test the SupabasePersistence adapter."""
-    print("Testing SupabasePersistence adapter...")
-
     # Create persistence adapter
     persistence = SupabasePersistence()
 
     # Check the internal config
-    print("\nPostgreSQL Config:")
-    print(
-        f"  Connection string: {persistence.postgres_config.connection_string[:60]}..."
-    )
 
     # Try to get a checkpointer
-    print("\nGetting checkpointer...")
     checkpointer = await persistence.get_checkpointer()
-    print("✓ Got checkpointer")
 
     # Test connection
-    print("\nTesting connection...")
     try:
-        async with checkpointer.conn.connection() as conn:
-            async with conn.cursor() as cursor:
-                await cursor.execute("SELECT version()")
-                version = await cursor.fetchone()
-                print("✓ Connected to PostgreSQL!"!")
-                print(f"  Version: {version[0][:50]}...")
+        async with checkpointer.conn.connection() as conn, conn.cursor() as cursor:
+            await cursor.execute("SELECT version()")
+            await cursor.fetchone()
 
-                # Check for our migration
-                await cursor.execute(
-                    """
+            # Check for our migration
+            await cursor.execute(
+                """
                     SELECT EXISTS (
-                        SELECT 1 FROM information_schema.schemata 
+                        SELECT 1 FROM information_schema.schemata
                         WHERE schema_name = 'agent_state'
                     )
                 """
-                )
-                has_agent_state = (await cursor.fetchone())[0]
+            )
+            has_agent_state = (await cursor.fetchone())[0]
 
-                await cursor.execute(
-                    """
+            await cursor.execute(
+                """
                     SELECT EXISTS (
-                        SELECT 1 FROM information_schema.tables 
+                        SELECT 1 FROM information_schema.tables
                         WHERE table_schema = 'public' AND table_name = 'threads'
                     )
                 """
-                )
-                has_threads = (await cursor.fetchone())[0]
+            )
+            has_threads = (await cursor.fetchone())[0]
 
-                print("\n✓ Migration status:":")
-                print(f"  agent_state schema: {has_agent_state}")
-                print(f"  public.threads table: {has_threads}")
+            if has_agent_state and has_threads:
+                pass
+            else:
+                pass
 
-                if has_agent_state and has_threads:
-                    print("\n✅ Successfully connected to Supabase with migrations!")
-                else:
-                    print("\n❌ Connected but migrations not found")
-
-    except Exception as e:
-        print(f"✗ Connection failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()

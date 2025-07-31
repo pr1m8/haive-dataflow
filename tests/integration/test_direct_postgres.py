@@ -8,9 +8,6 @@ import psycopg
 
 async def test_connections():
     """Test different connection configurations."""
-
-    print("Testing PostgreSQL connections to Supabase...\n")
-
     # Connection configurations to test
     connections = [
         {
@@ -36,7 +33,6 @@ async def test_connections():
     ]
 
     for config in connections:
-        print(f"=== Testing: {config['name']} ===")
         try:
             # Try to connect
             conn = await psycopg.AsyncConnection.connect(config["uri"])
@@ -44,40 +40,34 @@ async def test_connections():
             # If successful, run a query
             async with conn.cursor() as cursor:
                 await cursor.execute("SELECT version()")
-                version = await cursor.fetchone()
-                print("✓ Connected successfully!"!")
-                print(f"  PostgreSQL version: {version[0][:50]}...")
+                await cursor.fetchone()
 
                 # Check for agent_state schema
                 await cursor.execute(
                     """
                     SELECT EXISTS (
-                        SELECT 1 FROM information_schema.schemata 
+                        SELECT 1 FROM information_schema.schemata
                         WHERE schema_name = 'agent_state'
                     )
                 """
                 )
-                has_agent_state = (await cursor.fetchone())[0]
-                print(f"  agent_state schema exists: {has_agent_state}")
+                (await cursor.fetchone())[0]
 
                 # Check for public.threads table
                 await cursor.execute(
                     """
                     SELECT EXISTS (
-                        SELECT 1 FROM information_schema.tables 
+                        SELECT 1 FROM information_schema.tables
                         WHERE table_schema = 'public' AND table_name = 'threads'
                     )
                 """
                 )
-                has_threads = (await cursor.fetchone())[0]
-                print(f"  public.threads table exists: {has_threads}")
+                (await cursor.fetchone())[0]
 
             await conn.close()
 
-        except Exception as e:
-            print(f"✗ Connection failed: {e}")
-
-        print()
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

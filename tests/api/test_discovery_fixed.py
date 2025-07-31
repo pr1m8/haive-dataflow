@@ -248,28 +248,18 @@ class TestDiscoveryIntegration:
 
 if __name__ == "__main__":
     # Run basic discovery tests
-    print("Testing Agent Discovery...")
     test_agent = TestAgentDiscovery()
     test_agent.test_discover_all_agents()
     test_agent.test_component_to_agent_info()
-    print("✅ Agent discovery basic tests passed")
 
-    print("\nTesting Tool Discovery...")
     test_tool = TestToolDiscovery()
     test_tool.test_discover_all_tools()
     test_tool.test_component_to_tool_info()
-    print("✅ Tool discovery basic tests passed")
 
-    print("\nTesting Game Discovery...")
     test_game = TestGameDiscovery()
     test_game.test_discover_game_agents()
     test_game.test_game_agent_structure()
-    print("✅ Game discovery basic tests passed")
 
-    print("\nTesting Integration...")
     test_integration = TestDiscoveryIntegration()
     test_integration.test_all_discoveries_work()
     test_integration.test_discovery_caching()
-    print("✅ Integration tests passed")
-
-    print("\n🎉 All basic tests passed!")

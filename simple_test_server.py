@@ -1,4 +1,4 @@
-"""Simple Test Server - Simple Test Server module
+"""Simple Test Server - Simple Test Server module.
 
 TODO: Add comprehensive description of simple test server functionality.
 

@@ -13,22 +13,12 @@ import re
 import traceback
 from typing import Any
 
-from haive.core.models.llm.base import LLMConfig, SecureConfigMixin
-from haive.core.models.llm.provider_types import LLMProvider
-
-from haive.dataflow.importers.embeddings_importer import (
-    EMBEDDING_MODELS,
-    import_embedding_models,
-)
-from haive.dataflow.importers.litellm_importer import import_llm_models
-
 from .db.supabase import get_supabase_client, table
-
-# Import supabase client utilities
-
 
 # Import LLM core models for environment variable inspection
 try:
+    from haive.core.models.llm.base import LLMConfig, SecureConfigMixin
+    from haive.core.models.llm.provider_types import LLMProvider
 
     CORE_LLM_AVAILABLE = True
 except ImportError:
@@ -68,20 +58,25 @@ class ModelRegistry:
         """Load model data from importers."""
         # Try to import embedding models data
         try:
+            from haive.dataflow.importers.embeddings_importer import (
+                EMBEDDING_MODELS,
+                import_embedding_models,
+            )
 
             logger.info(
-                f"Loaded {
-                    len(EMBEDDING_MODELS)} embedding models from embeddings_importer")
+                f"Loaded {len(EMBEDDING_MODELS)} embedding models from embeddings_importer"
+            )
             self._embedding_models_cache = EMBEDDING_MODELS
         except ImportError:
             logger.warning("Could not import embedding models data")
 
         # Try to load LLM models data
         try:
+            from haive.dataflow.importers.litellm_importer import import_llm_models
+
             # LiteLLM importer doesn't have a static list like embedding_importer
             # Instead it fetches from GitHub, so we'll need to use this data
             # differently. For now, we'll rely on the database for LLM models.
-            pass
         except ImportError:
             logger.warning("Could not import LLM models data")
 
@@ -219,9 +214,11 @@ class ModelRegistry:
                                     "is_required": True,
                                     "description": f"API key for {
                                         provider_name.title()} provider",
-                                })
+                                }
+                            )
                             logger.debug(
-                                f"Detected environment variable: {env_var_name} for provider {provider_name}")
+                                f"Detected environment variable: {env_var_name} for provider {provider_name}"
+                            )
 
         # Add special mappings for providers that might be missed
         for provider, env_var_names in special_mappings.items():
@@ -249,9 +246,11 @@ class ModelRegistry:
                                 "is_required": True,
                                 "description": f"API key for {
                                     provider.title()} provider",
-                            })
+                            }
+                        )
                         logger.debug(
-                            f"Added special mapping: {env_var_name} for provider {provider_lower}")
+                            f"Added special mapping: {env_var_name} for provider {provider_lower}"
+                        )
 
         # If we couldn't extract any from the code, fall back to secure config
         # mixin mapping
@@ -281,9 +280,11 @@ class ModelRegistry:
                             "is_required": True,
                             "description": f"API key for {
                                 provider_name.title()} provider",
-                        })
+                        }
+                    )
                     logger.debug(
-                        f"Extracted environment variable from SecureConfigMixin: {env_var_name} for provider {provider_name}")
+                        f"Extracted environment variable from SecureConfigMixin: {env_var_name} for provider {provider_name}"
+                    )
 
         # Check existing environment variables to see which ones are set
         # This is helpful for debugging and may catch variables not found by code
@@ -328,7 +329,8 @@ class ModelRegistry:
                             }
                         )
                         logger.debug(
-                            f"Auto-detected environment variable: {env_name} for provider {provider_match}")
+                            f"Auto-detected environment variable: {env_name} for provider {provider_match}"
+                        )
 
         # Register these environment variables in config
         if self._supabase and env_vars:
@@ -438,15 +440,17 @@ class ModelRegistry:
                         else:
                             # Create provider type if not exists
                             provider_type_insert = (
-                                table(
-                                    self._supabase,
-                                    "models.provider_types") .insert(
+                                table(self._supabase, "models.provider_types")
+                                .insert(
                                     {
                                         "name": "llm",
                                         "display_name": "LLM Provider",
                                         "description": "Provider for Large Language Models",
                                         "created_at": "NOW()",
-                                    }) .execute())
+                                    }
+                                )
+                                .execute()
+                            )
 
                             if (
                                 provider_type_insert.data
@@ -705,7 +709,9 @@ class ModelRegistry:
                     return response.data
 
             except Exception as e:
-                logger.exception(f"Error retrieving available LLM providers using RPC: {e}")
+                logger.exception(
+                    f"Error retrieving available LLM providers using RPC: {e}"
+                )
 
                 # Try the table method as a fallback
                 try:
@@ -797,7 +803,8 @@ class ModelRegistry:
                         return embedding_providers
                 except Exception as table_e:
                     logger.exception(
-                        f"Error retrieving embedding providers with table method: {table_e}")
+                        f"Error retrieving embedding providers with table method: {table_e}"
+                    )
 
         # Fall back to environment variable detection
         env_vars = self.get_required_environment_vars()
@@ -879,7 +886,8 @@ class ModelRegistry:
         if self._supabase:
             try:
                 logger.debug(
-                    f"Fetching LLM models with provider={provider}, only_available={only_available}")
+                    f"Fetching LLM models with provider={provider}, only_available={only_available}"
+                )
 
                 # Build SQL query with proper filtering
                 where_clause = ""
@@ -928,6 +936,7 @@ class ModelRegistry:
         if not results:
             try:
                 # Try to run the litellm import
+                from haive.dataflow.importers.litellm_importer import import_llm_models
 
                 # Run the import if needed (this will populate the database)
                 import_success = import_llm_models()
@@ -968,7 +977,9 @@ class ModelRegistry:
                                     normalized_model = self.normalize_model_data(model)
                                     results.append(normalized_model)
                         except Exception as e:
-                            logger.exception(f"Error retrieving models after import: {e}")
+                            logger.exception(
+                                f"Error retrieving models after import: {e}"
+                            )
             except Exception as import_e:
                 logger.exception(f"Error importing LLM models: {import_e}")
 
@@ -999,7 +1010,8 @@ class ModelRegistry:
         if self._supabase:
             try:
                 logger.debug(
-                    f"Fetching embedding models with provider={provider}, only_available={only_available}")
+                    f"Fetching embedding models with provider={provider}, only_available={only_available}"
+                )
 
                 # Build SQL query with proper filtering
                 where_clause = ""
@@ -1040,7 +1052,9 @@ class ModelRegistry:
                         return results
 
             except Exception as e:
-                logger.exception(f"Error retrieving embedding models from database: {e}")
+                logger.exception(
+                    f"Error retrieving embedding models from database: {e}"
+                )
 
                 logger.debug(
                     f"Get embedding models error traceback: {traceback.format_exc()}"
@@ -1083,6 +1097,10 @@ class ModelRegistry:
         if not results and not self._embedding_models_cache:
             try:
                 # Run embedding models importer
+                from haive.dataflow.importers.embeddings_importer import (
+                    EMBEDDING_MODELS,
+                    import_embedding_models,
+                )
 
                 # Cache the models list
                 self._embedding_models_cache = EMBEDDING_MODELS
@@ -1232,11 +1250,15 @@ class ModelRegistry:
 
                         # We found a match - create a model entry
                         model_data = {
-                            "model_id": model_id, "provider": provider_value, "name": cls.__name__.replace(
-                                "LLMConfig", ""), "display_name": cls.__name__.replace(
-                                "LLMConfig", ""), "description": cls.__doc__ or f"Configuration for {
+                            "model_id": model_id,
+                            "provider": provider_value,
+                            "name": cls.__name__.replace("LLMConfig", ""),
+                            "display_name": cls.__name__.replace("LLMConfig", ""),
+                            "description": cls.__doc__
+                            or f"Configuration for {
                                 cls.__name__.replace(
-                                    'LLMConfig', '')} models", }
+                                    'LLMConfig', '')} models",
+                        }
 
                         return model_data
                     except Exception:

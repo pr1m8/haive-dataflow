@@ -20,8 +20,6 @@ async def test_persistence():
     thread_id = f"test-persistence-{datetime.now().isoformat()}"
     agent_name = "base_agent_v2"
 
-    print(f"Testing persistence with thread_id: {thread_id}")
-
     # Prepare WebSocket URL with auth token
     ws_url = f"ws://localhost:8000/api/agent/chat/{agent_name}?thread_id={thread_id}&token={JWT_TOKEN}"
 
@@ -40,8 +38,7 @@ async def test_persistence():
         async with websockets.connect(full_url) as websocket:
             # Wait for welcome message
             welcome = await websocket.recv()
-            welcome_data = json.loads(welcome)
-            print(f"Welcome message: {welcome_data}")
+            json.loads(welcome)
 
             # Send first message
             message1 = {"content": "My name is TestUser and I like Python programming."}
@@ -49,20 +46,16 @@ async def test_persistence():
 
             # Get response
             response1 = await websocket.recv()
-            response1_data = json.loads(response1)
-            print(f"Response 1: {response1_data}")
+            json.loads(response1)
 
             # Close connection
             await websocket.close()
-
-        print("\nReconnecting to same thread...")
 
         # Reconnect to same thread
         async with websockets.connect(full_url) as websocket:
             # Wait for welcome message
             welcome2 = await websocket.recv()
-            welcome2_data = json.loads(welcome2)
-            print(f"Welcome message 2: {welcome2_data}")
+            json.loads(welcome2)
 
             # Ask if it remembers
             message2 = {"content": "What is my name and what do I like?"}
@@ -71,19 +64,15 @@ async def test_persistence():
             # Get response
             response2 = await websocket.recv()
             response2_data = json.loads(response2)
-            print(f"Response 2: {response2_data}")
 
             # Check if it remembers
             content = response2_data.get("content", "").lower()
             if "testuser" in content and "python" in content:
-                print("\n✅ SUCCESS: Agent remembered the information!")
-                print("Persistence is working correctly.")
+                pass
             else:
-                print("\n❌ FAILED: Agent did not remember the information.")
-                print("Persistence might not be working.")
+                pass
 
-    except Exception as e:
-        print(f"Error: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()

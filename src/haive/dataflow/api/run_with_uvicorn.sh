@@ -6,7 +6,7 @@
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
 # Set working directory to src
-cd "$SCRIPT_DIR/../../../"
+cd "${SCRIPT_DIR}/../../../" || exit
 
 # Start uvicorn with the app
 echo "Starting Haive API with game routes on http://localhost:8000"

@@ -20,8 +20,6 @@ sys.path.insert(0, str(packages_dir / "haive-games" / "src"))
 
 def test_game_discovery():
     """Test game discovery without full imports."""
-    print("\n🎮 Testing Game Discovery...")
-
     try:
         # Import just the discovery function
         from haive.dataflow.api.game_router_fixed import (
@@ -33,21 +31,16 @@ def test_game_discovery():
         game_agents.clear()
         discover_game_agents()
 
-        print(f"✅ Found {len(game_agents)} games:")
         for game_name in sorted(game_agents.keys()):
-            game_info = game_agents[game_name]
-            print(f"  - {game_name}: {game_info['module']}")
+            game_agents[game_name]
 
         return True
-    except Exception as e:
-        print(f"❌ Game discovery failed: {e}")
+    except Exception:
         return False
 
 
 def test_discovery_system_availability():
     """Test if the discovery system is available."""
-    print("\n🔍 Testing Discovery System Availability...")
-
     try:
         # Test basic import
         from haive.core.utils.haive_discovery.haive_discovery import (
@@ -56,26 +49,21 @@ def test_discovery_system_availability():
 
         # Create discovery instance
         discovery = HaiveComponentDiscovery(str(haive_root))
-        print("✅ Discovery system is available")
 
         # Try to discover something simple
         tools_path = packages_dir / "haive-tools" / "src" / "haive" / "tools" / "tools"
         if tools_path.exists():
-            components = discovery.discover_from_directory(
+            discovery.discover_from_directory(
                 tools_path, "haive.tools.tools", create_tools=False
             )
-            print(f"✅ Test discovery found {len(components)} components")
 
         return True
-    except Exception as e:
-        print(f"❌ Discovery system not available: {e}")
+    except Exception:
         return False
 
 
 def test_api_structure():
     """Test that the API files have the correct structure."""
-    print("\n📁 Testing API File Structure...")
-
     api_files = {
         "game_router_fixed.py": packages_dir
         / "haive-dataflow"
@@ -103,12 +91,10 @@ def test_api_structure():
     }
 
     all_exist = True
-    for name, path in api_files.items():
+    for _name, path in api_files.items():
         if path.exists():
-            size = path.stat().st_size
-            print(f"✅ {name}: {size:,} bytes")
+            path.stat().st_size
         else:
-            print(f"❌ {name}: NOT FOUND")
             all_exist = False
 
     return all_exist
@@ -116,8 +102,6 @@ def test_api_structure():
 
 def test_manual_discovery():
     """Test manual discovery without using the full discovery system."""
-    print("\n🔧 Testing Manual Discovery Patterns...")
-
     # Test pattern 1: Find agent classes in haive-agents
     agents_path = packages_dir / "haive-agents" / "src" / "haive" / "agents"
     if agents_path.exists():
@@ -127,7 +111,6 @@ def test_manual_discovery():
                 if file.endswith(".py") and file != "__init__.py":
                     if "agent" in file.lower():
                         agent_count += 1
-        print(f"✅ Found {agent_count} potential agent files")
 
     # Test pattern 2: Find tool classes in haive-tools
     tools_path = packages_dir / "haive-tools" / "src" / "haive" / "tools"
@@ -137,7 +120,6 @@ def test_manual_discovery():
             for file in files:
                 if file.endswith(".py") and file != "__init__.py":
                     tool_count += 1
-        print(f"✅ Found {tool_count} potential tool files")
 
     # Test pattern 3: Find game classes in haive-games
     games_path = packages_dir / "haive-games" / "src" / "haive" / "games"
@@ -147,15 +129,12 @@ def test_manual_discovery():
             for file in files:
                 if file == "agent.py":
                     game_count += 1
-        print(f"✅ Found {game_count} game agent files")
 
     return True
 
 
 def test_import_paths():
     """Test that import paths are correctly set up."""
-    print("\n🛤️ Testing Import Paths...")
-
     important_paths = [
         ("haive-core", packages_dir / "haive-core" / "src"),
         ("haive-dataflow", packages_dir / "haive-dataflow" / "src"),
@@ -164,20 +143,17 @@ def test_import_paths():
         ("haive-games", packages_dir / "haive-games" / "src"),
     ]
 
-    for name, path in important_paths:
+    for _name, path in important_paths:
         if path.exists():
-            print(f"✅ {name}: {path}")
+            pass
         else:
-            print(f"❌ {name}: NOT FOUND at {path}")
+            pass
 
     return True
 
 
 def main():
     """Run all simple tests."""
-    print("🧪 Running Simple Discovery Tests")
-    print("=" * 50)
-
     results = []
 
     # Run tests
@@ -188,21 +164,16 @@ def main():
     results.append(("Game Discovery", test_game_discovery()))
 
     # Summary
-    print("\n" + "=" * 50)
-    print("📊 Test Summary:")
     passed = sum(1 for _, result in results if result)
     total = len(results)
 
-    for name, result in results:
-        status = "✅ PASS" if result else "❌ FAIL"
-        print(f"  {name}: {status}")
-
-    print(f"\nTotal: {passed}/{total} tests passed")
+    for _name, _result in results:
+        pass
 
     if passed == total:
-        print("\n🎉 All tests passed!")
+        pass
     else:
-        print(f"\n⚠️ {total - passed} tests failed")
+        pass
 
 
 if __name__ == "__main__":

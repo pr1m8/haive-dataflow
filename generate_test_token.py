@@ -1,4 +1,4 @@
-"""Generate Test Token - Generate Test Token module
+"""Generate Test Token - Generate Test Token module.
 
 TODO: Add comprehensive description of generate test token functionality.
 
@@ -68,9 +68,3 @@ payload = {
 token = jwt.encode(
     payload, secret, algorithm="HS256", headers={"kid": "8Gol6XEitfGLrnol"}
 )
-
-print(f"Generated token: {token}")
-print("\nPayload:")
-print(f"  User ID: {payload['sub']}")
-print(f"  Email: {payload['email']}")
-print(f"  Expires: {payload['exp']}")

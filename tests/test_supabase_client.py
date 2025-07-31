@@ -49,7 +49,7 @@ async def test_jwt_direct():
 
         return True
     except Exception as e:
-        logger.error(f"JWT error: {e}")
+        logger.exception(f"JWT error: {e}")
         return False
 
 

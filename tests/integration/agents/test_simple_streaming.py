@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Simple test for agent streaming"""
+"""Simple test for agent streaming."""
 
 import asyncio
 import json
@@ -11,15 +11,13 @@ BASE_URL = "ws://192.168.2.13:8000"
 
 
 async def test_simple_agent():
-    """Test with a simple agent name that should exist"""
-
+    """Test with a simple agent name that should exist."""
     token = sys.argv[1] if len(sys.argv) > 1 else "test"
 
     # Try different agent names
     agent_names = ["simple", "chat", "base", "test", "agent"]
 
     for agent_name in agent_names:
-        print(f"\n=== Testing agent: {agent_name} ===")
 
         try:
             # Simple config
@@ -32,13 +30,11 @@ async def test_simple_agent():
             }
 
             uri = f"{BASE_URL}/api/ws/chat/{agent_name}?token={token}&config={json.dumps(config)}"
-            print(f"Connecting to: {agent_name}")
 
             async with websockets.connect(uri, timeout=10) as websocket:
                 # Wait for welcome
                 welcome = await asyncio.wait_for(websocket.recv(), timeout=5)
-                welcome_data = json.loads(welcome)
-                print(f"✓ Connected! Thread: {welcome_data['content']['thread_id']}")
+                json.loads(welcome)
 
                 # Send simple message
                 message = {"type": "message", "content": "Hello!"}
@@ -46,17 +42,15 @@ async def test_simple_agent():
 
                 # Get response
                 response = await asyncio.wait_for(websocket.recv(), timeout=10)
-                response_data = json.loads(response)
-                print(f"✓ Got response: {response_data['type']}")
+                json.loads(response)
 
                 return True
 
-        except Exception as e:
-            print(f"✗ Failed with {agent_name}: {e}")
+        except Exception:
+            pass
 
     return False
 
 
 if __name__ == "__main__":
     result = asyncio.run(test_simple_agent())
-    print(f"\nTest result: {'✓ SUCCESS' if result else '✗ FAILED'}")

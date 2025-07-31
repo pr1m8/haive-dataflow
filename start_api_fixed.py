@@ -1,4 +1,4 @@
-"""Start Api Fixed - Start Api Fixed module
+"""Start Api Fixed - Start Api Fixed module.
 
 TODO: Add comprehensive description of start api fixed functionality.
 
@@ -44,5 +44,4 @@ from .api.app import app
 if __name__ == "__main__":
     import uvicorn
 
-    print("Starting API server with fixed tools discovery...")
     uvicorn.run(app, host="0.0.0.0", port=8000)

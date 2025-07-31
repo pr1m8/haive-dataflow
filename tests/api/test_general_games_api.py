@@ -10,8 +10,9 @@ This module tests:
 NOTE: This test module does not use any mocking. All tests work with real games and functionality.
 """
 
-# Add path for imports
 import sys
+
+# Add path for imports
 from pathlib import Path
 
 import pytest
@@ -42,10 +43,7 @@ class TestRealGameDiscovery:
         api = GeneralGameAPI(app, exclude_games=["go", "among_us", "battleship"])
 
         # Should discover at least some games
-        discovered_count = len(api.discovered_games)
-        print(
-            f"Discovered {discovered_count} games: {list(api.discovered_games.keys())}"
-        )
+        len(api.discovered_games)
 
         # We expect at least chess, connect4, and tic_tac_toe to work
         working_games = ["chess", "connect4", "tic_tac_toe"]
@@ -56,9 +54,8 @@ class TestRealGameDiscovery:
                 assert "agent_class" in game_info
                 assert "config_class" in game_info
                 assert "name" in game_info
-                print(f"✅ {game} discovered successfully")
             else:
-                print(f"⚠️ {game} not discovered - may need fixing")
+                pass
 
     def test_general_api_creation(self, app: FastAPI):
         """Test creating a general game API."""
@@ -78,13 +75,11 @@ class TestRealGameDiscovery:
 
         assert response.status_code == 200
         games = response.json()
-        print(f"Found {len(games)} games in API")
 
         # Verify structure of discovered games
         for game in games:
             assert "game_id" in game
             assert "name" in game
-            print(f"Game found: {game['game_id']} - {game['name']}")
 
     def test_create_game_not_found(self, app: FastAPI):
         """Test creating a non-existent game."""
@@ -129,9 +124,8 @@ class TestRealGameImports:
                 assert result["game_id"] == game_name
                 assert "agent_class" in result
                 assert "config_class" in result
-                print(f"✅ Successfully imported {game_name}")
             else:
-                print(f"⚠️ Failed to import {game_name} - may need fixing")
+                pass
 
     def test_import_failure_handling(self):
         """Test handling of import failures with non-existent games."""
@@ -193,7 +187,6 @@ class TestRealAPIIntegration:
         # Should have main routes
         assert any("/api/games/" in route for route in routes)
         assert any("/api/games/create" in route for route in routes)
-        print(f"Registered routes: {[r for r in routes if '/api/games' in r]}")
 
 
 class TestWorkingGamesIntegration:
@@ -207,8 +200,6 @@ class TestWorkingGamesIntegration:
         # Exclude games we know have issues
         api = GeneralGameAPI(app, exclude_games=["go", "among_us", "battleship"])
 
-        print(f"\nDiscovered games: {list(api.discovered_games.keys())}")
-
         # Check if we have any games at all
         assert len(api.discovered_games) >= 0, "Should discover at least some games"
 
@@ -220,9 +211,8 @@ class TestWorkingGamesIntegration:
                 game_info = api.discovered_games[game_name]
                 assert "agent_class" in game_info, f"{game_name} missing agent_class"
                 assert "config_class" in game_info, f"{game_name} missing config_class"
-                print(f"✅ {game_name} properly discovered")
             else:
-                print(f"⚠️ {game_name} not discovered - may need fixing")
+                pass
 
     @pytest.mark.integration
     def test_api_creation_with_real_games(self):
@@ -242,8 +232,7 @@ class TestWorkingGamesIntegration:
         response = client.get("/api/games/")
         assert response.status_code == 200
 
-        games = response.json()
-        print(f"Games available via API: {[g['game_id'] for g in games]}")
+        response.json()
 
     @pytest.mark.integration
     def test_game_creation_validation(self):
@@ -266,20 +255,15 @@ class TestWorkingGamesIntegration:
 
             # Should fail due to missing required fields
             assert response.status_code in [400, 422], "Should validate required fields"
-            print("✅ Validation working for missing fields")
         else:
-            print("⚠️ Chess not available for validation testing")
+            pass
 
 
 @pytest.mark.integration
 def test_end_to_end_functionality():
     """Test end-to-end functionality without mocking."""
-    print("\n=== Testing End-to-End Functionality ===")
-
     # Create the general API
     app, api = create_general_game_api(exclude_games=["go", "among_us", "battleship"])
-
-    print(f"Created API with {len(api.discovered_games)} games")
 
     # Test basic API functionality
     client = TestClient(app)
@@ -287,13 +271,11 @@ def test_end_to_end_functionality():
     # Test OpenAPI docs
     openapi_response = client.get("/openapi.json")
     assert openapi_response.status_code == 200
-    print("✅ OpenAPI documentation generated")
 
     # Test games list
     games_response = client.get("/api/games/")
     assert games_response.status_code == 200
-    games = games_response.json()
-    print(f"✅ Games endpoint returned {len(games)} games")
+    games_response.json()
 
     # Test error handling
     error_response = client.post(
@@ -301,9 +283,6 @@ def test_end_to_end_functionality():
         json={"game_id": "nonexistent_game", "config_mode": "simple"},
     )
     assert error_response.status_code == 404
-    print("✅ Error handling works for nonexistent games")
-
-    print("\n=== End-to-End Test Complete ===")
 
 
 if __name__ == "__main__":

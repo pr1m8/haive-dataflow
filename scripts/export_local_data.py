@@ -11,10 +11,6 @@ import asyncpg
 
 async def export_local_data():
     """Export all local PostgreSQL data to JSON files."""
-
-    print("📦 Exporting Local PostgreSQL Data")
-    print("=" * 50)
-
     # Local PostgreSQL config
     local_config = {
         "host": "localhost",
@@ -26,10 +22,8 @@ async def export_local_data():
 
     try:
         conn = await asyncpg.connect(**local_config)
-        print("✓ Connected to local PostgreSQL")
 
         # 1. Export threads
-        print("\n📥 Exporting threads...")
         threads = await conn.fetch("SELECT * FROM public.threads")
 
         # Convert to proper format with UUID mapping
@@ -73,10 +67,7 @@ async def export_local_data():
                 }
             )
 
-        print(f"✓ Exported {len(threads_data)} threads")
-
         # 2. Export checkpoints
-        print("\n📥 Exporting checkpoints...")
         checkpoints = await conn.fetch("SELECT * FROM public.checkpoints")
 
         checkpoints_data = []
@@ -85,16 +76,12 @@ async def export_local_data():
             if new_thread_id:
                 # Handle checkpoint data
                 checkpoint_data = checkpoint["checkpoint"]
-                if checkpoint_data is None:
-                    checkpoint_data = {}
-                elif not isinstance(checkpoint_data, dict):
+                if checkpoint_data is None or not isinstance(checkpoint_data, dict):
                     checkpoint_data = {}
 
                 # Handle metadata
                 metadata = checkpoint["metadata"]
-                if metadata is None:
-                    metadata = {}
-                elif not isinstance(metadata, dict):
+                if metadata is None or not isinstance(metadata, dict):
                     metadata = {}
 
                 checkpoints_data.append(
@@ -109,10 +96,7 @@ async def export_local_data():
                     }
                 )
 
-        print(f"✓ Exported {len(checkpoints_data)} checkpoints")
-
         # 3. Export checkpoint writes
-        print("\n📥 Exporting checkpoint writes...")
         writes = await conn.fetch("SELECT * FROM public.checkpoint_writes")
 
         writes_data = []
@@ -135,10 +119,7 @@ async def export_local_data():
                     }
                 )
 
-        print(f"✓ Exported {len(writes_data)} checkpoint writes")
-
         # 4. Export checkpoint blobs
-        print("\n📥 Exporting checkpoint blobs...")
         blobs = await conn.fetch("SELECT * FROM public.checkpoint_blobs")
 
         blobs_data = []
@@ -157,8 +138,6 @@ async def export_local_data():
                         ),  # Convert binary to hex
                     }
                 )
-
-        print(f"✓ Exported {len(blobs_data)} checkpoint blobs")
 
         # 5. Save all data to JSON files
         export_data = {
@@ -180,10 +159,7 @@ async def export_local_data():
         with open("local_postgres_export.json", "w") as f:
             json.dump(export_data, f, indent=2, default=str)
 
-        print("\n💾 Data exported to: local_postgres_export.json"on")
-
         # 6. Create individual SQL insert files for Supabase
-        print("\n📝 Creating SQL import files..."..")
 
         # Threads SQL
         with open("supabase_import_threads.sql", "w") as f:
@@ -204,23 +180,12 @@ VALUES (
 """
                 )
 
-        print("✓ Created supabase_import_threads.sql"l")
-
         # Summary
-        print("\n📊 Export Summary:"y:")
-        print(f"  - Threads: {len(threads_data)}")
-        print(f"  - Checkpoints: {len(checkpoints_data)}")
-        print(f"  - Writes: {len(writes_data)}")
-        print(f"  - Blobs: {len(blobs_data)}")
-        print("  - Files created:")
-        print("    • local_postgres_export.json (complete data)")")
-        print("    • supabase_import_threads.sql (ready to run in Supabase)")")
 
         await conn.close()
         return True
 
-    except Exception as e:
-        print(f"❌ Export failed: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()
@@ -229,22 +194,12 @@ VALUES (
 
 async def main():
     """Run the export."""
-
-    print("🚀 Local PostgreSQL Data Export")
-    print("=" * 60)
-
     success = await export_local_data()
 
     if success:
-        print("\n🎉 Export completed successfully!"y!")
-        print("\nNext steps:")
-        print("1. Run SUPABASE_SCHEMA_SETUP.sql in your Supabase SQL editor")
-        print("2. Run supabase_import_threads.sql in your Supabase SQL editor")
-        print("3. Use local_postgres_export.json for any additional data needs")
+        pass
     else:
-        print("\n❌ Export failed"d")
-
-    print("\n" + "=" * 60)
+        pass
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@
 """Check what's in the public schema and create proper thread tables if needed."""
 
 import asyncio
+import contextlib
 import os
 
 import asyncpg
@@ -9,27 +10,21 @@ import asyncpg
 
 async def check_public_schema():
     """Check existing tables in public schema."""
-
-    print("🔍 Checking Public Schema")
-    print("=" * 50)
-
     # Get connection string
     supabase_uri = os.getenv("SUPABASE_DATABASE_URI_SSL") or os.getenv(
         "SUPABASE_DATABASE_URI"
     )
 
     if not supabase_uri:
-        print("❌ No Supabase connection string found")
         return False
 
     try:
         conn = await asyncpg.connect(supabase_uri)
-        print("✓ Connected to Supabase")
 
         # Check public schema tables
         public_tables = await conn.fetch(
             """
-            SELECT table_name, 
+            SELECT table_name,
                    (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = 'public' AND table_name = t.table_name) as column_count
             FROM information_schema.tables t
             WHERE table_schema = 'public'
@@ -38,19 +33,13 @@ async def check_public_schema():
         """
         )
 
-        print(f"\n📋 Found {len(public_tables)} tables in public schema:")
         for table in public_tables:
             table_name = table["table_name"]
-            column_count = table["column_count"]
+            table["column_count"]
 
             # Get row count
-            try:
-                row_count = await conn.fetchval(
-                    f"SELECT COUNT(*) FROM public.{table_name}"
-                )
-                print(f"  - {table_name}: {column_count} columns, {row_count} rows")
-            except Exception:
-                print(f"  - {table_name}: {column_count} columns, error counting rows")
+            with contextlib.suppress(Exception):
+                await conn.fetchval(f"SELECT COUNT(*) FROM public.{table_name}")
 
         # Check for threads table specifically
         threads_table = await conn.fetch(
@@ -63,12 +52,10 @@ async def check_public_schema():
         )
 
         if threads_table:
-            print("\n🧵 threads table structure:"e:")
             for col in threads_table:
-                nullable = "NULL" if col["is_nullable"] == "YES" else "NOT NULL"
-                print(f"  - {col['column_name']} ({col['data_type']}) {nullable}")
+                "NULL" if col["is_nullable"] == "YES" else "NOT NULL"
         else:
-            print("\n❌ No 'threads' table found in public schema"a")
+            pass
 
         # Check foreign key relationships
         fks = await conn.fetch(
@@ -78,7 +65,7 @@ async def check_public_schema():
                 kcu.column_name as column_from,
                 ccu.table_name AS table_to,
                 ccu.column_name AS column_to
-            FROM information_schema.table_constraints AS tc 
+            FROM information_schema.table_constraints AS tc
             JOIN information_schema.key_column_usage AS kcu
               ON tc.constraint_name = kcu.constraint_name
               AND tc.table_schema = kcu.table_schema
@@ -91,28 +78,20 @@ async def check_public_schema():
         )
 
         if fks:
-            print("\n🔗 Foreign key relationships in public schema:"a:")
-            for fk in fks:
-                print(
-                    f"  {fk['table_from']}.{fk['column_from']} ➝ {fk['table_to']}.{fk['column_to']}"
-                )
+            for _fk in fks:
+                pass
         else:
-            print("\n📝 No foreign key relationships found in public schema"ma")
+            pass
 
         await conn.close()
         return True
 
-    except Exception as e:
-        print(f"❌ Error: {e}")
+    except Exception:
         return False
 
 
 async def create_public_thread_tables():
     """Create proper thread tables in public schema."""
-
-    print("\n🔧 Creating Public Thread Tables")
-    print("=" * 50)
-
     supabase_uri = os.getenv("SUPABASE_DATABASE_URI_SSL") or os.getenv(
         "SUPABASE_DATABASE_URI"
     )
@@ -135,7 +114,6 @@ async def create_public_thread_tables():
             );
         """
         )
-        print("✓ Created threads table")
 
         # Create thread_messages table for conversation history
         await conn.execute(
@@ -151,7 +129,6 @@ async def create_public_thread_tables():
             );
         """
         )
-        print("✓ Created thread_messages table")
 
         # Create thread_checkpoints for LangGraph state
         await conn.execute(
@@ -170,7 +147,6 @@ async def create_public_thread_tables():
             );
         """
         )
-        print("✓ Created thread_checkpoints table")
 
         # Create indexes for performance
         await conn.execute(
@@ -188,7 +164,6 @@ async def create_public_thread_tables():
         await conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_thread_checkpoints_checkpoint_id ON public.thread_checkpoints(checkpoint_id);"
         )
-        print("✓ Created indexes")
 
         # Set up RLS policies
         await conn.execute("ALTER TABLE public.threads ENABLE ROW LEVEL SECURITY;")
@@ -216,8 +191,8 @@ async def create_public_thread_tables():
             ON public.thread_messages
             FOR ALL
             USING (EXISTS (
-                SELECT 1 FROM public.threads 
-                WHERE id = thread_messages.thread_id 
+                SELECT 1 FROM public.threads
+                WHERE id = thread_messages.thread_id
                 AND user_id = auth.uid()
             ));
         """
@@ -230,30 +205,22 @@ async def create_public_thread_tables():
             ON public.thread_checkpoints
             FOR ALL
             USING (EXISTS (
-                SELECT 1 FROM public.threads 
-                WHERE id = thread_checkpoints.thread_id 
+                SELECT 1 FROM public.threads
+                WHERE id = thread_checkpoints.thread_id
                 AND user_id = auth.uid()
             ));
         """
         )
 
-        print("✓ Set up RLS policies")
-
         await conn.close()
-        print("🎉 Public schema thread tables created successfully!")
         return True
 
-    except Exception as e:
-        print(f"❌ Error creating tables: {e}")
+    except Exception:
         return False
 
 
 async def main():
     """Check schema and create tables if needed."""
-
-    print("🚀 Public Schema Setup")
-    print("=" * 60)
-
     # Check current state
     check_success = await check_public_schema()
 
@@ -263,10 +230,7 @@ async def main():
 
         if create_success:
             # Check again to show final state
-            print("\n📊 Final State:"e:")
             await check_public_schema()
-
-    print("\n" + "=" * 60)
 
 
 if __name__ == "__main__":

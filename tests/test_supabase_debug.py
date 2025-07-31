@@ -28,7 +28,6 @@ logging.getLogger("asyncio").setLevel(logging.INFO)
 
 def print_separator():
     """Print a separator line."""
-    print("\n" + "=" * 80 + "\n")
 
 
 async def safe_import(module_path, class_name=None):
@@ -39,14 +38,14 @@ async def safe_import(module_path, class_name=None):
             return getattr(module, class_name)
         return module
     except ImportError as e:
-        logger.error(f"Import error: {e}")
-        logger.error(f"Could not import {class_name or module_path}")
-        logger.error(f"Stack trace: {traceback.format_exc()}")
+        logger.exception(f"Import error: {e}")
+        logger.exception(f"Could not import {class_name or module_path}")
+        logger.exception(f"Stack trace: {traceback.format_exc()}")
         return None
     except AttributeError as e:
-        logger.error(f"Attribute error: {e}")
-        logger.error(f"Could not find {class_name} in {module_path}")
-        logger.error(f"Stack trace: {traceback.format_exc()}")
+        logger.exception(f"Attribute error: {e}")
+        logger.exception(f"Could not find {class_name} in {module_path}")
+        logger.exception(f"Stack trace: {traceback.format_exc()}")
         return None
 
 
@@ -60,8 +59,8 @@ async def run_with_error_handling(func_name, func, *args, **kwargs):
         logger.info(f"COMPLETED: {func_name} - Result: {result}")
         return result
     except Exception as e:
-        logger.error(f"ERROR in {func_name}: {e}")
-        logger.error(f"Stack trace:\n{traceback.format_exc()}")
+        logger.exception(f"ERROR in {func_name}: {e}")
+        logger.exception(f"Stack trace:\n{traceback.format_exc()}")
         return None
 
 
@@ -113,8 +112,8 @@ async def test_config():
 
         return True
     except Exception as e:
-        logger.error(f"Error in config test: {e}")
-        logger.error(f"Stack trace: {traceback.format_exc()}")
+        logger.exception(f"Error in config test: {e}")
+        logger.exception(f"Stack trace: {traceback.format_exc()}")
         return False
 
 
@@ -148,8 +147,8 @@ async def test_supabase_connection():
 
         return True
     except Exception as e:
-        logger.error(f"Error connecting to Supabase: {e}")
-        logger.error(f"Stack trace: {traceback.format_exc()}")
+        logger.exception(f"Error connecting to Supabase: {e}")
+        logger.exception(f"Stack trace: {traceback.format_exc()}")
         return False
 
 
@@ -192,8 +191,8 @@ async def test_auth():
         logger.info(f"Auth test successful - User ID: {user_id}")
         return user_id
     except Exception as e:
-        logger.error(f"Error testing auth: {e}")
-        logger.error(f"Stack trace: {traceback.format_exc()}")
+        logger.exception(f"Error testing auth: {e}")
+        logger.exception(f"Stack trace: {traceback.format_exc()}")
         return False
 
 
@@ -232,8 +231,8 @@ async def test_credits(user_id):
 
         return success
     except Exception as e:
-        logger.error(f"Error testing credits: {e}")
-        logger.error(f"Stack trace: {traceback.format_exc()}")
+        logger.exception(f"Error testing credits: {e}")
+        logger.exception(f"Stack trace: {traceback.format_exc()}")
         return False
 
 
@@ -287,8 +286,8 @@ async def test_conversation(user_id):
 
         return thread_id
     except Exception as e:
-        logger.error(f"Error testing conversations: {e}")
-        logger.error(f"Stack trace: {traceback.format_exc()}")
+        logger.exception(f"Error testing conversations: {e}")
+        logger.exception(f"Stack trace: {traceback.format_exc()}")
         return False
 
 
@@ -332,8 +331,8 @@ async def test_persistence(user_id, thread_id):
         logger.info(f"Retrieved state: {state}")
         return True
     except Exception as e:
-        logger.error(f"Error testing persistence: {e}")
-        logger.error(f"Stack trace: {traceback.format_exc()}")
+        logger.exception(f"Error testing persistence: {e}")
+        logger.exception(f"Stack trace: {traceback.format_exc()}")
         return False
 
 
