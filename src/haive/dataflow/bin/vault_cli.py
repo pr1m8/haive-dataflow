@@ -154,7 +154,8 @@ def ensure_vault_reference_column(table_name: str) -> bool:
             if hasattr(refs_result, "error") and refs_result.error:
                 logger.error(
                     f"Failed to add config_vault_refs to engines.engines: {
-                        refs_result.error}")
+                        refs_result.error}"
+                )
             else:
                 logger.info("Added config_vault_refs column to engines.engines")
 
@@ -549,7 +550,8 @@ def run_import_secrets(args):
                     logger.exception(f"Error importing secret: {e}")
 
             logger.info(
-                f"Import completed: {imported_count} secrets imported, {updated_count} secrets updated")
+                f"Import completed: {imported_count} secrets imported, {updated_count} secrets updated"
+            )
             return 0 if imported_count > 0 or updated_count > 0 else 1
 
         except Exception as e:

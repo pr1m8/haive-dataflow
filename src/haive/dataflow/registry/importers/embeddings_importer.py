@@ -352,11 +352,14 @@ def import_embedding_models() -> bool:
                 )
 
                 logger.info(
-                    f"Registered embedding provider: {provider} (available: {is_available})")
+                    f"Registered embedding provider: {provider} (available: {is_available})"
+                )
 
             except Exception as e:
                 error_tb = traceback.format_exc()
-                logger.exception(f"Error registering provider {provider}: {e}\n{error_tb}")
+                logger.exception(
+                    f"Error registering provider {provider}: {e}\n{error_tb}"
+                )
 
                 registry_system.add_import_log(
                     import_session=import_session,
@@ -482,7 +485,9 @@ def import_embedding_models() -> bool:
 
                 except Exception as e:
                     error_tb = traceback.format_exc()
-                    logger.exception(f"Error registering model {model_id}: {e}\n{error_tb}")
+                    logger.exception(
+                        f"Error registering model {model_id}: {e}\n{error_tb}"
+                    )
 
                     registry_system.add_import_log(
                         import_session=import_session,
@@ -555,7 +560,9 @@ def import_embedding_models() -> bool:
 
                 except Exception as e:
                     error_tb = traceback.format_exc()
-                    logger.exception(f"Error registering model {model_id}: {e}\n{error_tb}")
+                    logger.exception(
+                        f"Error registering model {model_id}: {e}\n{error_tb}"
+                    )
 
                     registry_system.add_import_log(
                         import_session=import_session,
@@ -568,7 +575,8 @@ def import_embedding_models() -> bool:
 
         logger.info(
             f"Imported {
-                len(provider_ids)} embedding providers and {model_count} embedding models")
+                len(provider_ids)} embedding providers and {model_count} embedding models"
+        )
         return True
 
     except Exception as e:

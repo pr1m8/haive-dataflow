@@ -234,7 +234,8 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
         connection_game_map.pop(websocket, None)
         logger.info(
             f"Connection terminated due to error, remaining connections: {
-                len(active_connections)}")
+                len(active_connections)}"
+        )
 
 
 async def make_ai_move(websocket: WebSocket, game_id: str):

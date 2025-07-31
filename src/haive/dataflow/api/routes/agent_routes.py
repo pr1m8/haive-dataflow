@@ -454,7 +454,8 @@ async def load_agent_config(
 
             logger.info(
                 f"Loaded agent config: {
-                    config_instance.__class__.__name__} for thread {thread_id}")
+                    config_instance.__class__.__name__} for thread {thread_id}"
+            )
             return config_instance
 
         except Exception as e:

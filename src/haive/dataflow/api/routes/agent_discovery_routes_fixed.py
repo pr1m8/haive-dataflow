@@ -177,7 +177,8 @@ def discover_all_agents(force_refresh: bool = False) -> list[ComponentInfo]:
                 logger.info(
                     f"✅ Found agent config: {
                         component.name} in {
-                        component.module_path}")
+                        component.module_path}"
+                )
 
         logger.info(f"📊 Total agents discovered: {len(agent_components)}")
         _cached_agents = agent_components

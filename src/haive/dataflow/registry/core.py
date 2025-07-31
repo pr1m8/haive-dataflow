@@ -248,16 +248,23 @@ class RegistrySystem:
             for schema, table_name, columns in tables:
                 # Check if table exists
                 table_check = self._supabase.rpc(
-                    "execute_sql", {
-                        "sql": f"SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = '{schema}' AND tablename = '{table_name}'"}, ).execute()
+                    "execute_sql",
+                    {
+                        "sql": f"SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = '{schema}' AND tablename = '{table_name}'"
+                    },
+                ).execute()
 
                 if not table_check.data or len(table_check.data) == 0:
                     # Create table
                     self._supabase.rpc(
-                        "execute_sql", {
-                            "sql": f"CREATE TABLE IF NOT EXISTS {schema}.{table_name} ({columns})"}, ).execute()
+                        "execute_sql",
+                        {
+                            "sql": f"CREATE TABLE IF NOT EXISTS {schema}.{table_name} ({columns})"
+                        },
+                    ).execute()
                     logger.info(
-                        f"Created table {schema}.{table_name} for backward compatibility")
+                        f"Created table {schema}.{table_name} for backward compatibility"
+                    )
 
         except Exception as e:
             logger.exception(f"Error ensuring registry schema: {e}")
@@ -366,9 +373,7 @@ class RegistrySystem:
                 # Store in the new schema location based on entity type
                 success = False
 
-                if (
-                    entity_type in (EntityType.LLM_PROVIDER, EntityType.LLM)
-                ):
+                if entity_type in (EntityType.LLM_PROVIDER, EntityType.LLM):
                     try:
                         # Get provider type ID for LLM
                         provider_type_response = self._get_or_create_provider_type(
@@ -434,8 +439,9 @@ class RegistrySystem:
                     except Exception as e:
                         logger.warning(f"Error storing {name} in models.providers: {e}")
 
-                elif (
-                    entity_type in (EntityType.EMBEDDING_PROVIDER, EntityType.EMBEDDING)
+                elif entity_type in (
+                    EntityType.EMBEDDING_PROVIDER,
+                    EntityType.EMBEDDING,
                 ):
                     try:
                         # Get provider type ID for embedding
@@ -471,7 +477,8 @@ class RegistrySystem:
                             if response.data:
                                 success = True
                                 logger.info(
-                                    f"Stored embedding provider {name} in models.providers")
+                                    f"Stored embedding provider {name} in models.providers"
+                                )
 
                                 # Register environment variable for API key
                                 env_var_name = f"{name.upper()}_API_KEY"
@@ -613,7 +620,9 @@ class RegistrySystem:
                 return sql_response.data[0]
 
         except Exception as e:
-            logger.exception(f"Error getting or creating provider type {type_name}: {e}")
+            logger.exception(
+                f"Error getting or creating provider type {type_name}: {e}"
+            )
 
         return None
 
@@ -675,7 +684,9 @@ class RegistrySystem:
                 return sql_response.data[0]["id"]
 
         except Exception as e:
-            logger.exception(f"Error getting or creating component type {type_name}: {e}")
+            logger.exception(
+                f"Error getting or creating component type {type_name}: {e}"
+            )
 
         return None
 
@@ -899,7 +910,8 @@ class RegistrySystem:
 
                         if response.data and len(response.data) > 0:
                             logger.info(
-                                f"Added environment variable {var_name} to config.environment_variables")
+                                f"Added environment variable {var_name} to config.environment_variables"
+                            )
 
                             # Now try to create a component-environment mapping if we
                             # have the provider in components
@@ -931,10 +943,12 @@ class RegistrySystem:
                                         self._supabase, "config.component_env_mappings"
                                     ).insert(mapping_data).execute()
                                     logger.info(
-                                        f"Created component to environment mapping for {provider_name} and {var_name}")
+                                        f"Created component to environment mapping for {provider_name} and {var_name}"
+                                    )
                             except Exception as mapping_e:
                                 logger.warning(
-                                    f"Error creating component-environment mapping: {mapping_e}")
+                                    f"Error creating component-environment mapping: {mapping_e}"
+                                )
 
                             return env_var_id
                     else:
@@ -952,7 +966,8 @@ class RegistrySystem:
                             env_var_data
                         ).eq("id", existing_id).execute()
                         logger.info(
-                            f"Updated environment variable {var_name} in config.environment_variables")
+                            f"Updated environment variable {var_name} in config.environment_variables"
+                        )
                         return existing_id
 
                 except Exception as e:
@@ -998,7 +1013,8 @@ class RegistrySystem:
                         ).eq("id", existing_id).execute()
                         env_var_id = existing_id
                         logger.info(
-                            f"Updated environment variable {var_name} in registry.environment_vars")
+                            f"Updated environment variable {var_name} in registry.environment_vars"
+                        )
                     else:
                         # Insert new record
                         response = (
@@ -1008,7 +1024,8 @@ class RegistrySystem:
                         )
                         if response.data and len(response.data) > 0:
                             logger.info(
-                                f"Added environment variable {var_name} to registry.environment_vars")
+                                f"Added environment variable {var_name} to registry.environment_vars"
+                            )
                             return env_var_id
                 except Exception as legacy_e:
                     logger.warning(
@@ -1109,19 +1126,27 @@ class RegistrySystem:
                 try:
                     # Check if table exists
                     table_check = self._supabase.rpc(
-                        "execute_sql", {
-                            "sql": f"SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = '{schema}' AND tablename = '{table_name}'"}, ).execute()
+                        "execute_sql",
+                        {
+                            "sql": f"SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = '{schema}' AND tablename = '{table_name}'"
+                        },
+                    ).execute()
 
                     if not table_check.data or len(table_check.data) == 0:
                         # Create table
                         self._supabase.rpc(
-                            "execute_sql", {
-                                "sql": f"CREATE TABLE IF NOT EXISTS {schema}.{table_name} ({columns})"}, ).execute()
+                            "execute_sql",
+                            {
+                                "sql": f"CREATE TABLE IF NOT EXISTS {schema}.{table_name} ({columns})"
+                            },
+                        ).execute()
                         logger.info(
-                            f"Created table {schema}.{table_name} for backward compatibility")
+                            f"Created table {schema}.{table_name} for backward compatibility"
+                        )
                 except Exception as table_e:
                     logger.warning(
-                        f"Error checking/creating table {schema}.{table_name}: {table_e}")
+                        f"Error checking/creating table {schema}.{table_name}: {table_e}"
+                    )
 
         except Exception as e:
             logger.exception(f"Error ensuring registry schema: {e}")
@@ -1172,7 +1197,8 @@ class RegistrySystem:
                         .execute()
                     )
                     logger.info(
-                        f"Successfully logged import for {entity_name} to audit.import_logs")
+                        f"Successfully logged import for {entity_name} to audit.import_logs"
+                    )
                     return
                 except Exception as e:
                     logger.warning(
@@ -1209,7 +1235,8 @@ class RegistrySystem:
                                 .execute()
                             )
                             logger.info(
-                                f"Successfully logged import for {entity_name} after creating table")
+                                f"Successfully logged import for {entity_name} after creating table"
+                            )
                             return
                         except Exception as create_e:
                             logger.exception(
@@ -1239,7 +1266,8 @@ class RegistrySystem:
                         },
                     ).execute()
                     logger.info(
-                        f"Successfully logged import for {entity_name} using direct query")
+                        f"Successfully logged import for {entity_name} using direct query"
+                    )
                     return
                 except Exception as query_e:
                     logger.exception(
@@ -1270,7 +1298,8 @@ class RegistrySystem:
                             log_entry
                         ).execute()
                         logger.info(
-                            f"Successfully logged import for {entity_name} to legacy registry.import_logs table")
+                            f"Successfully logged import for {entity_name} to legacy registry.import_logs table"
+                        )
                     except Exception as legacy_e:
                         logger.warning(
                             f"Error storing import log in legacy location: {legacy_e}"

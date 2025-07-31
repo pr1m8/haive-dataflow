@@ -142,7 +142,8 @@ class Registry(Generic[T]):
             logger.info(
                 f"Registered {item_type} {item_name} ({
                     cls.__name__}) in {
-                    self.__class__.__name__}")
+                    self.__class__.__name__}"
+            )
 
             return cls
 
@@ -415,7 +416,8 @@ class Registry(Generic[T]):
         start_time = datetime.now()
         logger.info(
             f"=== Starting component discovery at {
-                start_time.strftime('%Y-%m-%d %H:%M:%S')} ===")
+                start_time.strftime('%Y-%m-%d %H:%M:%S')} ==="
+        )
 
         # Default search paths if none provided
         if not search_paths:
@@ -442,7 +444,8 @@ class Registry(Generic[T]):
                     logger.debug(f"Package directory: {pkg_path}")
                     logger.debug(
                         f"Directory contents: {
-                            os.listdir(pkg_path) if os.path.exists(pkg_path) else 'Not available'}")
+                            os.listdir(pkg_path) if os.path.exists(pkg_path) else 'Not available'}"
+                    )
 
                 for _, name, is_pkg in pkgutil.iter_modules(
                     package.__path__, package.__name__ + "."
@@ -507,7 +510,8 @@ class Registry(Generic[T]):
 
         logger.info(
             f"=== Component discovery completed at {
-                end_time.strftime('%Y-%m-%d %H:%M:%S')} ===")
+                end_time.strftime('%Y-%m-%d %H:%M:%S')} ==="
+        )
 
     def get_default_search_paths(self) -> list[str]:
         """Get default search paths for component discovery.

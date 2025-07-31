@@ -214,7 +214,8 @@ def discover_agents(module_paths: list[str] | None = None) -> list[str]:
                                     )
                             except Exception as e:
                                 logger.exception(
-                                    f"Error registering configurations for {agent_name}: {e}")
+                                    f"Error registering configurations for {agent_name}: {e}"
+                                )
 
                             # Log success
                             registry_system.add_import_log(
@@ -231,7 +232,8 @@ def discover_agents(module_paths: list[str] | None = None) -> list[str]:
                             # Log error
                             error_tb = traceback.format_exc()
                             logger.exception(
-                                f"Error registering agent {name} from {module_name}: {e}\n{error_tb}")
+                                f"Error registering agent {name} from {module_name}: {e}\n{error_tb}"
+                            )
 
                             registry_system.add_import_log(
                                 import_session=import_session,
@@ -244,7 +246,9 @@ def discover_agents(module_paths: list[str] | None = None) -> list[str]:
 
             except Exception as e:
                 error_tb = traceback.format_exc()
-                logger.exception(f"Error processing module {module_name}: {e}\n{error_tb}")
+                logger.exception(
+                    f"Error processing module {module_name}: {e}\n{error_tb}"
+                )
 
     logger.info(f"Discovered {len(registered_ids)} agents")
     return registered_ids
@@ -396,7 +400,8 @@ def discover_tools(module_paths: list[str] | None = None) -> list[str]:
                             # Log error
                             error_tb = traceback.format_exc()
                             logger.exception(
-                                f"Error registering tool {name} from {module_name}: {e}\n{error_tb}")
+                                f"Error registering tool {name} from {module_name}: {e}\n{error_tb}"
+                            )
 
                             registry_system.add_import_log(
                                 import_session=import_session,
@@ -409,7 +414,9 @@ def discover_tools(module_paths: list[str] | None = None) -> list[str]:
 
             except Exception as e:
                 error_tb = traceback.format_exc()
-                logger.exception(f"Error processing module {module_name}: {e}\n{error_tb}")
+                logger.exception(
+                    f"Error processing module {module_name}: {e}\n{error_tb}"
+                )
 
     logger.info(f"Discovered {len(registered_ids)} tools")
     return registered_ids
@@ -554,7 +561,8 @@ def discover_toolkits(module_paths: list[str] | None = None) -> list[str]:
                             # Log error
                             error_tb = traceback.format_exc()
                             logger.exception(
-                                f"Error registering toolkit {name} from {module_name}: {e}\n{error_tb}")
+                                f"Error registering toolkit {name} from {module_name}: {e}\n{error_tb}"
+                            )
 
                             registry_system.add_import_log(
                                 import_session=import_session,
@@ -567,7 +575,9 @@ def discover_toolkits(module_paths: list[str] | None = None) -> list[str]:
 
             except Exception as e:
                 error_tb = traceback.format_exc()
-                logger.exception(f"Error processing module {module_name}: {e}\n{error_tb}")
+                logger.exception(
+                    f"Error processing module {module_name}: {e}\n{error_tb}"
+                )
 
     logger.info(f"Discovered {len(registered_ids)} toolkits")
     return registered_ids
@@ -732,7 +742,8 @@ def discover_engines(module_paths: list[str] | None = None) -> list[str]:
                             # Log error
                             error_tb = traceback.format_exc()
                             logger.exception(
-                                f"Error registering engine {name} from {module_name}: {e}\n{error_tb}")
+                                f"Error registering engine {name} from {module_name}: {e}\n{error_tb}"
+                            )
 
                             registry_system.add_import_log(
                                 import_session=import_session,
@@ -745,7 +756,9 @@ def discover_engines(module_paths: list[str] | None = None) -> list[str]:
 
             except Exception as e:
                 error_tb = traceback.format_exc()
-                logger.exception(f"Error processing module {module_name}: {e}\n{error_tb}")
+                logger.exception(
+                    f"Error processing module {module_name}: {e}\n{error_tb}"
+                )
 
     logger.info(f"Discovered {len(registered_ids)} engines")
     return registered_ids
@@ -830,7 +843,8 @@ def discover_games(module_paths: list[str] | None = None) -> list[str]:
                             # Log error
                             error_tb = traceback.format_exc()
                             logger.exception(
-                                f"Error registering game {name} from {module_name}: {e}\n{error_tb}")
+                                f"Error registering game {name} from {module_name}: {e}\n{error_tb}"
+                            )
 
                             registry_system.add_import_log(
                                 import_session=import_session,
@@ -843,7 +857,9 @@ def discover_games(module_paths: list[str] | None = None) -> list[str]:
 
             except Exception as e:
                 error_tb = traceback.format_exc()
-                logger.exception(f"Error processing module {module_name}: {e}\n{error_tb}")
+                logger.exception(
+                    f"Error processing module {module_name}: {e}\n{error_tb}"
+                )
 
     logger.info(f"Discovered {len(registered_ids)} games")
     return registered_ids

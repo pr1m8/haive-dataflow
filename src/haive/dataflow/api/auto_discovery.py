@@ -638,7 +638,8 @@ All endpoints follow consistent error response format:
             table_rows.append(
                 f"| {
                     pattern_type.title()} | {
-                    len(patterns)} | {rest_count} | {ws_count} |")
+                    len(patterns)} | {rest_count} | {ws_count} |"
+            )
 
         table_header = """| Pattern Type | Total | REST | WebSocket |
 |--------------|-------|------|-----------|"""

@@ -295,7 +295,8 @@ class SerializationRegistry:
                     logger.warning(
                         f"Error deserializing function {
                             type_data['module']}.{
-                            type_data['name']}: {e}")
+                            type_data['name']}: {e}"
+                    )
                     return None
 
             # Handle classes
@@ -309,7 +310,8 @@ class SerializationRegistry:
                     logger.warning(
                         f"Error deserializing class {
                             type_data['module']}.{
-                            type_data['name']}: {e}")
+                            type_data['name']}: {e}"
+                    )
                     return None
 
             # Handle string representations

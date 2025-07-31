@@ -198,7 +198,8 @@ class MCPHealthMonitor:
         logger.info(
             f"Recovered {
                 len(recovered_servers)} out of {
-                len(failed_servers)} failed servers")
+                len(failed_servers)} failed servers"
+        )
         return recovered_servers
 
     async def _monitoring_loop(self):
@@ -216,7 +217,8 @@ class MCPHealthMonitor:
                 )
                 total_count = len(health_status)
                 logger.info(
-                    f"Health check complete: {healthy_count}/{total_count} servers healthy")
+                    f"Health check complete: {healthy_count}/{total_count} servers healthy"
+                )
 
                 # Attempt recovery for failed servers
                 if healthy_count < total_count:

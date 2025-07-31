@@ -31,7 +31,8 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         logger.info(
             f"Request {request_id} started: {
                 request.method} {
-                request.url.path} (User: {user_id})")
+                request.url.path} (User: {user_id})"
+        )
 
         # Process request
         try:
@@ -108,7 +109,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                         "detail": f"Maximum {
                             self.rate_limit} requests per {
                             self.window} seconds",
-                    }),
+                    }
+                ),
                 status_code=429,
                 media_type="application/json",
             )

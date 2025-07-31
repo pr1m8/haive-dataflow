@@ -551,5 +551,4 @@ if __name__ == "__main__":
     for _game_id, _info in game_api.discovered_games.items():
         pass
 
-
     uvicorn.run(app, host="0.0.0.0", port=8000)

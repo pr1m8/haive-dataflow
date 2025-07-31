@@ -471,7 +471,8 @@ def import_from_env() -> list[dict[str, Any]]:
                     "input_cost_per_token": 0.0000001 if provider == "openai" else 0.0,
                     "description": f"{
                         provider.capitalize()} embedding model: {model_name}",
-                })
+                }
+            )
 
     # Add default embedding models if none found in environment
     if not embedding_models:
@@ -637,7 +638,8 @@ def import_embedding_models() -> int:
             except Exception as e:
                 logger.exception(
                     f"Error processing embedding model {
-                        model_info.get('model_id')}: {e}")
+                        model_info.get('model_id')}: {e}"
+                )
 
         logger.info(
             f"Embedding import completed: {models_imported} models imported from {

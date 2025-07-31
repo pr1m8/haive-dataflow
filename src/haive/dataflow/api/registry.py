@@ -104,7 +104,8 @@ class AgentRegistryService:
         start_time = datetime.now()
         logger.info(
             f"=== Starting agent discovery at {
-                start_time.strftime('%Y-%m-%d %H:%M:%S')} ===")
+                start_time.strftime('%Y-%m-%d %H:%M:%S')} ==="
+        )
         logger.info(f"Search paths: {search_paths}")
         logger.info(f"Python path: {sys.path}")
 
@@ -127,7 +128,8 @@ class AgentRegistryService:
                     logger.debug(f"Package directory: {pkg_path}")
                     logger.debug(
                         f"Directory contents: {
-                            os.listdir(pkg_path) if os.path.exists(pkg_path) else 'Not available'}")
+                            os.listdir(pkg_path) if os.path.exists(pkg_path) else 'Not available'}"
+                    )
 
                 for _, name, is_pkg in pkgutil.iter_modules(
                     package.__path__, package.__name__ + "."
@@ -173,7 +175,8 @@ class AgentRegistryService:
                                             obj, "name", None
                                         ) or class_name.replace("Config", "")
                                         logger.debug(
-                                            f"Found AgentConfig subclass: {class_name} → {agent_name}")
+                                            f"Found AgentConfig subclass: {class_name} → {agent_name}"
+                                        )
 
                                         # Check if it's a game agent
                                         is_game = "game" in module.__name__.lower() or (
@@ -189,10 +192,12 @@ class AgentRegistryService:
                                         )
                                 except (TypeError, Exception) as class_err:
                                     logger.debug(
-                                        f"Error checking class {class_name}: {class_err}")
+                                        f"Error checking class {class_name}: {class_err}"
+                                    )
 
                             logger.debug(
-                                f"Module {name} had {class_count} classes, {agent_count} agents")
+                                f"Module {name} had {class_count} classes, {agent_count} agents"
+                            )
 
                         except (ImportError, AttributeError) as e:
                             failed_packages.append((name, str(e)))
@@ -226,7 +231,8 @@ class AgentRegistryService:
 
         logger.info(
             f"=== Agent discovery completed at {
-                end_time.strftime('%Y-%m-%d %H:%M:%S')} ===")
+                end_time.strftime('%Y-%m-%d %H:%M:%S')} ==="
+        )
 
     def register_agent_config(
         self, name: str, config_class: type[AgentConfig], agent_type: str = "agent"

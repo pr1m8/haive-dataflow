@@ -229,7 +229,7 @@ def check_docs(session: nox.Session) -> None:
     try:
         session.run(*cmd, external=True)
         session.log("✅ Link check passed!")
-    except:
+    except Exception:
         session.warn("⚠️  Some links may be broken")
 
     # Also do a dummy build to check for other errors
@@ -250,7 +250,7 @@ def check_docs(session: nox.Session) -> None:
     try:
         session.run(*cmd, external=True)
         session.log("✅ Documentation check passed!")
-    except:
+    except Exception:
         session.warn(f"⚠️  Documentation has warnings. See {log_file}")
 
 

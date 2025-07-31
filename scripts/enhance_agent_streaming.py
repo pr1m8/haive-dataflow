@@ -236,7 +236,7 @@ class SchemaAwareStreamProcessor:
             # Try to create instance
             self.output_schema(**self.partial_data)
             return True
-        except:
+        except Exception:
             return False
 
     def get_complete_fields(self) -> list[str]:

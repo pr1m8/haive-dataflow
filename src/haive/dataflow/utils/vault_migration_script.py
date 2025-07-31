@@ -108,7 +108,8 @@ def ensure_vault_reference_column(table_name: str) -> bool:
             if hasattr(refs_result, "error") and refs_result.error:
                 logger.error(
                     f"Failed to add config_vault_refs to engines.engines: {
-                        refs_result.error}")
+                        refs_result.error}"
+                )
             else:
                 logger.info("Added config_vault_refs column to engines.engines")
 
@@ -262,7 +263,8 @@ def migrate_environment_variables() -> int:
 
                 if update_response.data and len(update_response.data) > 0:
                     logger.info(
-                        f"Updated environment variable {env_name} to reference vault secret {secret_id}")
+                        f"Updated environment variable {env_name} to reference vault secret {secret_id}"
+                    )
                     migrated_count += 1
                 else:
                     logger.error(f"Failed to update environment variable {env_name}")
@@ -367,13 +369,16 @@ def migrate_component_env_mappings() -> int:
 
                 if update_response.data and len(update_response.data) > 0:
                     logger.info(
-                        f"Updated mapping {mapping_id} to reference vault secret {vault_secret_id}")
+                        f"Updated mapping {mapping_id} to reference vault secret {vault_secret_id}"
+                    )
                     migrated_count += 1
                 else:
                     logger.error(f"Failed to update mapping {mapping_id}")
 
             except Exception as mapping_error:
-                logger.exception(f"Error processing component env mapping: {mapping_error}")
+                logger.exception(
+                    f"Error processing component env mapping: {mapping_error}"
+                )
 
         logger.info(
             f"Completed migration of {migrated_count} component environment mappings"
@@ -479,7 +484,8 @@ def migrate_provider_api_keys() -> int:
 
                 if update_response.data and len(update_response.data) > 0:
                     logger.info(
-                        f"Updated provider {provider_name} to reference vault secret {secret_id}")
+                        f"Updated provider {provider_name} to reference vault secret {secret_id}"
+                    )
                     migrated_count += 1
                 else:
                     logger.error(f"Failed to update provider {provider_name}")
@@ -631,7 +637,8 @@ def migrate_engine_api_keys() -> int:
 
                     if update_response.data and len(update_response.data) > 0:
                         logger.info(
-                            f"Updated engine {engine_name} to reference vault secret {secret_id} for key {key}")
+                            f"Updated engine {engine_name} to reference vault secret {secret_id} for key {key}"
+                        )
                     else:
                         logger.error(f"Failed to update engine {engine_name}")
 

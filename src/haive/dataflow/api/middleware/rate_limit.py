@@ -59,7 +59,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                         "detail": f"Maximum {
                             self.rate_limit} requests per {
                             self.window} seconds",
-                    }),
+                    }
+                ),
                 status_code=429,
                 media_type="application/json",
             )

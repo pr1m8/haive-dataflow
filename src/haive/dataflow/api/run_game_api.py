@@ -83,7 +83,8 @@ def create_app():
         f"Discovered and registered routes for {
             len(game_agents)} games: {
             list(
-                game_agents.keys())}")
+                game_agents.keys())}"
+    )
 
     return app
 

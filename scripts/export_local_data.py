@@ -41,7 +41,7 @@ async def export_local_data():
             elif isinstance(metadata, str):
                 try:
                     metadata = json.loads(metadata)
-                except:
+                except (json.JSONDecodeError, ValueError):
                     metadata = {}
             elif not isinstance(metadata, dict):
                 metadata = {}

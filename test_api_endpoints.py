@@ -65,7 +65,7 @@ async def test_endpoint(session, endpoint, method="GET", data=None):
                             if len(str(content)) > 200
                             else str(content)
                         )
-                    except:
+                    except Exception:
                         content = await response.text()
                         result["content_type"] = "text"
                         result["sample_data"] = (
@@ -83,7 +83,7 @@ async def test_endpoint(session, endpoint, method="GET", data=None):
                 try:
                     content = await response.json()
                     result["response"] = content
-                except:
+                except Exception:
                     result["response"] = await response.text()
                 return result
     except Exception as e:
