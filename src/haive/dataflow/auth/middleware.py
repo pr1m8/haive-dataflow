@@ -1,4 +1,5 @@
 # haive/dataflow/auth/middleware.py
+
 import logging
 
 from fastapi import Depends, HTTPException, Request, Response

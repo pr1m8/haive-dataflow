@@ -26,7 +26,11 @@ import os
 import sys
 
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from haive.dataflow.api.game_router import discover_game_agents, game_agents, get_router
 
 from .api.middleware.logging import RequestLoggingMiddleware
 from .api.middleware.rate_limit import RateLimitMiddleware
@@ -126,11 +130,6 @@ def create_app() -> FastAPI:
                 sys.path.insert(0, path)
 
         # Import game_router after setting up paths
-        from haive.dataflow.api.game_router import (
-            discover_game_agents,
-            game_agents,
-            get_router,
-        )
 
         # Discover game agents
         logger.info("Discovering game agents...")
@@ -155,11 +154,7 @@ def create_app() -> FastAPI:
 app = create_app()
 
 
-import logging
-
 # In your main.py file
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 

@@ -2,7 +2,6 @@
 """Migrate data from local PostgreSQL to Supabase."""
 
 import asyncio
-import json
 import os
 from datetime import datetime
 
@@ -235,15 +234,15 @@ async def migrate_local_to_supabase():
         print("✓ Indexes created")
 
         # 9. Summary
-        print(f"\n📋 Migration Summary:")
+        print("\n📋 Migration Summary:"y:")
         print(f"  - Threads: {migrated_threads}/{len(local_threads)}")
         print(f"  - Checkpoints: {migrated_checkpoints}/{len(local_checkpoints)}")
         print(f"  - Writes: {migrated_writes}/{len(local_writes)}")
         print(f"  - Blobs: {migrated_blobs}/{len(local_blobs)}")
 
         # 10. Show thread mapping for reference
-        print(f"\n🗂️  Thread ID Mapping (first 5):")
-        for i, (old_id, new_id) in enumerate(list(thread_mapping.items())[:5]):
+        print("\n🗂️  Thread ID Mapping (first 5):" 5):")
+        for _i, (old_id, new_id) in enumerate(list(thread_mapping.items())[:5]):
             print(f"  {old_id} → {new_id}")
         if len(thread_mapping) > 5:
             print(f"  ... and {len(thread_mapping) - 5} more")
@@ -251,7 +250,7 @@ async def migrate_local_to_supabase():
         await local_conn.close()
         await supabase_conn.close()
 
-        print(f"\n🎉 Migration completed successfully!")
+        print("\n🎉 Migration completed successfully!"y!")
         return True
 
     except Exception as e:
@@ -265,7 +264,7 @@ async def migrate_local_to_supabase():
 async def verify_migration():
     """Verify the migration worked."""
 
-    print(f"\n🔍 Verifying Migration")
+    print("\n🔍 Verifying Migration"on")
     print("=" * 50)
 
     supabase_uri = os.getenv("SUPABASE_DATABASE_URI_SSL") or os.getenv(
@@ -287,7 +286,7 @@ async def verify_migration():
             "SELECT COUNT(*) FROM public.checkpoint_blobs"
         )
 
-        print(f"📊 Supabase data counts:")
+        print("📊 Supabase data counts:"s:")
         print(f"  - Threads: {thread_count}")
         print(f"  - Checkpoints: {checkpoint_count}")
         print(f"  - Writes: {writes_count}")
@@ -296,7 +295,7 @@ async def verify_migration():
         # Show sample thread
         sample_thread = await conn.fetchrow("SELECT * FROM public.threads LIMIT 1")
         if sample_thread:
-            print(f"\n📝 Sample migrated thread:")
+            print("\n📝 Sample migrated thread:"d:")
             print(f"  ID: {sample_thread['id']}")
             print(f"  Agent: {sample_thread['agent_name']}")
             print(f"  Created: {sample_thread['created_at']}")
@@ -323,16 +322,16 @@ async def main():
         verification_success = await verify_migration()
 
         if verification_success:
-            print(f"\n🎊 SUCCESS: Migration completed and verified!")
+            print("\n🎊 SUCCESS: Migration completed and verified!"d!")
             print(
-                f"Your local PostgreSQL data is now in Supabase with proper UUID structure."
+                "Your local PostgreSQL data is now in Supabase with proper UUID structure."
             )
         else:
-            print(f"\n⚠️  WARNING: Migration completed but verification failed")
+            print("\n⚠️  WARNING: Migration completed but verification failed"led")
     else:
-        print(f"\n❌ FAILED: Migration failed")
+        print("\n❌ FAILED: Migration failed"d")
 
-    print(f"\n" + "=" * 70)
+    print("\n" + "=" * 70)
 
 
 if __name__ == "__main__":

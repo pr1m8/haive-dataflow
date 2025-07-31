@@ -6,6 +6,7 @@ including setup functions for various log types.
 
 import logging
 import os
+import traceback
 from pathlib import Path
 from typing import Any
 
@@ -179,8 +180,6 @@ def log_entity_operation(
     if error:
         log_entry["error"] = str(error)
         if hasattr(error, "__traceback__"):
-            import traceback
-
             log_entry["traceback"] = traceback.format_exc()
 
     # Format message

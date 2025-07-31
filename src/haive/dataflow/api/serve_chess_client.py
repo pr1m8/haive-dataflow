@@ -14,6 +14,7 @@ Note:
 import argparse
 import http.server
 import logging
+import os
 import socketserver
 import sys
 import webbrowser
@@ -31,7 +32,6 @@ logger = logging.getLogger("chess-client-server")
 def get_static_dir():
     """Get the directory containing the static files."""
     # Fix imports for local development
-    import sys
 
     sys.path.append(
         os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))

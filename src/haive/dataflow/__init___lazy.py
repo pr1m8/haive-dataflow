@@ -43,6 +43,7 @@ This package consists of several modules:
 """
 
 # Import discovery functions (these should also be lazy)
+
 from .registry.discovery import (
     discover_agents,
     discover_all,
@@ -51,8 +52,6 @@ from .registry.discovery import (
     discover_toolkits,
     discover_tools,
 )
-
-# Use lazy loading for the registry system
 from .registry.lazy_core import registry_system
 from .registry.models import (  # MCP Models
     ConfigType,
@@ -72,45 +71,48 @@ from .registry.models import (  # MCP Models
     MCPTransport,
     RegistryItem,
 )
-
-# Import serialization utilities
 from .registry.serialization import (
     SerializationRegistry,
     deserialize_object,
     serialize_object,
 )
 
+# Use lazy loading for the registry system
+
+# Import serialization utilities
+
+
 # Export for convenient imports
 __all__ = [
-    # Core registry system
-    "registry_system",
+    "ConfigType",
+    "Configuration",
+    "Dependency",
+    "DependencyType",
     # Models
     "EntityType",
-    "ConfigType",
-    "DependencyType",
-    "ImportStatus",
-    "RegistryItem",
-    "Configuration",
-    "GraphDefinition",
-    "Dependency",
     "EnvironmentVar",
+    "GraphDefinition",
     "ImportLogItem",
+    "ImportStatus",
+    "MCPPromptDefinition",
+    "MCPResourceDefinition",
+    "MCPServerConfig",
+    "MCPServerHealth",
+    "MCPToolDefinition",
     # MCP Models
     "MCPTransport",
-    "MCPServerConfig",
-    "MCPToolDefinition",
-    "MCPResourceDefinition",
-    "MCPPromptDefinition",
-    "MCPServerHealth",
+    "RegistryItem",
+    "SerializationRegistry",
+    "deserialize_object",
+    "discover_agents",
     # Discovery
     "discover_all",
-    "discover_agents",
-    "discover_tools",
-    "discover_toolkits",
     "discover_engines",
     "discover_games",
+    "discover_toolkits",
+    "discover_tools",
+    # Core registry system
+    "registry_system",
     # Serialization
     "serialize_object",
-    "deserialize_object",
-    "SerializationRegistry",
 ]

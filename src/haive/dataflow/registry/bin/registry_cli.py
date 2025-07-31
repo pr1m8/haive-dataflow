@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Haive Registry CLI
+"""Haive Registry CLI.
 
 This script provides a command-line interface for the Haive registry system.
 It allows users to:
@@ -22,8 +22,25 @@ import argparse
 import json
 import sys
 import textwrap
-import traceback
 from pathlib import Path
+
+from rich import box
+from rich.console import Console
+from rich.panel import Panel
+from rich.syntax import Syntax
+from rich.table import Table
+
+from haive.dataflow.core import registry_system
+from haive.dataflow.discovery import (
+    discover_agents,
+    discover_all,
+    discover_engines,
+    discover_games,
+    discover_toolkits,
+    discover_tools,
+)
+from haive.dataflow.importers.litellm_importer import import_llm_models
+from haive.dataflow.models import EntityType
 
 # Add project root to path if needed
 project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
@@ -32,12 +49,6 @@ if str(project_root) not in sys.path:
 
 # Try to import rich for better formatting
 try:
-    from rich import box
-    from rich.console import Console
-    from rich.markdown import Markdown
-    from rich.panel import Panel
-    from rich.syntax import Syntax
-    from rich.table import Table
 
     RICH_AVAILABLE = True
 except ImportError:
@@ -45,22 +56,12 @@ except ImportError:
 
 # Import registry system
 try:
-    from haive.dataflow.core import registry_system
-    from haive.dataflow.discovery import (
-        discover_agents,
-        discover_all,
-        discover_engines,
-        discover_games,
-        discover_toolkits,
-        discover_tools,
-    )
-    from haive.dataflow.importers.litellm_importer import import_llm_models
-    from haive.dataflow.models import EntityType, ImportStatus
-except ImportError as e:
-    print(f"Error importing registry system: {e}")
-    print(
-        "Make sure you're running this script from the project root or that the module is in your PYTHONPATH."
-    )
+    import importlib.util
+
+    spec = importlib.util.find_spec("..core", package=__package__)
+    if spec is None:
+        sys.exit(1)
+except ImportError:
     sys.exit(1)
 
 # Initialize console if rich is available
@@ -72,7 +73,7 @@ def print_rich(message, style="", highlight=False, markup=True):
     if RICH_AVAILABLE:
         console.print(message, style=style, highlight=highlight, markup=markup)
     else:
-        print(message)
+        pass
 
 
 def print_header(title, style="bold blue"):
@@ -81,8 +82,7 @@ def print_header(title, style="bold blue"):
         console.print(f"\n[{style}]{title}[/{style}]")
         console.print("=" * len(title))
     else:
-        print(f"\n{title}")
-        print("=" * len(title))
+        pass
 
 
 def print_subheader(title, style="bold cyan"):
@@ -91,8 +91,7 @@ def print_subheader(title, style="bold cyan"):
         console.print(f"\n[{style}]{title}[/{style}]")
         console.print("-" * len(title))
     else:
-        print(f"\n{title}")
-        print("-" * len(title))
+        pass
 
 
 def print_table(headers, rows, title=None):
@@ -114,8 +113,7 @@ def print_table(headers, rows, title=None):
     else:
         # Simple ASCII table
         if title:
-            print(f"\n{title}")
-            print("-" * len(title))
+            pass
 
         # Calculate column widths
         col_widths = []
@@ -133,18 +131,16 @@ def print_table(headers, rows, title=None):
             col_widths.append(col_width)
 
         # Print headers
-        header_row = (
+        (
             "| "
             + " | ".join(h.ljust(col_widths[i]) for i, h in enumerate(headers))
             + " |"
         )
-        print(header_row)
-        print("|" + "-" * (len(header_row) - 2) + "|")
 
         # Print rows
         for row in rows:
             str_row = [str(val) if val is not None else "" for val in row]
-            padded_row = [
+            [
                 (
                     str_row[i].ljust(col_widths[i])
                     if i < len(str_row)
@@ -152,7 +148,6 @@ def print_table(headers, rows, title=None):
                 )
                 for i in range(len(col_widths))
             ]
-            print("| " + " | ".join(padded_row) + " |")
 
 
 def setup_parser() -> argparse.ArgumentParser:
@@ -275,7 +270,6 @@ def handle_discover(args):
             print_table(["Entity Type", "Count"], rows, "Discovery Results")
         except Exception as e:
             print_rich(f"Error during discovery: {e}", style="bold red")
-            print(traceback.format_exc())
 
     elif args.type == "agents":
         print_header("Discovering agents...")
@@ -310,7 +304,6 @@ def handle_discover(args):
                 )
         except Exception as e:
             print_rich(f"Error discovering agents: {e}", style="bold red")
-            print(traceback.format_exc())
 
     elif args.type == "tools":
         print_header("Discovering tools...")
@@ -345,7 +338,6 @@ def handle_discover(args):
                 )
         except Exception as e:
             print_rich(f"Error discovering tools: {e}", style="bold red")
-            print(traceback.format_exc())
 
     elif args.type == "toolkits":
         print_header("Discovering toolkits...")
@@ -389,7 +381,6 @@ def handle_discover(args):
                 )
         except Exception as e:
             print_rich(f"Error discovering toolkits: {e}", style="bold red")
-            print(traceback.format_exc())
 
     elif args.type == "engines":
         print_header("Discovering engines...")
@@ -438,7 +429,6 @@ def handle_discover(args):
                 )
         except Exception as e:
             print_rich(f"Error discovering engines: {e}", style="bold red")
-            print(traceback.format_exc())
 
     elif args.type == "games":
         print_header("Discovering games...")
@@ -473,7 +463,6 @@ def handle_discover(args):
                 )
         except Exception as e:
             print_rich(f"Error discovering games: {e}", style="bold red")
-            print(traceback.format_exc())
 
 
 def handle_import(args):
@@ -490,7 +479,6 @@ def handle_import(args):
                 print_rich("Failed to import LLM models", style="bold red")
         except Exception as e:
             print_rich(f"Error importing LLM models: {e}", style="bold red")
-            print(traceback.format_exc())
 
 
 def handle_stats(args):
@@ -528,7 +516,6 @@ def handle_stats(args):
         print_rich(f"Dependencies: {stats.get('dependencies', 0)}")
     except Exception as e:
         print_rich(f"Error retrieving stats: {e}", style="bold red")
-        print(traceback.format_exc())
 
 
 def handle_search(args):
@@ -615,7 +602,6 @@ def handle_search(args):
             print_rich("No matching components found", style="bold yellow")
     except Exception as e:
         print_rich(f"Error searching for components: {e}", style="bold red")
-        print(traceback.format_exc())
 
 
 def handle_show(args):
@@ -641,9 +627,6 @@ def handle_show(args):
             console.print(panel)
         else:
             print_subheader("Component Details")
-            print(f"Name: {details.get('name')}")
-            print(f"Type: {details.get('type')}")
-            print(f"Description: {details.get('description')}")
 
         # Print module info
         print_subheader("Implementation")
@@ -657,15 +640,15 @@ def handle_show(args):
             if RICH_AVAILABLE:
                 console.print(format_json(metadata))
             else:
-                for key, value in metadata.items():
-                    print(f"- {key}: {value}")
+                for _key, _value in metadata.items():
+                    pass
 
         # Print configurations
         configs = details.get("configurations", [])
         if configs:
             print_subheader("Configurations")
             for i, config in enumerate(configs):
-                print_rich(f"Configuration {i+1}: {config.get('type')}", style="bold")
+                print_rich(f"Configuration {i + 1}: {config.get('type')}", style="bold")
 
                 if config.get("type") in [
                     "state_schema",
@@ -747,7 +730,6 @@ def handle_show(args):
             print_table(["Variable", "Status", "Default Value"], rows)
     except Exception as e:
         print_rich(f"Error retrieving entity details: {e}", style="bold red")
-        print(traceback.format_exc())
 
 
 def handle_list(args):
@@ -822,7 +804,6 @@ def handle_list(args):
             print_rich(f"No {entity_type_str} found in registry", style="bold yellow")
     except Exception as e:
         print_rich(f"Error listing entities: {e}", style="bold red")
-        print(traceback.format_exc())
 
 
 def handle_clear(args):
@@ -848,7 +829,6 @@ def handle_clear(args):
             print_rich("Failed to clear registry", style="bold red")
     except Exception as e:
         print_rich(f"Error clearing registry: {e}", style="bold red")
-        print(traceback.format_exc())
 
 
 def main():

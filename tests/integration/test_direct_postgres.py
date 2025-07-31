@@ -45,7 +45,7 @@ async def test_connections():
             async with conn.cursor() as cursor:
                 await cursor.execute("SELECT version()")
                 version = await cursor.fetchone()
-                print(f"✓ Connected successfully!")
+                print("✓ Connected successfully!"!")
                 print(f"  PostgreSQL version: {version[0][:50]}...")
 
                 # Check for agent_state schema

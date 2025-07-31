@@ -108,8 +108,8 @@ class ConversationManager:
     def __init__(self):
         """Initialize the conversation manager.
 
-        Sets up the Supabase configuration and persistence adapter.
-        The actual Supabase client is lazy-loaded when first needed.
+        Sets up the Supabase configuration and persistence adapter. The
+        actual Supabase client is lazy-loaded when first needed.
         """
         self.supabase_config = get_supabase_server_config()
         self.persistence = SupabasePersistence()
@@ -194,9 +194,12 @@ class ConversationManager:
             if not success:
                 logger.error(f"Failed to register thread: {thread_id}")
                 # Rollback conversation
-                await self.client.from_("user_data.conversations").delete().eq(
-                    "id", conversation_id
-                ).execute()
+                await (
+                    self.client.from_("user_data.conversations")
+                    .delete()
+                    .eq("id", conversation_id)
+                    .execute()
+                )
                 return None
 
             return {
@@ -206,7 +209,7 @@ class ConversationManager:
                 "agent_id": metadata.agent_id,
             }
         except Exception as e:
-            logger.error(f"Error creating conversation: {e}")
+            logger.exception(f"Error creating conversation: {e}")
             return None
 
     async def get_conversation(
@@ -244,7 +247,7 @@ class ConversationManager:
 
             return conversation
         except Exception as e:
-            logger.error(f"Error getting conversation: {e}")
+            logger.exception(f"Error getting conversation: {e}")
             return None
 
     async def list_conversations(
@@ -276,5 +279,5 @@ class ConversationManager:
 
             return response.data
         except Exception as e:
-            logger.error(f"Error listing conversations: {e}")
+            logger.exception(f"Error listing conversations: {e}")
             return []

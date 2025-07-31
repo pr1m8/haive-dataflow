@@ -231,13 +231,13 @@ def fetch_foreign_key_relations(client: Client) -> list[dict]:
             ccu.table_schema AS foreign_table_schema,
             ccu.table_name AS foreign_table_name,
             ccu.column_name AS foreign_column_name
-        FROM 
-            information_schema.table_constraints AS tc 
+        FROM
+            information_schema.table_constraints AS tc
             JOIN information_schema.key_column_usage AS kcu
               ON tc.constraint_name = kcu.constraint_name
             JOIN information_schema.constraint_column_usage AS ccu
               ON ccu.constraint_name = tc.constraint_name
-        WHERE 
+        WHERE
             tc.constraint_type = 'FOREIGN KEY'
         ORDER BY
             tc.table_schema, tc.table_name
@@ -247,9 +247,11 @@ def fetch_foreign_key_relations(client: Client) -> list[dict]:
 
 
 def fetch_table_columns(client: Client) -> list[dict]:
-    """Get all columns, types, and constraints from information_schema.columns."""
+    """Get all columns, types, and constraints from
+    information_schema.columns.
+    """
     sql = """
-        SELECT 
+        SELECT
             table_schema,
             table_name,
             column_name,
@@ -259,11 +261,11 @@ def fetch_table_columns(client: Client) -> list[dict]:
             character_maximum_length,
             numeric_precision,
             numeric_scale
-        FROM 
+        FROM
             information_schema.columns
-        WHERE 
+        WHERE
             table_schema NOT IN ('information_schema', 'pg_catalog')
-        ORDER BY 
+        ORDER BY
             table_schema, table_name, ordinal_position
     """
     sql = sanitize_sql(sql)
@@ -278,13 +280,13 @@ def fetch_primary_keys(client: Client) -> list[dict]:
             kcu.table_name,
             tco.constraint_name,
             kcu.column_name
-        FROM 
+        FROM
             information_schema.table_constraints tco
-            JOIN information_schema.key_column_usage kcu 
+            JOIN information_schema.key_column_usage kcu
               ON kcu.constraint_name = tco.constraint_name
-        WHERE 
+        WHERE
             tco.constraint_type = 'PRIMARY KEY'
-        ORDER BY 
+        ORDER BY
             kcu.table_schema, kcu.table_name, kcu.ordinal_position
     """
     sql = sanitize_sql(sql)

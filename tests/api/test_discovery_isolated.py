@@ -8,7 +8,6 @@ haive_root = Path(__file__).parents[4]
 sys.path.insert(0, str(haive_root / "packages" / "haive-core" / "src"))
 sys.path.insert(0, str(haive_root / "packages" / "haive-dataflow" / "src"))
 
-from haive.core.utils.haive_discovery.component_info import ComponentInfo
 
 # Import only the specific discovery classes we need
 from haive.core.utils.haive_discovery.haive_discovery import HaiveComponentDiscovery
@@ -138,7 +137,7 @@ def test_path_resolution():
     # Test discovery instance creation
     print("\n  Testing HaiveComponentDiscovery instantiation...")
     try:
-        test_discovery = HaiveComponentDiscovery(str(calculated_root))
+        HaiveComponentDiscovery(str(calculated_root))
         print("  ✅ Discovery instance created successfully")
     except Exception as e:
         print(f"  ❌ Failed to create discovery instance: {e}")

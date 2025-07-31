@@ -31,16 +31,19 @@ Note:
     and haive_discovery by using the lazy import pattern implemented in haive-core.
 """
 
+import contextlib
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
-# Import discovery system
 from .utils.haive_discovery import ComponentInfo, HaiveComponentDiscovery
+
+# Import discovery system
+
 
 logger = logging.getLogger(__name__)
 
@@ -48,8 +51,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/agents", tags=["agents"])
 
 # Module-level cache
-_discovery_cache: Dict[str, Any] = {}
-_discovery_instance: Optional[HaiveComponentDiscovery] = None
+_discovery_cache: dict[str, Any] = {}
+_discovery_instance: HaiveComponentDiscovery | None = None
 
 # Get haive root path
 haive_root = Path(__file__).parents[6]
@@ -74,9 +77,9 @@ class AgentInfo(BaseModel):
     module: str = Field(..., description="Module path")
     agent_type: str = Field(..., description="Agent type (v1 or v2)")
     version: str = Field(..., description="Agent version")
-    config_class: Optional[str] = Field(None, description="Config class for v1 agents")
+    config_class: str | None = Field(None, description="Config class for v1 agents")
     category: str = Field(default="general", description="Agent category")
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
@@ -84,8 +87,8 @@ class AgentInfo(BaseModel):
 class AgentDetailResponse(BaseModel):
     """Detailed response for a specific agent.
 
-    Includes all AgentInfo fields plus additional details about
-    the component discovery and file location.
+    Includes all AgentInfo fields plus additional details about the
+    component discovery and file location.
     """
 
     name: str
@@ -93,11 +96,11 @@ class AgentDetailResponse(BaseModel):
     module: str
     agent_type: str
     version: str
-    config_class: Optional[str]
+    config_class: str | None
     category: str
-    metadata: Dict[str, Any]
-    component_info: Dict[str, Any]
-    discovery_info: Dict[str, Any]
+    metadata: dict[str, Any]
+    component_info: dict[str, Any]
+    discovery_info: dict[str, Any]
 
 
 class AgentListResponse(BaseModel):
@@ -111,7 +114,7 @@ class AgentListResponse(BaseModel):
         discovery_method: Method used for discovery.
     """
 
-    agents: List[AgentInfo] = Field(..., description="List of available agents")
+    agents: list[AgentInfo] = Field(..., description="List of available agents")
     count: int = Field(..., description="Total number of agents")
     v1_count: int = Field(..., description="Number of v1 agents")
     v2_count: int = Field(..., description="Number of v2 agents")
@@ -136,7 +139,7 @@ def get_discovery_instance() -> HaiveComponentDiscovery:
     return _discovery_instance
 
 
-def discover_all_agents(force_refresh: bool = False) -> List[ComponentInfo]:
+def discover_all_agents(force_refresh: bool = False) -> list[ComponentInfo]:
     """Discover all agents using the unified discovery system.
 
     Args:
@@ -216,9 +219,8 @@ def discover_all_agents(force_refresh: bool = False) -> List[ComponentInfo]:
             elif (
                 component.name.endswith("Config")
                 and "agent" in component.module_path.lower()
-            ):
-                if component.name not in ["BaseConfig", "AgentConfig"]:
-                    agent_components.append(component)
+            ) and component.name not in ["BaseConfig", "AgentConfig"]:
+                agent_components.append(component)
 
         logger.info(f"Total agents discovered: {len(agent_components)}")
         _discovery_cache[cache_key] = agent_components
@@ -229,7 +231,7 @@ def discover_all_agents(force_refresh: bool = False) -> List[ComponentInfo]:
         return []
 
 
-def categorize_agents(agents: List[ComponentInfo]) -> Dict[str, List[ComponentInfo]]:
+def categorize_agents(agents: list[ComponentInfo]) -> dict[str, list[ComponentInfo]]:
     """Categorize agents by their type/category.
 
     Args:
@@ -272,7 +274,7 @@ def categorize_agents(agents: List[ComponentInfo]) -> Dict[str, List[ComponentIn
     return categories
 
 
-def extract_agent_metadata(agent: ComponentInfo) -> Dict[str, Any]:
+def extract_agent_metadata(agent: ComponentInfo) -> dict[str, Any]:
     """Extract rich metadata from an agent component.
 
     Args:
@@ -322,10 +324,8 @@ def extract_agent_metadata(agent: ComponentInfo) -> Dict[str, Any]:
 
     # Extract capabilities if available
     if agent.class_obj and hasattr(agent.class_obj, "capabilities"):
-        try:
+        with contextlib.suppress(BaseException):
             metadata["capabilities"] = agent.class_obj.capabilities
-        except:
-            pass
 
     return metadata
 
@@ -377,10 +377,8 @@ def component_to_agent_info(component: ComponentInfo) -> AgentInfo:
 
 @router.get("/", response_model=AgentListResponse)
 async def list_agents(
-    agent_type: Optional[str] = Query(
-        None, description="Filter by agent type (v1, v2)"
-    ),
-    category: Optional[str] = Query(None, description="Filter by category"),
+    agent_type: str | None = Query(None, description="Filter by agent type (v1, v2)"),
+    category: str | None = Query(None, description="Filter by category"),
     force_refresh: bool = Query(False, description="Force refresh discovery cache"),
 ) -> AgentListResponse:
     """List all available agents with optional filtering.
@@ -432,14 +430,14 @@ async def list_agents(
             discovery_method="haive-core unified discovery",
         )
     except Exception as e:
-        logger.error(f"Failed to list agents: {e}")
+        logger.exception(f"Failed to list agents: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/search", response_model=AgentListResponse)
 async def search_agents(
     query: str = Query(..., description="Search query"),
-    agent_type: Optional[str] = Query(None, description="Filter by agent type"),
+    agent_type: str | None = Query(None, description="Filter by agent type"),
 ) -> AgentListResponse:
     """Search agents by name or description.
 
@@ -492,7 +490,7 @@ async def search_agents(
             discovery_method="haive-core unified discovery",
         )
     except Exception as e:
-        logger.error(f"Failed to search agents: {e}")
+        logger.exception(f"Failed to search agents: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -566,12 +564,12 @@ async def get_agent_details(agent_name: str) -> AgentDetailResponse:
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get agent details: {e}")
+        logger.exception(f"Failed to get agent details: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/stats", response_model=Dict[str, Any])
-async def get_agent_stats() -> Dict[str, Any]:
+@router.get("/stats", response_model=dict[str, Any])
+async def get_agent_stats() -> dict[str, Any]:
     """Get statistics about discovered agents.
 
     Returns:
@@ -635,5 +633,5 @@ async def get_agent_stats() -> Dict[str, Any]:
         }
 
     except Exception as e:
-        logger.error(f"Failed to get agent stats: {e}")
+        logger.exception(f"Failed to get agent stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))

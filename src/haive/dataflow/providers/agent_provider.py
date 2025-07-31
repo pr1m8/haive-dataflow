@@ -1,7 +1,7 @@
 """Agent provider for the Haive Registry System.
 
-This module implements the agent provider that handles discovery and registration
-of agent components.
+This module implements the agent provider that handles discovery and
+registration of agent components.
 """
 
 import inspect
@@ -10,15 +10,17 @@ import uuid
 from datetime import datetime
 
 from haive.dataflow.core import registry_system
-
-# Import models
 from haive.dataflow.models import ConfigType, DependencyType, EntityType, ImportStatus
 
-# Import provider base class
 from .providers.base import EntityProvider
+from .utils.logging import setup_discovery_logger
+
+# Import models
+
+# Import provider base class
 
 # Set up logging
-from .utils.logging import setup_discovery_logger
+
 
 logger = setup_discovery_logger("agents")
 
@@ -26,8 +28,9 @@ logger = setup_discovery_logger("agents")
 class AgentProvider(EntityProvider):
     """Provider for agent components.
 
-    This provider handles discovery and registration of agent configurations,
-    including their state schemas, engines, and other components.
+    This provider handles discovery and registration of agent
+    configurations, including their state schemas, engines, and other
+    components.
     """
 
     def __init__(self):
@@ -79,14 +82,15 @@ class AgentProvider(EntityProvider):
                         is_agent_config = False
 
                         # Check class name and inheritance
-                        if name.endswith("Config") or name.endswith("AgentConfig"):
+                        if name.endswith(("Config", "AgentConfig")):
                             # Check inheritance - look for AgentConfig in mro
                             for base in obj.__mro__:
                                 if base.__name__ in ["AgentConfig"]:
                                     is_agent_config = True
                                     break
 
-                        # Check for specific attributes that suggest it's an agent config
+                        # Check for specific attributes that suggest it's an agent
+                        # config
                         if hasattr(obj, "build_agent") or hasattr(obj, "agent_class"):
                             is_agent_config = True
 
@@ -192,7 +196,8 @@ class AgentProvider(EntityProvider):
                                             config_data=instance.engine,
                                         )
 
-                                        # If it's an AugLLMConfig, extract its components
+                                        # If it's an AugLLMConfig, extract its
+                                        # components
                                         if engine_type == "aug_llm":
                                             # Extract prompt template
                                             if hasattr(
@@ -359,7 +364,7 @@ class AgentProvider(EntityProvider):
 
                                 except Exception as e:
                                     err_tb = traceback.format_exc()
-                                    logger.error(
+                                    logger.exception(
                                         f"Error registering configurations for {agent_name}: {e}\n{err_tb}"
                                     )
 
@@ -377,7 +382,7 @@ class AgentProvider(EntityProvider):
                             except Exception as e:
                                 # Log error
                                 err_tb = traceback.format_exc()
-                                logger.error(
+                                logger.exception(
                                     f"Error registering agent {name} from {module_name}: {e}\n{err_tb}"
                                 )
 
@@ -391,7 +396,7 @@ class AgentProvider(EntityProvider):
 
                 except Exception as e:
                     err_tb = traceback.format_exc()
-                    logger.error(
+                    logger.exception(
                         f"Error processing module {module_name}: {e}\n{err_tb}"
                     )
 

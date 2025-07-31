@@ -5,15 +5,13 @@ integrating with the haive-games package.
 """
 
 import logging
-from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
+from haive.games.api import GameInfo, GameSelectionRequest, create_general_game_api
 
 # Import games API
 try:
-    from haive.games.api import GameInfo, GameSelectionRequest, create_general_game_api
-
     GAMES_AVAILABLE = True
 except ImportError:
     GAMES_AVAILABLE = False
@@ -25,8 +23,8 @@ logger = logging.getLogger(__name__)
 
 def create_games_router(
     prefix: str = "/games",
-    tags: Optional[List[str]] = None,
-    exclude_games: Optional[List[str]] = None,
+    tags: list[str] | None = None,
+    exclude_games: list[str] | None = None,
 ) -> APIRouter:
     """Create a router for the games API.
 
@@ -62,7 +60,6 @@ def create_games_router(
         return router
 
     # Create a sub-app for games
-    from fastapi import FastAPI
 
     games_app = FastAPI()
 
@@ -73,7 +70,7 @@ def create_games_router(
         )
 
         # Mount the games app routes
-        @router.get("/", response_model=List[GameInfo])
+        @router.get("/", response_model=list[GameInfo])
         async def list_games():
             """List all available games."""
             # Forward to the games API
@@ -142,13 +139,17 @@ def create_games_router(
         )
 
     except Exception as e:
-        logger.error(f"Failed to initialize games API: {e}")
+        logger.exception(f"Failed to initialize games API: {e}")
+        error_message = str(e)
 
         @router.get("/")
         async def games_error():
             return JSONResponse(
                 status_code=500,
-                content={"error": "Failed to initialize games", "message": str(e)},
+                content={
+                    "error": "Failed to initialize games",
+                    "message": error_message,
+                },
             )
 
     return router
@@ -163,8 +164,6 @@ def get_game_api():
     global _game_api_instance
 
     if _game_api_instance is None and GAMES_AVAILABLE:
-        from fastapi import FastAPI
-
         app = FastAPI()
         _, _game_api_instance = create_general_game_api(app)
 
@@ -185,8 +184,6 @@ def create_games_websocket_router(prefix: str = "/ws/games") -> APIRouter:
 
     if not GAMES_AVAILABLE:
         return router
-
-    from fastapi import WebSocket, WebSocketDisconnect
 
     @router.websocket("/{game_id}/{thread_id}")
     async def game_websocket(websocket: WebSocket, game_id: str, thread_id: str):
@@ -241,7 +238,7 @@ def create_games_websocket_router(prefix: str = "/ws/games") -> APIRouter:
         except WebSocketDisconnect:
             logger.info(f"WebSocket disconnected for {game_id}/{thread_id}")
         except Exception as e:
-            logger.error(f"WebSocket error: {e}")
+            logger.exception(f"WebSocket error: {e}")
             await websocket.close()
 
     return router

@@ -13,6 +13,7 @@ import chess
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 # Configure logging
@@ -130,7 +131,9 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
         active_connections.add(websocket)
         connection_game_map[websocket] = game_id
         logger.info(
-            f"Connection registered for game: {game_id}, total connections: {len(active_connections)}"
+            f"Connection registered for game: {game_id}, total connections: {
+                len(active_connections)
+            }"
         )
 
         # Initialize game if needed
@@ -156,7 +159,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
                 message_type = data.get("type", "")
                 logger.info(f"Processing message type: {message_type}")
             except Exception as e:
-                logger.error(f"Error receiving message: {e}")
+                logger.exception(f"Error receiving message: {e}")
                 raise
 
             if message_type == "make_move":
@@ -218,20 +221,20 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
 
     except Exception as e:
         error_msg = f"WebSocket error for game {game_id}: {e!s}"
-        logger.error(error_msg)
-        logger.error(traceback.format_exc())  # Full traceback
+        logger.exception(error_msg)
+        logger.exception(traceback.format_exc())  # Full traceback
         try:
             await websocket.send_json(
                 {"type": "error", "message": f"Server error: {e!s}"}
             )
         except Exception as send_error:
-            logger.error(f"Failed to send error message to client: {send_error!s}")
+            logger.exception(f"Failed to send error message to client: {send_error!s}")
 
         active_connections.discard(websocket)
         connection_game_map.pop(websocket, None)
         logger.info(
-            f"Connection terminated due to error, remaining connections: {len(active_connections)}"
-        )
+            f"Connection terminated due to error, remaining connections: {
+                len(active_connections)}")
 
 
 async def make_ai_move(websocket: WebSocket, game_id: str):
@@ -269,7 +272,6 @@ async def make_ai_move(websocket: WebSocket, game_id: str):
 
 
 # Serve HTML client
-from fastapi.responses import HTMLResponse
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -289,7 +291,7 @@ async def get_client():
             margin: 0 auto;
             padding: 20px;
         }
-        
+
         #log {
             height: 300px;
             overflow-y: auto;
@@ -297,19 +299,19 @@ async def get_client():
             padding: 10px;
             margin-top: 10px;
         }
-        
+
         .entry {
             margin-bottom: 5px;
         }
-        
+
         .error {
             color: red;
         }
-        
+
         .sent {
             color: blue;
         }
-        
+
         .received {
             color: green;
         }
@@ -317,22 +319,22 @@ async def get_client():
 </head>
 <body>
     <h1>Simple WebSocket Test</h1>
-    
+
     <div>
         <label for="wsUrl">WebSocket URL:</label>
         <input type="text" id="wsUrl" value="ws://localhost:8003/ws/chess/test123" style="width: 300px;">
         <button id="connectBtn">Connect</button>
         <button id="disconnectBtn" disabled>Disconnect</button>
     </div>
-    
+
     <div style="margin-top: 10px;">
         <button id="getStateBtn" disabled>Get State</button>
         <button id="aiMoveBtn" disabled>AI Move</button>
     </div>
-    
+
     <h3>WebSocket Log</h3>
     <div id="log"></div>
-    
+
     <script>
         // DOM elements
         const wsUrlInput = document.getElementById('wsUrl');
@@ -341,10 +343,10 @@ async def get_client():
         const getStateBtn = document.getElementById('getStateBtn');
         const aiMoveBtn = document.getElementById('aiMoveBtn');
         const logContainer = document.getElementById('log');
-        
+
         // WebSocket connection
         let socket = null;
-        
+
         // Log a message
         function log(message, type = 'info') {
             const entry = document.createElement('div');
@@ -353,21 +355,21 @@ async def get_client():
             logContainer.appendChild(entry);
             logContainer.scrollTop = logContainer.scrollHeight;
         }
-        
+
         // Connect to WebSocket
         function connect() {
             const url = wsUrlInput.value;
-            
+
             if (socket) {
                 socket.close();
                 socket = null;
             }
-            
+
             log(`Connecting to ${url}...`);
-            
+
             try {
                 socket = new WebSocket(url);
-                
+
                 socket.addEventListener('open', (event) => {
                     log('Connection established', 'received');
                     connectBtn.disabled = true;
@@ -375,7 +377,7 @@ async def get_client():
                     getStateBtn.disabled = false;
                     aiMoveBtn.disabled = false;
                 });
-                
+
                 socket.addEventListener('message', (event) => {
                     log(`Received: ${event.data}`, 'received');
                     try {
@@ -385,7 +387,7 @@ async def get_client():
                         console.error('Error parsing message:', e);
                     }
                 });
-                
+
                 socket.addEventListener('close', (event) => {
                     log('Connection closed', 'error');
                     connectBtn.disabled = false;
@@ -393,7 +395,7 @@ async def get_client():
                     getStateBtn.disabled = true;
                     aiMoveBtn.disabled = true;
                 });
-                
+
                 socket.addEventListener('error', (event) => {
                     log('WebSocket error', 'error');
                     console.error('WebSocket error:', event);
@@ -403,7 +405,7 @@ async def get_client():
                 console.error('Error creating WebSocket:', e);
             }
         }
-        
+
         // Disconnect from WebSocket
         function disconnect() {
             if (socket) {
@@ -412,7 +414,7 @@ async def get_client():
                 socket = null;
             }
         }
-        
+
         // Send a message to get state
         function getState() {
             if (socket && socket.readyState === WebSocket.OPEN) {
@@ -425,7 +427,7 @@ async def get_client():
                 log('WebSocket not connected', 'error');
             }
         }
-        
+
         // Send a message to request AI move
         function requestAiMove() {
             if (socket && socket.readyState === WebSocket.OPEN) {
@@ -438,7 +440,7 @@ async def get_client():
                 log('WebSocket not connected', 'error');
             }
         }
-        
+
         // Event listeners
         connectBtn.addEventListener('click', connect);
         disconnectBtn.addEventListener('click', disconnect);

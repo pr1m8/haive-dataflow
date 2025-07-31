@@ -67,7 +67,8 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
     auth: SupabaseAuth = Depends(get_auth_instance),
 ) -> str | None:
-    """Verify the token and return the user ID if valid (optional authentication).
+    """Verify the token and return the user ID if valid (optional
+    authentication).
 
     This dependency function provides optional authentication for routes.
     It extracts the JWT token from the Authorization header if present,

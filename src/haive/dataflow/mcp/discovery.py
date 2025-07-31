@@ -20,9 +20,7 @@ Functions:
 import asyncio
 import json
 import logging
-import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from .registry.models import (
     EntityType,
@@ -66,12 +64,12 @@ class MCPDiscovery:
             registry_system: Optional registry system instance
         """
         self.registry_system = registry_system
-        self.discovered_servers: List[MCPServerConfig] = []
-        self.discovered_tools: List[MCPToolDefinition] = []
-        self.discovered_resources: List[MCPResourceDefinition] = []
-        self.discovered_prompts: List[MCPPromptDefinition] = []
+        self.discovered_servers: list[MCPServerConfig] = []
+        self.discovered_tools: list[MCPToolDefinition] = []
+        self.discovered_resources: list[MCPResourceDefinition] = []
+        self.discovered_prompts: list[MCPPromptDefinition] = []
 
-    async def discover_all(self) -> List[MCPServerConfig]:
+    async def discover_all(self) -> list[MCPServerConfig]:
         """Discover MCP servers from all available sources.
 
         Returns:
@@ -111,7 +109,7 @@ class MCPDiscovery:
 
         return self.discovered_servers
 
-    async def discover_npm_servers(self) -> List[MCPServerConfig]:
+    async def discover_npm_servers(self) -> list[MCPServerConfig]:
         """Discover MCP servers from npm packages.
 
         Returns:
@@ -174,7 +172,7 @@ class MCPDiscovery:
 
         return servers
 
-    async def discover_pip_servers(self) -> List[MCPServerConfig]:
+    async def discover_pip_servers(self) -> list[MCPServerConfig]:
         """Discover MCP servers from pip packages.
 
         Returns:
@@ -222,7 +220,7 @@ class MCPDiscovery:
 
         return servers
 
-    async def discover_local_servers(self) -> List[MCPServerConfig]:
+    async def discover_local_servers(self) -> list[MCPServerConfig]:
         """Discover locally configured MCP servers.
 
         Returns:
@@ -241,7 +239,7 @@ class MCPDiscovery:
         for config_path in config_paths:
             if config_path.exists():
                 try:
-                    with open(config_path, "r") as f:
+                    with open(config_path) as f:
                         config_data = json.load(f)
 
                     # Parse different configuration formats
@@ -253,7 +251,7 @@ class MCPDiscovery:
 
         return servers
 
-    async def discover_from_haive_mcp(self) -> List[MCPServerConfig]:
+    async def discover_from_haive_mcp(self) -> list[MCPServerConfig]:
         """Discover servers from the haive-mcp package data.
 
         This integrates with the existing haive-mcp package to load the 941
@@ -283,7 +281,7 @@ class MCPDiscovery:
         for config_path in mcp_config_paths:
             if config_path.exists():
                 try:
-                    with open(config_path, "r") as f:
+                    with open(config_path) as f:
                         config_data = json.load(f)
 
                     mcp_servers = config_data.get("mcpServers", {})
@@ -317,7 +315,7 @@ class MCPDiscovery:
 
         return servers
 
-    async def register_with_dataflow(self) -> List[str]:
+    async def register_with_dataflow(self) -> list[str]:
         """Register discovered MCP servers with the dataflow registry.
 
         Returns:
@@ -339,13 +337,13 @@ class MCPDiscovery:
                     module_path="haive.dataflow.mcp.client",
                     class_name="MCPServerAdapter",
                     config=server.dict(),
-                    tags=["mcp", "server"] + server.capabilities,
+                    tags=["mcp", "server", *server.capabilities],
                 )
                 registered_ids.append(server_id)
                 logger.info(f"Registered MCP server: {server.name} -> {server_id}")
 
             except Exception as e:
-                logger.error(f"Failed to register MCP server {server.name}: {e}")
+                logger.exception(f"Failed to register MCP server {server.name}: {e}")
 
         logger.info(
             f"Registered {len(registered_ids)} MCP servers with dataflow registry"
@@ -397,7 +395,7 @@ class MCPDiscovery:
         except Exception:
             return False
 
-    async def _parse_mcp_config(self, config_data: Dict) -> List[MCPServerConfig]:
+    async def _parse_mcp_config(self, config_data: dict) -> list[MCPServerConfig]:
         """Parse MCP configuration data into server configs.
 
         Args:
@@ -438,7 +436,7 @@ class MCPDiscovery:
         return servers
 
 
-async def discover_mcp_servers(registry_system=None) -> List[RegistryItem]:
+async def discover_mcp_servers(registry_system=None) -> list[RegistryItem]:
     """Discover MCP servers and create registry items.
 
     This function provides a simple interface for discovering MCP servers
@@ -468,11 +466,13 @@ async def discover_mcp_servers(registry_system=None) -> List[RegistryItem]:
         item = RegistryItem(
             name=server.name,
             type=EntityType.MCP_SERVER,
-            description=f"MCP server providing {', '.join(server.capabilities) if server.capabilities else 'various capabilities'}",
+            description=f"MCP server providing {
+                ', '.join(
+                    server.capabilities) if server.capabilities else 'various capabilities'}",
             module_path="haive.dataflow.mcp.client",
             class_name="MCPServerAdapter",
             config=server.dict(),
-            tags=["mcp", "server"] + server.capabilities,
+            tags=["mcp", "server", *server.capabilities],
         )
         registry_items.append(item)
 

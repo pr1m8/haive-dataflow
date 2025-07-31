@@ -1,7 +1,8 @@
 """Base registry system for Haive components.
 
-This module provides the fundamental registry system that all specific registries inherit from.
-It handles registration, discovery, database persistence, and retrieval of components.
+This module provides the fundamental registry system that all specific
+registries inherit from. It handles registration, discovery, database
+persistence, and retrieval of components.
 """
 
 import importlib
@@ -16,6 +17,8 @@ from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, Field
 
+from haive.dataflow.db.supabase import get_supabase_client
+
 # Set up logging
 logger = logging.getLogger(__name__)
 
@@ -24,8 +27,6 @@ T = TypeVar("T")
 
 # Try to import the Supabase client
 try:
-    from haive.dataflow.db.supabase import get_supabase_client
-
     SUPABASE_AVAILABLE = True
     logger.info("Supabase client available for registry persistence")
 except ImportError:
@@ -68,7 +69,7 @@ class Registry(Generic[T]):
     def __new__(cls):
         """Singleton pattern to ensure only one registry exists."""
         if cls._instance is None:
-            cls._instance = super(Registry, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             cls._instance.entries = {}
             cls._instance._discovered = False
             cls._instance._disabled_discovery = False
@@ -139,8 +140,9 @@ class Registry(Generic[T]):
                     logger.warning(f"Failed to register {item_name} in Supabase: {e}")
 
             logger.info(
-                f"Registered {item_type} {item_name} ({cls.__name__}) in {self.__class__.__name__}"
-            )
+                f"Registered {item_type} {item_name} ({
+                    cls.__name__}) in {
+                    self.__class__.__name__}")
 
             return cls
 
@@ -166,7 +168,7 @@ class Registry(Generic[T]):
             self._supabase_client.table(table_name).upsert(item_dict).execute()
 
         except Exception as e:
-            logger.error(f"Error registering {item.name} in Supabase: {e}")
+            logger.exception(f"Error registering {item.name} in Supabase: {e}")
             logger.debug(traceback.format_exc())
 
     def get(self, name: str, load_if_missing: bool = True) -> type[T] | None:
@@ -201,7 +203,7 @@ class Registry(Generic[T]):
                 item.class_ref = cls
                 return cls
             except (ImportError, AttributeError) as e:
-                logger.error(f"Error loading {name}: {e}")
+                logger.exception(f"Error loading {name}: {e}")
                 return None
 
         # Try loading from Supabase
@@ -240,9 +242,9 @@ class Registry(Generic[T]):
 
                         return cls
                     except (ImportError, AttributeError) as e:
-                        logger.error(f"Error loading {name} from Supabase: {e}")
+                        logger.exception(f"Error loading {name} from Supabase: {e}")
             except Exception as e:
-                logger.error(f"Supabase error retrieving {name}: {e}")
+                logger.exception(f"Supabase error retrieving {name}: {e}")
 
         return None
 
@@ -262,7 +264,7 @@ class Registry(Generic[T]):
             try:
                 return cls(*args, **kwargs)
             except Exception as e:
-                logger.error(f"Error creating {name}: {e}")
+                logger.exception(f"Error creating {name}: {e}")
                 logger.debug(traceback.format_exc())
                 return None
         return None
@@ -317,7 +319,7 @@ class Registry(Generic[T]):
                         **(json.loads(row["metadata"]) if row["metadata"] else {}),
                     }
             except Exception as e:
-                logger.error(f"Supabase error retrieving metadata for {name}: {e}")
+                logger.exception(f"Supabase error retrieving metadata for {name}: {e}")
 
         return {}
 
@@ -340,7 +342,7 @@ class Registry(Generic[T]):
 
         # Filter items by type if needed
         items = []
-        for name, item in self.entries.items():
+        for _name, item in self.entries.items():
             if item_type is None or item.item_type == item_type:
                 items.append(
                     {
@@ -380,7 +382,7 @@ class Registry(Generic[T]):
                             }
                         )
             except Exception as e:
-                logger.error(f"Supabase error retrieving items: {e}")
+                logger.exception(f"Supabase error retrieving items: {e}")
 
         return items
 
@@ -412,8 +414,8 @@ class Registry(Generic[T]):
 
         start_time = datetime.now()
         logger.info(
-            f"=== Starting component discovery at {start_time.strftime('%Y-%m-%d %H:%M:%S')} ==="
-        )
+            f"=== Starting component discovery at {
+                start_time.strftime('%Y-%m-%d %H:%M:%S')} ===")
 
         # Default search paths if none provided
         if not search_paths:
@@ -429,7 +431,9 @@ class Registry(Generic[T]):
             try:
                 package = importlib.import_module(package_path)
                 logger.debug(
-                    f"Package loaded: {package.__name__} from {getattr(package, '__file__', 'unknown location')}"
+                    f"Package loaded: {package.__name__} from {
+                        getattr(package, '__file__', 'unknown location')
+                    }"
                 )
 
                 # Get the package path
@@ -437,8 +441,8 @@ class Registry(Generic[T]):
                 if pkg_path:
                     logger.debug(f"Package directory: {pkg_path}")
                     logger.debug(
-                        f"Directory contents: {os.listdir(pkg_path) if os.path.exists(pkg_path) else 'Not available'}"
-                    )
+                        f"Directory contents: {
+                            os.listdir(pkg_path) if os.path.exists(pkg_path) else 'Not available'}")
 
                 for _, name, is_pkg in pkgutil.iter_modules(
                     package.__path__, package.__name__ + "."
@@ -463,7 +467,9 @@ class Registry(Generic[T]):
                             logger.debug(f"Importing module: {name}")
                             module = importlib.import_module(name)
                             logger.debug(
-                                f"Module loaded: {module.__name__} from {getattr(module, '__file__', 'unknown location')}"
+                                f"Module loaded: {module.__name__} from {
+                                    getattr(module, '__file__', 'unknown location')
+                                }"
                             )
 
                             # Process the module for components
@@ -500,8 +506,8 @@ class Registry(Generic[T]):
                 logger.debug(f"  ✗ {package_name}: {error}")
 
         logger.info(
-            f"=== Component discovery completed at {end_time.strftime('%Y-%m-%d %H:%M:%S')} ==="
-        )
+            f"=== Component discovery completed at {
+                end_time.strftime('%Y-%m-%d %H:%M:%S')} ===")
 
     def get_default_search_paths(self) -> list[str]:
         """Get default search paths for component discovery.

@@ -52,6 +52,10 @@ from decimal import Decimal
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from haive.core.registry import AgentRegistry
+from langchain_core.messages import HumanMessage
+
+from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
 
 from .auth.credits import CreditsManager, UsageRecord
 from .auth.dependencies import require_auth
@@ -60,7 +64,7 @@ from .persistence.conversations import ConversationManager
 
 # Try importing from your registry
 try:
-    from haive.core.registry import AgentRegistry
+    from ...registry import AgentRegistry
 except ImportError:
     # Mock registry for testing
     class AgentRegistry:
@@ -156,7 +160,6 @@ async def add_message(
 
     # Add user message to state
     if isinstance(state, dict):
-        from langchain_core.messages import HumanMessage
 
         if "messages" not in state:
             state["messages"] = []
@@ -173,7 +176,6 @@ async def add_message(
     result = await agent.ainvoke(state, config)
 
     # Update conversation state
-    from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
 
     persistence = SupabasePersistence()
     await persistence.update_state(thread_id, user_id, result)

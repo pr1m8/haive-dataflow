@@ -11,7 +11,6 @@ This script will:
 
 import asyncio
 import os
-import subprocess
 import sys
 from pathlib import Path
 
@@ -60,10 +59,10 @@ def check_supabase_connection():
     try:
         config = get_supabase_server_config()
         print(f"✓ Supabase URL: {config.url}")
-        print(f"✓ Service key configured")
+        print("✓ Service key configured"d")
 
         # Test persistence adapter
-        persistence = SupabasePersistence()
+        SupabasePersistence()
         print("✓ Supabase persistence adapter created")
 
         return True
@@ -133,8 +132,9 @@ def show_configuration_example():
         """
 # Example: Using Supabase checkpointer in your agent
 
-from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
 from haive.core.engine.agent.config import AgentConfig
+
+from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
 
 # Create your agent config
 agent_config = AgentConfig(

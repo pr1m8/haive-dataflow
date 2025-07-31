@@ -14,6 +14,8 @@ import sys
 
 import uvicorn
 
+from haive.dataflow.api.app import app
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
@@ -34,7 +36,6 @@ def main():
     """Run the integrated API."""
     try:
         # Import the app
-        from haive.dataflow.api.app import app
 
         logger.info("Starting integrated Haive API with game support...")
         logger.info("Server will be available at http://localhost:8000")

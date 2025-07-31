@@ -10,12 +10,9 @@ This module tests:
 NOTE: This test module does not use any mocking. All tests work with real games and functionality.
 """
 
-import asyncio
-
 # Add path for imports
 import sys
 from pathlib import Path
-from typing import Any, Dict
 
 import pytest
 from fastapi import FastAPI
@@ -26,7 +23,6 @@ sys.path.insert(
 )
 
 from haive.dataflow.api.general_games_api import (
-    GameSelectionRequest,
     GeneralGameAPI,
     create_general_game_api,
 )
@@ -75,7 +71,7 @@ class TestRealGameDiscovery:
 
     def test_list_games_endpoint(self, app: FastAPI):
         """Test the list games endpoint with real games."""
-        api = GeneralGameAPI(app, exclude_games=["go", "among_us"])
+        GeneralGameAPI(app, exclude_games=["go", "among_us"])
 
         client = TestClient(app)
         response = client.get("/api/games/")
@@ -92,7 +88,7 @@ class TestRealGameDiscovery:
 
     def test_create_game_not_found(self, app: FastAPI):
         """Test creating a non-existent game."""
-        api = GeneralGameAPI(app)
+        GeneralGameAPI(app)
         client = TestClient(app)
 
         request_data = {"game_id": "nonexistent_game", "config_mode": "simple"}
@@ -104,7 +100,7 @@ class TestRealGameDiscovery:
 
     def test_openapi_generation(self, app: FastAPI):
         """Test OpenAPI documentation generation."""
-        api = GeneralGameAPI(app)
+        GeneralGameAPI(app)
 
         client = TestClient(app)
         response = client.get("/openapi.json")
@@ -153,7 +149,7 @@ class TestRealConfigurationValidation:
 
     def test_missing_config_validation(self, app: FastAPI):
         """Test validation of missing required configs."""
-        api = GeneralGameAPI(app)
+        GeneralGameAPI(app)
         client = TestClient(app)
 
         # Test missing player_models for simple mode
@@ -171,7 +167,7 @@ class TestRealConfigurationValidation:
 
     def test_invalid_config_mode(self, app: FastAPI):
         """Test invalid configuration mode."""
-        api = GeneralGameAPI(app)
+        GeneralGameAPI(app)
         client = TestClient(app)
 
         # Test with invalid config mode
@@ -189,7 +185,7 @@ class TestRealAPIIntegration:
 
     def test_route_registration(self, app: FastAPI):
         """Test that routes are properly registered."""
-        api = GeneralGameAPI(app)
+        GeneralGameAPI(app)
 
         # Check that routes are registered
         routes = [route.path for route in app.routes]

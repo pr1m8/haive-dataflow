@@ -1,17 +1,21 @@
 # haive_dataflow/main.py
+
 import logging
 import os
 
 import uvicorn
 from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
-
 from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+
+from .api.app import app
+from .config.settings import get_settings
+
+# Load environment variables from .env file
+load_dotenv()
+
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 
@@ -28,8 +32,6 @@ logging.basicConfig(
 logger = logging.getLogger("haive.dataflow")
 
 # Import fastapi app
-from .api.app import app
-from .config.settings import get_settings
 
 settings = get_settings()
 

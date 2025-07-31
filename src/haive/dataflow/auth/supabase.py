@@ -1,5 +1,9 @@
 # haive/dataflow/auth/supabase.py
+
+import base64
+import json
 import logging
+import traceback
 from typing import Any
 
 import jwt
@@ -34,9 +38,6 @@ class SupabaseAuth:
             # Try to parse the token header to check algorithm
             token_parts = token.split(".")
             if len(token_parts) >= 1:
-                import base64
-                import json
-
                 header_bytes = base64.urlsafe_b64decode(
                     token_parts[0] + "=" * (4 - len(token_parts[0]) % 4)
                 )
@@ -53,7 +54,6 @@ class SupabaseAuth:
         except Exception as e:
             logger.warning(f"Token verification failed: {e!s}")
             # For more detailed debugging
-            import traceback
 
             logger.warning(f"Traceback: {traceback.format_exc()}")
             return None

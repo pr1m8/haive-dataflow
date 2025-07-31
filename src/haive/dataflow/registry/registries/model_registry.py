@@ -1,22 +1,34 @@
 """Model Registry Client for Haive.
 
-This module provides a client interface for working with the registry system
-to access LLM and embedding models with dynamic environment variable detection.
+This module provides a client interface for working with the registry
+system to access LLM and embedding models with dynamic environment
+variable detection.
 """
 
 import inspect
 import json
 import logging
 import os
+import re
+import traceback
 from typing import Any
 
-# Import supabase client utilities
+from haive.core.models.llm.base import LLMConfig, SecureConfigMixin
+from haive.core.models.llm.provider_types import LLMProvider
+
+from haive.dataflow.importers.embeddings_importer import (
+    EMBEDDING_MODELS,
+    import_embedding_models,
+)
+from haive.dataflow.importers.litellm_importer import import_llm_models
+
 from .db.supabase import get_supabase_client, table
+
+# Import supabase client utilities
+
 
 # Import LLM core models for environment variable inspection
 try:
-    from haive.core.models.llm.base import LLMConfig, SecureConfigMixin
-    from haive.core.models.llm.provider_types import LLMProvider
 
     CORE_LLM_AVAILABLE = True
 except ImportError:
@@ -43,7 +55,6 @@ class ModelRegistry:
             logger.info("✅ Initialized Supabase connection for model registry")
         except Exception as e:
             logger.warning(f"Could not initialize Supabase connection: {e}")
-            import traceback
 
             logger.debug(f"Supabase init error traceback: {traceback.format_exc()}")
 
@@ -57,11 +68,10 @@ class ModelRegistry:
         """Load model data from importers."""
         # Try to import embedding models data
         try:
-            from haive.dataflow.importers.embeddings_importer import EMBEDDING_MODELS
 
             logger.info(
-                f"Loaded {len(EMBEDDING_MODELS)} embedding models from embeddings_importer"
-            )
+                f"Loaded {
+                    len(EMBEDDING_MODELS)} embedding models from embeddings_importer")
             self._embedding_models_cache = EMBEDDING_MODELS
         except ImportError:
             logger.warning("Could not import embedding models data")
@@ -76,8 +86,11 @@ class ModelRegistry:
             logger.warning("Could not import LLM models data")
 
     def update_provider_availability(self):
-        """Scan environment variables and update provider availability status."""
-        # Get all required environment variables by scanning the core LLM implementations
+        """Scan environment variables and update provider availability
+        status.
+        """
+        # Get all required environment variables by scanning the core LLM
+        # implementations
         env_vars = self.get_required_environment_vars()
 
         # Check which ones are available in the current environment
@@ -124,10 +137,11 @@ class ModelRegistry:
                 )
 
             except Exception as e:
-                logger.error(f"Error updating provider availability: {e}")
+                logger.exception(f"Error updating provider availability: {e}")
 
     def get_required_environment_vars(self) -> list[dict[str, Any]]:
-        """Scan source code to detect environment variables used by LLM providers.
+        """Scan source code to detect environment variables used by LLM
+        providers.
 
         Returns:
             List of environment variables with provider mapping
@@ -142,7 +156,7 @@ class ModelRegistry:
             return env_vars
 
         # Get the LLMProvider enum values
-        provider_values = {e.value: e.name for e in LLMProvider}
+        {e.value: e.name for e in LLMProvider}
 
         # Extract all subclasses of LLMConfig to find environment variable usage
         llm_config_classes = self._get_llm_config_subclasses()
@@ -176,8 +190,9 @@ class ModelRegistry:
             if not provider_name:
                 continue
 
-            # Look through class attributes to find SecretStr fields with default_factory
-            for attr_name, attr_value in cls.__annotations__.items():
+            # Look through class attributes to find SecretStr fields with
+            # default_factory
+            for attr_name, _attr_value in cls.__annotations__.items():
                 if attr_name == "api_key":
                     # Try to find the default_factory lambda that references os.getenv
                     field_info = (
@@ -191,7 +206,6 @@ class ModelRegistry:
 
                         # Extract environment variable names using a simple approach
                         # Looking for patterns like: os.getenv("ENV_VAR_NAME", "")
-                        import re
 
                         env_var_matches = re.findall(
                             r'os\.getenv\(["\']([A-Z0-9_]+)["\']', source_code
@@ -203,12 +217,11 @@ class ModelRegistry:
                                     "var_name": env_var_name,
                                     "provider_name": provider_name,
                                     "is_required": True,
-                                    "description": f"API key for {provider_name.title()} provider",
-                                }
-                            )
+                                    "description": f"API key for {
+                                        provider_name.title()} provider",
+                                })
                             logger.debug(
-                                f"Detected environment variable: {env_var_name} for provider {provider_name}"
-                            )
+                                f"Detected environment variable: {env_var_name} for provider {provider_name}")
 
         # Add special mappings for providers that might be missed
         for provider, env_var_names in special_mappings.items():
@@ -220,7 +233,8 @@ class ModelRegistry:
                 for var in env_vars
             )
 
-            # If not found or provider is Gemini (we want to ensure both env vars are checked)
+            # If not found or provider is Gemini (we want to ensure both env vars are
+            # checked)
             if not has_provider or provider_lower == "gemini":
                 for env_var_name in env_var_names:
                     # Check if this specific env var is already registered
@@ -233,20 +247,19 @@ class ModelRegistry:
                                 "var_name": env_var_name,
                                 "provider_name": provider_lower,
                                 "is_required": True,
-                                "description": f"API key for {provider.title()} provider",
-                            }
-                        )
+                                "description": f"API key for {
+                                    provider.title()} provider",
+                            })
                         logger.debug(
-                            f"Added special mapping: {env_var_name} for provider {provider_lower}"
-                        )
+                            f"Added special mapping: {env_var_name} for provider {provider_lower}")
 
-        # If we couldn't extract any from the code, fall back to secure config mixin mapping
+        # If we couldn't extract any from the code, fall back to secure config
+        # mixin mapping
         if not env_vars and hasattr(SecureConfigMixin, "_validate_api_key"):
             # Extract environment variable mapping from the secure config mixin
             source_code = inspect.getsource(SecureConfigMixin._validate_api_key)
 
             # Extract the env_key_map dictionary
-            import re
 
             env_map_match = re.search(
                 r"env_key_map\s*=\s*{([^}]+)}", source_code, re.DOTALL
@@ -266,15 +279,15 @@ class ModelRegistry:
                             "var_name": env_var_name,
                             "provider_name": provider_name,
                             "is_required": True,
-                            "description": f"API key for {provider_name.title()} provider",
-                        }
-                    )
+                            "description": f"API key for {
+                                provider_name.title()} provider",
+                        })
                     logger.debug(
-                        f"Extracted environment variable from SecureConfigMixin: {env_var_name} for provider {provider_name}"
-                    )
+                        f"Extracted environment variable from SecureConfigMixin: {env_var_name} for provider {provider_name}")
 
         # Check existing environment variables to see which ones are set
-        # This is helpful for debugging and may catch variables not found by code analysis
+        # This is helpful for debugging and may catch variables not found by code
+        # analysis
         for env_name in os.environ:
             if any(term in env_name for term in ["API_KEY", "TOKEN", "SECRET"]):
                 # Try to match to a provider
@@ -309,12 +322,13 @@ class ModelRegistry:
                                 "var_name": env_name,
                                 "provider_name": provider_match,
                                 "is_required": True,
-                                "description": f"API key for {provider_match.title()} provider (auto-detected)",
+                                "description": f"API key for {
+                                    provider_match.title()
+                                } provider (auto-detected)",
                             }
                         )
                         logger.debug(
-                            f"Auto-detected environment variable: {env_name} for provider {provider_match}"
-                        )
+                            f"Auto-detected environment variable: {env_name} for provider {provider_match}")
 
         # Register these environment variables in config
         if self._supabase and env_vars:
@@ -323,7 +337,7 @@ class ModelRegistry:
         return env_vars
 
     def _get_llm_config_subclasses(self) -> list[type]:
-        """Get all subclasses of LLMConfig"""
+        """Get all subclasses of LLMConfig."""
         if not CORE_LLM_AVAILABLE:
             return []
 
@@ -338,7 +352,9 @@ class ModelRegistry:
 
     def _register_environment_vars_in_vault(self, env_vars: list[dict[str, Any]]):
         """Register detected environment variables in the config table.
-        Also securely store actual values in the vault schema if present.
+
+        Also securely store actual values in the vault schema if
+        present.
         """
         try:
             # For each env var, register or update in config.environment_variables
@@ -365,7 +381,9 @@ class ModelRegistry:
                         .insert(
                             {
                                 "name": var_name,
-                                "display_name": f"{env_var.get('provider_name', '').title()} API Key",
+                                "display_name": f"{
+                                    env_var.get('provider_name', '').title()
+                                } API Key",
                                 "description": env_var.get(
                                     "description", "API key for provider"
                                 ),
@@ -420,17 +438,15 @@ class ModelRegistry:
                         else:
                             # Create provider type if not exists
                             provider_type_insert = (
-                                table(self._supabase, "models.provider_types")
-                                .insert(
+                                table(
+                                    self._supabase,
+                                    "models.provider_types") .insert(
                                     {
                                         "name": "llm",
                                         "display_name": "LLM Provider",
                                         "description": "Provider for Large Language Models",
                                         "created_at": "NOW()",
-                                    }
-                                )
-                                .execute()
-                            )
+                                    }) .execute())
 
                             if (
                                 provider_type_insert.data
@@ -449,7 +465,9 @@ class ModelRegistry:
                                         "type_id": provider_type_id,
                                         "name": provider_name,
                                         "display_name": provider_name.title(),
-                                        "description": f"Provider for {provider_name.title()} models",
+                                        "description": f"Provider for {
+                                            provider_name.title()
+                                        } models",
                                         "is_available": bool(os.getenv(var_name)),
                                         "created_at": "NOW()",
                                         "updated_at": "NOW()",
@@ -466,10 +484,10 @@ class ModelRegistry:
                         self._store_secret_in_vault(env_var_id, var_name, provider_id)
 
         except Exception as e:
-            logger.error(f"Error registering environment variables: {e}")
+            logger.exception(f"Error registering environment variables: {e}")
 
     def _store_secret_in_vault(
-        self, env_var_id: str, var_name: str, provider_id: str = None
+        self, env_var_id: str, var_name: str, provider_id: str | None = None
     ):
         """Securely store the secret value in the vault schema.
 
@@ -521,7 +539,8 @@ class ModelRegistry:
                     ).execute()
                     logger.info(f"Stored secret value for {var_name} in vault")
 
-                # If we have a provider ID, also store in team_env_secrets for the default team
+                # If we have a provider ID, also store in team_env_secrets for the
+                # default team
                 if provider_id:
                     default_team_id = self._get_default_team_id(current_user_id)
                     if default_team_id:
@@ -559,7 +578,7 @@ class ModelRegistry:
                     raise
 
         except Exception as e:
-            logger.error(f"Error storing secret in vault: {e}")
+            logger.exception(f"Error storing secret in vault: {e}")
 
     def _get_current_user_id(self) -> str | None:
         """Get the current authenticated user ID."""
@@ -662,7 +681,7 @@ class ModelRegistry:
                     return team_secret_response.data[0].get("secret_value")
 
         except Exception as e:
-            logger.error(f"Error getting secret from vault: {e}")
+            logger.exception(f"Error getting secret from vault: {e}")
 
         return None
 
@@ -686,11 +705,10 @@ class ModelRegistry:
                     return response.data
 
             except Exception as e:
-                logger.error(f"Error retrieving available LLM providers using RPC: {e}")
+                logger.exception(f"Error retrieving available LLM providers using RPC: {e}")
 
                 # Try the table method as a fallback
                 try:
-                    from haive.dataflow.db.supabase import table
 
                     response = (
                         table(self._supabase, "models.providers")
@@ -701,7 +719,7 @@ class ModelRegistry:
                     if response.data:
                         return response.data
                 except Exception as table_e:
-                    logger.error(
+                    logger.exception(
                         f"Error retrieving providers with table method: {table_e}"
                     )
 
@@ -728,7 +746,7 @@ class ModelRegistry:
             try:
                 # Query for available embedding providers using RPC
                 sql = """
-                SELECT p.* 
+                SELECT p.*
                 FROM models.providers p
                 JOIN models.provider_types pt ON p.type_id = pt.id
                 WHERE p.is_available = true AND pt.name = 'embedding'
@@ -739,13 +757,12 @@ class ModelRegistry:
                     return response.data
 
             except Exception as e:
-                logger.error(
+                logger.exception(
                     f"Error retrieving available embedding providers using RPC: {e}"
                 )
 
                 # Try the table method as a fallback
                 try:
-                    from haive.dataflow.db.supabase import table
 
                     # Get providers that have embedding models
                     embedding_providers = []
@@ -779,9 +796,8 @@ class ModelRegistry:
 
                         return embedding_providers
                 except Exception as table_e:
-                    logger.error(
-                        f"Error retrieving embedding providers with table method: {table_e}"
-                    )
+                    logger.exception(
+                        f"Error retrieving embedding providers with table method: {table_e}")
 
         # Fall back to environment variable detection
         env_vars = self.get_required_environment_vars()
@@ -810,7 +826,7 @@ class ModelRegistry:
         if isinstance(metadata, str):
             try:
                 metadata = json.loads(metadata)
-            except:
+            except BaseException:
                 metadata = {}
 
         normalized["metadata"] = metadata
@@ -863,8 +879,7 @@ class ModelRegistry:
         if self._supabase:
             try:
                 logger.debug(
-                    f"Fetching LLM models with provider={provider}, only_available={only_available}"
-                )
+                    f"Fetching LLM models with provider={provider}, only_available={only_available}")
 
                 # Build SQL query with proper filtering
                 where_clause = ""
@@ -905,8 +920,7 @@ class ModelRegistry:
                         return results
 
             except Exception as e:
-                logger.error(f"Error retrieving LLM models from database: {e}")
-                import traceback
+                logger.exception(f"Error retrieving LLM models from database: {e}")
 
                 logger.debug(f"Get models error traceback: {traceback.format_exc()}")
 
@@ -914,7 +928,6 @@ class ModelRegistry:
         if not results:
             try:
                 # Try to run the litellm import
-                from haive.dataflow.importers.litellm_importer import import_llm_models
 
                 # Run the import if needed (this will populate the database)
                 import_success = import_llm_models()
@@ -955,9 +968,9 @@ class ModelRegistry:
                                     normalized_model = self.normalize_model_data(model)
                                     results.append(normalized_model)
                         except Exception as e:
-                            logger.error(f"Error retrieving models after import: {e}")
+                            logger.exception(f"Error retrieving models after import: {e}")
             except Exception as import_e:
-                logger.error(f"Error importing LLM models: {import_e}")
+                logger.exception(f"Error importing LLM models: {import_e}")
 
         return results
 
@@ -986,8 +999,7 @@ class ModelRegistry:
         if self._supabase:
             try:
                 logger.debug(
-                    f"Fetching embedding models with provider={provider}, only_available={only_available}"
-                )
+                    f"Fetching embedding models with provider={provider}, only_available={only_available}")
 
                 # Build SQL query with proper filtering
                 where_clause = ""
@@ -1028,14 +1040,14 @@ class ModelRegistry:
                         return results
 
             except Exception as e:
-                logger.error(f"Error retrieving embedding models from database: {e}")
-                import traceback
+                logger.exception(f"Error retrieving embedding models from database: {e}")
 
                 logger.debug(
                     f"Get embedding models error traceback: {traceback.format_exc()}"
                 )
 
-        # If database doesn't have data, use the cached embedding models from the importer
+        # If database doesn't have data, use the cached embedding models from the
+        # importer
         if not results and self._embedding_models_cache:
             for model in self._embedding_models_cache:
                 model_provider = model.get("provider")
@@ -1071,10 +1083,6 @@ class ModelRegistry:
         if not results and not self._embedding_models_cache:
             try:
                 # Run embedding models importer
-                from haive.dataflow.importers.embeddings_importer import (
-                    EMBEDDING_MODELS,
-                    import_embedding_models,
-                )
 
                 # Cache the models list
                 self._embedding_models_cache = EMBEDDING_MODELS
@@ -1119,7 +1127,7 @@ class ModelRegistry:
 
                         results.append(model_data)
             except Exception as import_e:
-                logger.error(f"Error importing embedding models: {import_e}")
+                logger.exception(f"Error importing embedding models: {import_e}")
 
         return results
 
@@ -1191,7 +1199,7 @@ class ModelRegistry:
                     return self.normalize_model_data(model)
 
             except Exception as e:
-                logger.error(f"Error retrieving LLM model from database: {e}")
+                logger.exception(f"Error retrieving LLM model from database: {e}")
 
         # Fall back to checking core LLM models
         if CORE_LLM_AVAILABLE:
@@ -1224,13 +1232,11 @@ class ModelRegistry:
 
                         # We found a match - create a model entry
                         model_data = {
-                            "model_id": model_id,
-                            "provider": provider_value,
-                            "name": cls.__name__.replace("LLMConfig", ""),
-                            "display_name": cls.__name__.replace("LLMConfig", ""),
-                            "description": cls.__doc__
-                            or f"Configuration for {cls.__name__.replace('LLMConfig', '')} models",
-                        }
+                            "model_id": model_id, "provider": provider_value, "name": cls.__name__.replace(
+                                "LLMConfig", ""), "display_name": cls.__name__.replace(
+                                "LLMConfig", ""), "description": cls.__doc__ or f"Configuration for {
+                                cls.__name__.replace(
+                                    'LLMConfig', '')} models", }
 
                         return model_data
                     except Exception:
@@ -1291,12 +1297,13 @@ class ModelRegistry:
                     return self.normalize_model_data(model)
 
             except Exception as e:
-                logger.error(f"Error retrieving embedding model from database: {e}")
+                logger.exception(f"Error retrieving embedding model from database: {e}")
 
         return None
 
     def detect_environment_variables(self):
-        """Detect available environment variables for LLM and embedding providers.
+        """Detect available environment variables for LLM and embedding
+        providers.
 
         Returns:
             Dict mapping provider names to available environment variables

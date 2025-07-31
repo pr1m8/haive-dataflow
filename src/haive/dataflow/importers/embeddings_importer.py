@@ -1,7 +1,7 @@
 """Embedding Models Importer for the Haive Registry System.
 
-This module provides functionality for importing embedding models
-from various providers and registering them in the system.
+This module provides functionality for importing embedding models from
+various providers and registering them in the system.
 """
 
 import logging
@@ -10,14 +10,17 @@ import traceback
 import uuid
 from datetime import datetime
 
-# Import registry models and utilities
 from haive.dataflow.core import (
     DependencyType,
     EntityType,
     ImportStatus,
     registry_system,
 )
+from haive.dataflow.db.supabase import table
 from haive.dataflow.serialization import serialize_object
+
+# Import registry models and utilities
+
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -247,7 +250,7 @@ def import_embedding_models() -> bool:
 
     try:
         # Extract unique providers
-        providers = set(model["provider"] for model in EMBEDDING_MODELS)
+        providers = {model["provider"] for model in EMBEDDING_MODELS}
 
         # Get environment variable mappings dynamically
         provider_availability = {}
@@ -273,7 +276,9 @@ def import_embedding_models() -> bool:
         for provider, env_var in env_var_mapping.items():
             provider_availability[provider] = os.getenv(env_var) is not None
             logger.debug(
-                f"Provider {provider}: using env var {env_var}, available: {provider_availability[provider]}"
+                f"Provider {provider}: using env var {env_var}, available: {
+                    provider_availability[provider]
+                }"
             )
 
         # Register providers and environment variables
@@ -289,7 +294,8 @@ def import_embedding_models() -> bool:
                         var_name=env_var,
                         provider_name=provider,
                         is_required=True,
-                        description=f"API key for {provider.title()} embedding provider",
+                        description=f"API key for {
+                            provider.title()} embedding provider",
                     )
 
                 # Register the provider
@@ -307,8 +313,6 @@ def import_embedding_models() -> bool:
                 # Store in Supabase directly if available
                 if registry_system._supabase is not None:
                     try:
-                        from haive.dataflow.db.supabase import table
-
                         # Add or update provider with environment variable
                         provider_data = {
                             "name": provider,
@@ -347,7 +351,7 @@ def import_embedding_models() -> bool:
                                 registry_system._supabase, "agents.embedding_providers"
                             ).insert(provider_data).execute()
                     except Exception as e:
-                        logger.error(f"Error storing provider in Supabase: {e}")
+                        logger.exception(f"Error storing provider in Supabase: {e}")
 
                 provider_ids[provider] = provider_id
 
@@ -361,12 +365,11 @@ def import_embedding_models() -> bool:
                 )
 
                 logger.info(
-                    f"Registered embedding provider: {provider} (available: {is_available})"
-                )
+                    f"Registered embedding provider: {provider} (available: {is_available})")
 
             except Exception as e:
                 error_tb = traceback.format_exc()
-                logger.error(f"Error registering provider {provider}: {e}\n{error_tb}")
+                logger.exception(f"Error registering provider {provider}: {e}\n{error_tb}")
 
                 registry_system.add_import_log(
                     import_session=import_session,
@@ -383,7 +386,6 @@ def import_embedding_models() -> bool:
         # Check if Supabase is available for direct DB access
         if registry_system._supabase is not None:
             # Register models via Supabase
-            from haive.dataflow.db.supabase import table
 
             for model_info in EMBEDDING_MODELS:
                 try:
@@ -493,7 +495,7 @@ def import_embedding_models() -> bool:
 
                 except Exception as e:
                     error_tb = traceback.format_exc()
-                    logger.error(f"Error registering model {model_id}: {e}\n{error_tb}")
+                    logger.exception(f"Error registering model {model_id}: {e}\n{error_tb}")
 
                     registry_system.add_import_log(
                         import_session=import_session,
@@ -566,7 +568,7 @@ def import_embedding_models() -> bool:
 
                 except Exception as e:
                     error_tb = traceback.format_exc()
-                    logger.error(f"Error registering model {model_id}: {e}\n{error_tb}")
+                    logger.exception(f"Error registering model {model_id}: {e}\n{error_tb}")
 
                     registry_system.add_import_log(
                         import_session=import_session,
@@ -578,11 +580,11 @@ def import_embedding_models() -> bool:
                     )
 
         logger.info(
-            f"Imported {len(provider_ids)} embedding providers and {model_count} embedding models"
-        )
+            f"Imported {
+                len(provider_ids)} embedding providers and {model_count} embedding models")
         return True
 
     except Exception as e:
         error_tb = traceback.format_exc()
-        logger.error(f"Error importing embedding models: {e}\n{error_tb}")
+        logger.exception(f"Error importing embedding models: {e}\n{error_tb}")
         return False

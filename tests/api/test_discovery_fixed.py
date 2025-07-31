@@ -171,7 +171,7 @@ class TestGameDiscovery:
         assert len(game_agents) >= 0
 
         # Each game should have required attributes
-        for game_name, game_info in game_agents.items():
+        for _game_name, game_info in game_agents.items():
             assert "name" in game_info
             assert "agent_class" in game_info
             assert "module" in game_info
@@ -181,7 +181,7 @@ class TestGameDiscovery:
         """Test the structure of discovered game agents."""
         discover_game_agents()
 
-        for game_name, game_info in game_agents.items():
+        for _game_name, game_info in game_agents.items():
             # Check that agent class is a class
             if game_info["agent_class"]:
                 assert hasattr(game_info["agent_class"], "__name__")

@@ -94,7 +94,7 @@ class TestGamesRouter:
         with patch(
             "haive.dataflow.api.routers.games.create_general_game_api"
         ) as mock_create:
-            router = create_games_router(exclude_games=["monopoly", "go"])
+            create_games_router(exclude_games=["monopoly", "go"])
 
             # Verify create_general_game_api was called with exclude_games
             mock_create.assert_called_once()

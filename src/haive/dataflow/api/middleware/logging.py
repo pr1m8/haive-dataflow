@@ -1,4 +1,5 @@
 # haive_dataflow/api/middleware/logging.py
+
 import logging
 import time
 import uuid
@@ -51,7 +52,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             # Log error
             process_time = time.time() - start_time
-            logger.error(
+            logger.exception(
                 f"Request {request_id} failed: {request.method} {request.url.path} "
                 f"- Error: {e!s} - Time: {process_time:.4f}s"
             )

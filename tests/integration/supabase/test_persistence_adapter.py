@@ -49,7 +49,7 @@ async def test_persistence_adapter():
         thread_id = f"adapter-test-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
         user_id = "test-user-456"
 
-        print(f"\n🧵 Testing thread registration...")
+        print("\n🧵 Testing thread registration..."..")
         print(f"  Thread ID: {thread_id}")
         print(f"  User ID: {user_id}")
 
@@ -64,13 +64,13 @@ async def test_persistence_adapter():
         )
 
         if success:
-            print(f"✓ Successfully registered thread via adapter")
+            print("✓ Successfully registered thread via adapter"r")
         else:
-            print(f"❌ Failed to register thread via adapter")
+            print("❌ Failed to register thread via adapter"r")
             return False
 
         # Test state update
-        print(f"\n💾 Testing state update...")
+        print("\n💾 Testing state update..."..")
         test_state = {
             "messages": [{"role": "user", "content": "Hello from persistence test"}],
             "step": 1,
@@ -89,19 +89,19 @@ async def test_persistence_adapter():
         )
 
         if update_success:
-            print(f"✓ Successfully updated state via adapter")
+            print("✓ Successfully updated state via adapter"r")
         else:
-            print(f"❌ Failed to update state via adapter")
+            print("❌ Failed to update state via adapter"r")
             return False
 
         # Test state retrieval
-        print(f"\n📥 Testing state retrieval...")
+        print("\n📥 Testing state retrieval..."..")
         retrieved_state = await persistence.get_state(
             thread_id=thread_id, user_id=user_id
         )
 
         if retrieved_state:
-            print(f"✓ Successfully retrieved state via adapter")
+            print("✓ Successfully retrieved state via adapter"r")
             if isinstance(retrieved_state, dict):
                 print(f"  State keys: {list(retrieved_state.keys())}")
                 if "messages" in retrieved_state:
@@ -109,7 +109,7 @@ async def test_persistence_adapter():
             else:
                 print(f"  State type: {type(retrieved_state)}")
         else:
-            print(f"❌ Failed to retrieve state via adapter")
+            print("❌ Failed to retrieve state via adapter"r")
             return False
 
         print("\n🎉 Persistence adapter test completed successfully!")
@@ -146,7 +146,7 @@ async def test_checkpointer_factory():
             connection_string=supabase_uri, setup_needed=True
         )
 
-        print(f"✓ Created PostgreSQL config for Supabase")
+        print("✓ Created PostgreSQL config for Supabase"e")
         print(f"  Connection string length: {len(supabase_uri)}")
 
         # Test creating checkpointer

@@ -1,26 +1,27 @@
 """Tools API routes using the unified discovery system.
 
-This module provides FastAPI routes for discovering and listing all available
-tools in the Haive ecosystem using the haive-core discovery system.
+This module provides FastAPI routes for discovering and listing all
+available tools in the Haive ecosystem using the haive-core discovery
+system.
 """
 
 import asyncio
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-# Import discovery system
 from .utils.haive_discovery import (
     ComponentInfo,
     HaiveComponentDiscovery,
     create_tool_from_component,
-    discover_tools,
     discover_tools_with_schemas,
-    get_all_tools,
 )
+
+# Import discovery system
+
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class ToolInfo(BaseModel):
     module: str = Field(..., description="Module path")
     type: str = Field(..., description="Tool type (tool or toolkit)")
     category: str = Field(default="general", description="Tool category")
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
@@ -44,7 +45,7 @@ class ToolInfo(BaseModel):
 class ToolsListResponse(BaseModel):
     """Response for tools list endpoint."""
 
-    tools: List[ToolInfo] = Field(..., description="List of available tools")
+    tools: list[ToolInfo] = Field(..., description="List of available tools")
     count: int = Field(..., description="Total number of tools")
     tool_count: int = Field(..., description="Number of individual tools")
     toolkit_count: int = Field(..., description="Number of toolkits")
@@ -58,11 +59,11 @@ class ToolSchema(BaseModel):
 
     name: str = Field(..., description="Tool name")
     description: str = Field(..., description="Tool description")
-    input_schema: Dict[str, Any] = Field(..., description="Input parameters schema")
-    output_schema: Optional[Dict[str, Any]] = Field(
+    input_schema: dict[str, Any] = Field(..., description="Input parameters schema")
+    output_schema: dict[str, Any] | None = Field(
         None, description="Output schema if available"
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
@@ -71,7 +72,7 @@ class ToolInvokeRequest(BaseModel):
     """Request to invoke a tool."""
 
     tool_name: str = Field(..., description="Name of the tool to invoke")
-    arguments: Dict[str, Any] = Field(..., description="Arguments to pass to the tool")
+    arguments: dict[str, Any] = Field(..., description="Arguments to pass to the tool")
 
 
 class ToolInvokeResponse(BaseModel):
@@ -79,12 +80,12 @@ class ToolInvokeResponse(BaseModel):
 
     success: bool = Field(..., description="Whether invocation was successful")
     result: Any = Field(None, description="Result from the tool")
-    error: Optional[str] = Field(None, description="Error message if failed")
+    error: str | None = Field(None, description="Error message if failed")
 
 
 # Cache for discovered tools
-_cached_tools: Optional[List[ComponentInfo]] = None
-_discovery_instance: Optional[HaiveComponentDiscovery] = None
+_cached_tools: list[ComponentInfo] | None = None
+_discovery_instance: HaiveComponentDiscovery | None = None
 
 
 def get_discovery_instance() -> HaiveComponentDiscovery:
@@ -98,7 +99,7 @@ def get_discovery_instance() -> HaiveComponentDiscovery:
     return _discovery_instance
 
 
-def discover_all_tools(force_refresh: bool = False) -> List[ComponentInfo]:
+def discover_all_tools(force_refresh: bool = False) -> list[ComponentInfo]:
     """Discover all tools using the unified discovery system."""
     global _cached_tools
 
@@ -126,7 +127,7 @@ def discover_all_tools(force_refresh: bool = False) -> List[ComponentInfo]:
         return discover_tools_fallback()
 
 
-def discover_tools_fallback() -> List[ComponentInfo]:
+def discover_tools_fallback() -> list[ComponentInfo]:
     """Fallback tool discovery if the main discovery fails."""
     try:
         logger.info("Using fallback tool discovery...")
@@ -147,7 +148,7 @@ def discover_tools_fallback() -> List[ComponentInfo]:
         return all_tools
 
     except Exception as e:
-        logger.error(f"Fallback discovery also failed: {e}")
+        logger.exception(f"Fallback discovery also failed: {e}")
         return []
 
 
@@ -223,13 +224,13 @@ async def list_tools(force_refresh: bool = False) -> ToolsListResponse:
             discovery_method="haive-core unified discovery",
         )
     except Exception as e:
-        logger.error(f"Failed to list tools: {e}")
+        logger.exception(f"Failed to list tools: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/search", response_model=ToolsListResponse)
 async def search_tools(
-    query: str = None, category: str = None, tool_type: str = None
+    query: str | None = None, category: str | None = None, tool_type: str | None = None
 ) -> ToolsListResponse:
     """Search for tools by query, category, or type.
 
@@ -274,7 +275,7 @@ async def search_tools(
             discovery_method="haive-core unified discovery",
         )
     except Exception as e:
-        logger.error(f"Failed to search tools: {e}")
+        logger.exception(f"Failed to search tools: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -339,7 +340,7 @@ async def get_tool_schema_endpoint(tool_name: str) -> ToolSchema:
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get tool schema: {e}")
+        logger.exception(f"Failed to get tool schema: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -400,16 +401,16 @@ async def invoke_tool_endpoint(request: ToolInvokeRequest) -> ToolInvokeResponse
             return ToolInvokeResponse(success=True, result=result)
 
         except Exception as e:
-            logger.error(f"Error invoking tool: {e}")
+            logger.exception(f"Error invoking tool: {e}")
             return ToolInvokeResponse(success=False, error=str(e))
 
     except Exception as e:
-        logger.error(f"Failed to invoke tool: {e}")
+        logger.exception(f"Failed to invoke tool: {e}")
         return ToolInvokeResponse(success=False, error=str(e))
 
 
 @router.get("/{tool_name}")
-async def get_tool_details(tool_name: str) -> Dict[str, Any]:
+async def get_tool_details(tool_name: str) -> dict[str, Any]:
     """Get detailed information about a specific tool.
 
     Args:
@@ -472,12 +473,12 @@ async def get_tool_details(tool_name: str) -> Dict[str, Any]:
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get tool details: {e}")
+        logger.exception(f"Failed to get tool details: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/refresh")
-async def refresh_tool_cache() -> Dict[str, Any]:
+async def refresh_tool_cache() -> dict[str, Any]:
     """Refresh the tool discovery cache.
 
     Returns:
@@ -499,12 +500,12 @@ async def refresh_tool_cache() -> Dict[str, Any]:
             "discovery_method": "haive-core unified discovery",
         }
     except Exception as e:
-        logger.error(f"Failed to refresh tool cache: {e}")
+        logger.exception(f"Failed to refresh tool cache: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/stats/summary")
-async def get_tool_stats() -> Dict[str, Any]:
+async def get_tool_stats() -> dict[str, Any]:
     """Get summary statistics about discovered tools.
 
     Returns:
@@ -543,12 +544,12 @@ async def get_tool_stats() -> Dict[str, Any]:
         return stats
 
     except Exception as e:
-        logger.error(f"Failed to get tool stats: {e}")
+        logger.exception(f"Failed to get tool stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/categories")
-async def get_tool_categories() -> Dict[str, List[str]]:
+async def get_tool_categories() -> dict[str, list[str]]:
     """Get all available tool categories and their tools.
 
     Returns:
@@ -571,5 +572,5 @@ async def get_tool_categories() -> Dict[str, List[str]]:
         return categories
 
     except Exception as e:
-        logger.error(f"Failed to get tool categories: {e}")
+        logger.exception(f"Failed to get tool categories: {e}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -58,9 +58,7 @@ async def test():
 
             # Test 4: Clean up
             print("\n🧹 Cleaning up test thread...")
-            delete_result = (
-                supabase.table("threads").delete().eq("id", thread_id).execute()
-            )
+            (supabase.table("threads").delete().eq("id", thread_id).execute())
             print("✓ Deleted test thread")
 
         print("\n✅ All tests passed! Supabase public schema is working correctly.")

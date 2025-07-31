@@ -1,4 +1,6 @@
 # src/haive/api/registry.py
+
+import hashlib
 import importlib
 import inspect
 import logging
@@ -8,6 +10,10 @@ import sys
 import traceback
 from datetime import datetime
 from typing import Any
+
+from haive.api.api.db import DatabaseManager
+from haive.core.engine.agent.persistence.types import CheckpointerType
+from langgraph.checkpoint.memory import MemorySaver
 
 from .engine.agent.agent import Agent, AgentConfig
 
@@ -30,7 +36,6 @@ class AgentRegistryService:
 
         # Try to load persistence types
         try:
-            from haive.core.engine.agent.persistence.types import CheckpointerType
 
             self.default_persistence_type = CheckpointerType.postgres
         except ImportError:
@@ -46,11 +51,8 @@ class AgentRegistryService:
 
     def _setup_database(self):
         """Set up the database connection and schema."""
-        from haive.api.api.db import DatabaseManager
-
         # Get database parameters from environment or config
         try:
-            import os
 
             db_params = {
                 "dbname": os.getenv("DB_NAME", "postgres"),
@@ -89,21 +91,20 @@ class AgentRegistryService:
 
     def discover_agents(
         self,
-        search_paths: list[str] = [
-            "src.haive.agents",
-            "src.haive.games",
-            "src.haive.tak",
-        ],
+        search_paths: list[str] | None = None,
     ) -> None:
-        """Automatically discover and register all agent configurations from multiple paths.
+        """Automatically discover and register all agent configurations from
+        multiple paths.
 
         Args:
             search_paths: List of package paths to search for agents
         """
+        if search_paths is None:
+            search_paths = ["src.haive.agents", "src.haive.games", "src.haive.tak"]
         start_time = datetime.now()
         logger.info(
-            f"=== Starting agent discovery at {start_time.strftime('%Y-%m-%d %H:%M:%S')} ==="
-        )
+            f"=== Starting agent discovery at {
+                start_time.strftime('%Y-%m-%d %H:%M:%S')} ===")
         logger.info(f"Search paths: {search_paths}")
         logger.info(f"Python path: {sys.path}")
 
@@ -115,7 +116,9 @@ class AgentRegistryService:
             try:
                 package = importlib.import_module(package_path)
                 logger.debug(
-                    f"Package loaded: {package.__name__} from {getattr(package, '__file__', 'unknown location')}"
+                    f"Package loaded: {package.__name__} from {
+                        getattr(package, '__file__', 'unknown location')
+                    }"
                 )
 
                 # Get the package path
@@ -123,8 +126,8 @@ class AgentRegistryService:
                 if pkg_path:
                     logger.debug(f"Package directory: {pkg_path}")
                     logger.debug(
-                        f"Directory contents: {os.listdir(pkg_path) if os.path.exists(pkg_path) else 'Not available'}"
-                    )
+                        f"Directory contents: {
+                            os.listdir(pkg_path) if os.path.exists(pkg_path) else 'Not available'}")
 
                 for _, name, is_pkg in pkgutil.iter_modules(
                     package.__path__, package.__name__ + "."
@@ -147,7 +150,9 @@ class AgentRegistryService:
                             logger.debug(f"Importing module: {name}")
                             module = importlib.import_module(name)
                             logger.debug(
-                                f"Module loaded: {module.__name__} from {getattr(module, '__file__', 'unknown location')}"
+                                f"Module loaded: {module.__name__} from {
+                                    getattr(module, '__file__', 'unknown location')
+                                }"
                             )
 
                             # Find all AgentConfig subclasses in the module
@@ -168,8 +173,7 @@ class AgentRegistryService:
                                             obj, "name", None
                                         ) or class_name.replace("Config", "")
                                         logger.debug(
-                                            f"Found AgentConfig subclass: {class_name} → {agent_name}"
-                                        )
+                                            f"Found AgentConfig subclass: {class_name} → {agent_name}")
 
                                         # Check if it's a game agent
                                         is_game = "game" in module.__name__.lower() or (
@@ -185,12 +189,10 @@ class AgentRegistryService:
                                         )
                                 except (TypeError, Exception) as class_err:
                                     logger.debug(
-                                        f"Error checking class {class_name}: {class_err}"
-                                    )
+                                        f"Error checking class {class_name}: {class_err}")
 
                             logger.debug(
-                                f"Module {name} had {class_count} classes, {agent_count} agents"
-                            )
+                                f"Module {name} had {class_count} classes, {agent_count} agents")
 
                         except (ImportError, AttributeError) as e:
                             failed_packages.append((name, str(e)))
@@ -223,8 +225,8 @@ class AgentRegistryService:
                 logger.warning(f"  ✗ {package_name}: {error}")
 
         logger.info(
-            f"=== Agent discovery completed at {end_time.strftime('%Y-%m-%d %H:%M:%S')} ==="
-        )
+            f"=== Agent discovery completed at {
+                end_time.strftime('%Y-%m-%d %H:%M:%S')} ===")
 
     def register_agent_config(
         self, name: str, config_class: type[AgentConfig], agent_type: str = "agent"
@@ -250,7 +252,7 @@ class AgentRegistryService:
         except Exception as e:
             error_msg = f"Error registering agent {name}: {e!s}"
             self.agent_errors[name] = error_msg
-            logger.error(error_msg)
+            logger.exception(error_msg)
             logger.debug(f"Traceback for registering {name}: {traceback.format_exc()}")
 
     # Update get_agent_config to handle the new structure
@@ -280,8 +282,8 @@ class AgentRegistryService:
     def get_or_create_agent(
         self, name: str, thread_id: str | None = None, **config_kwargs
     ) -> tuple[Agent | None, str | None]:
-        """Get a previously instantiated agent or create a new one.
-        Returns the agent and an error message if there was a problem.
+        """Get a previously instantiated agent or create a new one. Returns the
+        agent and an error message if there was a problem.
 
         Args:
             name: Agent name
@@ -300,7 +302,6 @@ class AgentRegistryService:
         if config_kwargs:
             # Use a simple hash of config values to create a unique key
             config_str = str(sorted([(k, str(v)) for k, v in config_kwargs.items()]))
-            import hashlib
 
             config_hash = hashlib.md5(config_str.encode()).hexdigest()[:8]
             agent_key = f"{name}_{config_hash}"
@@ -351,7 +352,7 @@ class AgentRegistryService:
             return agent, None
         except Exception as e:
             error_msg = f"Error creating agent {name}: {e!s}\n{traceback.format_exc()}"
-            logger.error(error_msg)
+            logger.exception(error_msg)
             return None, error_msg
 
     def _configure_persistence(self, agent_config: AgentConfig) -> None:
@@ -363,9 +364,7 @@ class AgentRegistryService:
             ):
                 # Try to import the persistence module
                 try:
-                    from haive.core.engine.agent.persistence import (
-                        load_checkpointer_config,
-                    )
+                    from ..persistence.supabase_adapter import load_checkpointer_config
 
                     # Load the checkpointer config
                     agent_config.persistence = load_checkpointer_config(
@@ -373,7 +372,6 @@ class AgentRegistryService:
                     )
                 except ImportError:
                     # Fall back to memory persistence
-                    from langgraph.checkpoint.memory import MemorySaver
 
                     agent_config.persistence = MemorySaver()
         except Exception as e:

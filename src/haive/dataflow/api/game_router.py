@@ -15,6 +15,7 @@ import pkgutil
 import sys
 from typing import Any
 
+import uvicorn
 from fastapi import APIRouter, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -68,10 +69,10 @@ def discover_game_agents():
             except ImportError as e:
                 logger.warning(f"Failed to import {import_path}: {e}")
             except SyntaxError as e:
-                logger.error(f"Syntax error in {import_path}: {e}")
+                logger.exception(f"Syntax error in {import_path}: {e}")
                 continue
             except Exception as e:
-                logger.error(f"Unexpected error importing {import_path}: {e}")
+                logger.exception(f"Unexpected error importing {import_path}: {e}")
                 continue
 
         if not base_module:
@@ -91,7 +92,7 @@ def discover_game_agents():
                     )
                     logger.info("Successfully imported using direct path")
                 except Exception as e:
-                    logger.error(f"Failed to import using direct path: {e}")
+                    logger.exception(f"Failed to import using direct path: {e}")
                     raise ImportError(
                         f"Could not import haive-games even with direct path: {e}"
                     )
@@ -136,7 +137,6 @@ def discover_game_agents():
                             and name.endswith("Agent")
                             and hasattr(obj, "run")
                         ):
-
                             # Add to registry
                             game_agents[game_name] = {
                                 "name": game_name,
@@ -189,7 +189,7 @@ def discover_game_agents():
 def create_game_instance(game_type, game_id):
     """Create or get a game instance."""
     if game_type not in game_agents:
-        raise ValueError(f"Unknown game type: {game_type}")
+        raise TypeError(f"Unknown game type: {game_type}")
 
     # Create unique key for this game
     game_key = f"{game_type}:{game_id}"
@@ -243,7 +243,7 @@ def get_game_instance(game_type, game_id):
 def create_game_router(game_type):
     """Create a router for a specific game type."""
     if game_type not in game_agents:
-        raise ValueError(f"Unknown game type: {game_type}")
+        raise TypeError(f"Unknown game type: {game_type}")
 
     router = APIRouter(tags=[f"{game_type} Game"])
 
@@ -257,7 +257,7 @@ def create_game_router(game_type):
                 f"WebSocket connection accepted for {game_type} game: {game_id}"
             )
         except Exception as e:
-            logger.error(f"Failed to accept WebSocket connection: {e}")
+            logger.exception(f"Failed to accept WebSocket connection: {e}")
             return
 
         # Register connection
@@ -271,7 +271,7 @@ def create_game_router(game_type):
                 game = create_game_instance(game_type, game_id)
                 agent = game["agent"]
             except Exception as e:
-                logger.error(f"Failed to create game instance: {e}")
+                logger.exception(f"Failed to create game instance: {e}")
                 await websocket.send_json(
                     {"type": "error", "message": f"Failed to create game: {e}"}
                 )
@@ -291,7 +291,7 @@ def create_game_router(game_type):
                     }
                 )
             except Exception as e:
-                logger.error(f"Failed to get initial state: {e}")
+                logger.exception(f"Failed to get initial state: {e}")
                 await websocket.send_json(
                     {"type": "error", "message": f"Failed to get initial state: {e}"}
                 )
@@ -320,7 +320,7 @@ def create_game_router(game_type):
                                 }
                             )
                         except Exception as e:
-                            logger.error(f"Error getting state: {e}")
+                            logger.exception(f"Error getting state: {e}")
                             await websocket.send_json(
                                 {
                                     "type": "error",
@@ -345,7 +345,7 @@ def create_game_router(game_type):
                                 }
                             )
                         except Exception as e:
-                            logger.error(f"Error making move: {e}")
+                            logger.exception(f"Error making move: {e}")
                             await websocket.send_json(
                                 {
                                     "type": "error",
@@ -367,7 +367,7 @@ def create_game_router(game_type):
                                 }
                             )
                         except Exception as e:
-                            logger.error(f"Error making AI move: {e}")
+                            logger.exception(f"Error making AI move: {e}")
                             await websocket.send_json(
                                 {
                                     "type": "error",
@@ -384,7 +384,7 @@ def create_game_router(game_type):
                             }
                         )
                 except Exception as e:
-                    logger.error(f"Error processing WebSocket message: {e}")
+                    logger.exception(f"Error processing WebSocket message: {e}")
                     try:
                         await websocket.send_json(
                             {
@@ -392,7 +392,7 @@ def create_game_router(game_type):
                                 "message": f"Error processing message: {e}",
                             }
                         )
-                    except:
+                    except BaseException:
                         # Connection might be closed
                         break
 
@@ -408,7 +408,7 @@ def create_game_router(game_type):
                 await websocket.send_json(
                     {"type": "error", "message": f"Server error: {e!s}"}
                 )
-            except:
+            except BaseException:
                 # Connection might be closed, ignore send error
                 pass
         finally:
@@ -486,14 +486,14 @@ def get_game_client_html(game_type):
         </head>
         <body>
             <h1>{game_type.title()} Game</h1>
-            
+
             <div class="container">
                 <div class="game-area">
                     <div id="gameBoard" style="min-height: 400px; border: 1px solid #ccc; padding: 10px;">
                         <p>Game board will appear here after connection.</p>
                     </div>
                 </div>
-                
+
                 <div class="controls">
                     <h3>Game Controls</h3>
                     <div>
@@ -502,35 +502,35 @@ def get_game_client_html(game_type):
                         <button onclick="connect()">Connect</button>
                         <button onclick="disconnect()">Disconnect</button>
                     </div>
-                    
+
                     <div class="game-info">
                         <p>Status: <span id="status">Disconnected</span></p>
                         <p>Turn: <span id="turn">-</span></p>
                         <p>Game Status: <span id="gameStatus">-</span></p>
                     </div>
-                    
+
                     <div>
                         <button onclick="getState()">Get State</button>
                         <button onclick="aiMove()">AI Move</button>
                     </div>
-                    
+
                     <h3>Log</h3>
                     <div class="log" id="log"></div>
                 </div>
             </div>
-            
+
             <script>
                 // Game variables
                 let ws = null;
                 let gameState = null;
-                
+
                 // DOM elements
                 const boardElement = document.getElementById('gameBoard');
                 const statusElement = document.getElementById('status');
                 const turnElement = document.getElementById('turn');
                 const gameStatusElement = document.getElementById('gameStatus');
                 const logElement = document.getElementById('log');
-                
+
                 // Log messages
                 function log(message) {{
                     const entry = document.createElement('div');
@@ -538,38 +538,38 @@ def get_game_client_html(game_type):
                     logElement.appendChild(entry);
                     logElement.scrollTop = logElement.scrollHeight;
                 }}
-                
+
                 // Connect to WebSocket
                 function connect() {{
                     const gameId = document.getElementById('gameId').value;
-                    
+
                     if (!gameId) {{
                         log('Please enter a game ID');
                         return;
                     }}
-                    
+
                     const wsUrl = `ws://${{window.location.host}}/ws/{game_type}/${{gameId}}`;
-                    
+
                     if (ws) {{
                         ws.close();
                     }}
-                    
+
                     log(`Connecting to ${{wsUrl}}...`);
                     ws = new WebSocket(wsUrl);
-                    
+
                     ws.onopen = function(event) {{
                         statusElement.textContent = 'Connected';
                         log('Connection established');
                     }};
-                    
+
                     ws.onmessage = function(event) {{
                         try {{
                             const data = JSON.parse(event.data);
                             log(`Received: ${{JSON.stringify(data).substring(0, 100)}}...`);
-                            
+
                             if (data.type === 'state_update') {{
                                 gameState = data.state;
-                                
+
                                 // Update UI
                                 updateBoardDisplay(gameState);
                                 turnElement.textContent = gameState.current_player || gameState.turn || '-';
@@ -581,18 +581,18 @@ def get_game_client_html(game_type):
                             log(`Error parsing message: ${{e.message}}`);
                         }}
                     }};
-                    
+
                     ws.onclose = function(event) {{
                         statusElement.textContent = 'Disconnected';
                         log('Connection closed');
                     }};
-                    
+
                     ws.onerror = function(event) {{
                         statusElement.textContent = 'Error';
                         log('WebSocket error');
                     }};
                 }}
-                
+
                 // Disconnect WebSocket
                 function disconnect() {{
                     if (ws) {{
@@ -600,7 +600,7 @@ def get_game_client_html(game_type):
                         ws = null;
                     }}
                 }}
-                
+
                 // Get game state
                 function getState() {{
                     if (ws && ws.readyState === WebSocket.OPEN) {{
@@ -613,7 +613,7 @@ def get_game_client_html(game_type):
                         log('WebSocket not connected');
                     }}
                 }}
-                
+
                 // Request AI move
                 function aiMove() {{
                     if (ws && ws.readyState === WebSocket.OPEN) {{
@@ -626,12 +626,12 @@ def get_game_client_html(game_type):
                         log('WebSocket not connected');
                     }}
                 }}
-                
+
                 // Update board display based on game state
                 function updateBoardDisplay(state) {{
                     // Simple display of game state as JSON
                     boardElement.innerHTML = `<pre>${{JSON.stringify(state, null, 2)}}</pre>`;
-                    
+
                     // For real implementation, create a proper game board visualization
                     // based on the specific game type
                 }}
@@ -681,7 +681,7 @@ def create_game_router_app():
             app.include_router(router, prefix="/api", tags=[game_type])
             logger.info(f"Registered routes for {game_type}")
         except Exception as e:
-            logger.error(f"Error creating router for {game_type}: {e}")
+            logger.exception(f"Error creating router for {game_type}: {e}")
 
     return app
 
@@ -729,15 +729,13 @@ def get_router():
             router.include_router(game_router, prefix=f"/{game_type}")
             logger.info(f"Registered routes for {game_type}")
         except Exception as e:
-            logger.error(f"Error creating router for {game_type}: {e}")
+            logger.exception(f"Error creating router for {game_type}: {e}")
 
     return router
 
 
 def main():
     """Run the API server as standalone."""
-    import uvicorn
-
     # Create a new app
     app = create_game_router_app()
 

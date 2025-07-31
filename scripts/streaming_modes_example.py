@@ -73,7 +73,7 @@ async def handle_stream_request(
     stream_config = message.get("stream_config", {})
     mode = stream_config.get("mode", "messages")
     format_output = stream_config.get("format", True)
-    include_metadata = stream_config.get("metadata", False)
+    stream_config.get("metadata", False)
 
     # Choose streaming mode based on agent type and request
     if mode == "analysis":

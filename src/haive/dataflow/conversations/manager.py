@@ -1,10 +1,12 @@
 # haive/dataflow/conversations/manager.py
+
 import datetime
 import logging
 import uuid
 from typing import Any
 
 from pydantic import BaseModel
+from supabase import create_client
 
 from haive.dataflow.config import SupabaseServerConfig
 
@@ -46,8 +48,6 @@ class ConversationManager:
     def client(self):
         """Lazy-loaded Supabase admin client."""
         if self._client is None:
-            from supabase import create_client
-
             self._client = create_client(
                 self.server_config.url,
                 self.server_config.service_role_key.get_secret_value(),
@@ -107,9 +107,12 @@ class ConversationManager:
             if not success:
                 logger.error(f"Failed to register LangGraph thread: {thread_id}")
                 # Try to rollback conversation
-                await self.client.from_("user_data.conversations").delete().eq(
-                    "id", conversation_id
-                ).execute()
+                await (
+                    self.client.from_("user_data.conversations")
+                    .delete()
+                    .eq("id", conversation_id)
+                    .execute()
+                )
                 return None
 
             return {
@@ -118,7 +121,7 @@ class ConversationManager:
                 "title": metadata.title,
             }
         except Exception as e:
-            logger.error(f"Error creating conversation: {e}")
+            logger.exception(f"Error creating conversation: {e}")
             return None
 
     async def get_conversation_state(
@@ -148,7 +151,7 @@ class ConversationManager:
             state = await aget_postgres_checkpoint(self.postgres_config, config)
             return state
         except Exception as e:
-            logger.error(f"Error getting conversation state: {e}")
+            logger.exception(f"Error getting conversation state: {e}")
             return None
 
     async def update_conversation_state(
@@ -180,9 +183,12 @@ class ConversationManager:
             conversation_id = response.data[0]["id"]
 
             # Update last_access in conversations
-            await self.client.from_("user_data.conversations").update(
-                {"updated_at": datetime.datetime.now().isoformat()}
-            ).eq("id", conversation_id).execute()
+            await (
+                self.client.from_("user_data.conversations")
+                .update({"updated_at": datetime.datetime.now().isoformat()})
+                .eq("id", conversation_id)
+                .execute()
+            )
 
             # Store checkpoint
             config = {"configurable": {"thread_id": thread_id}}
@@ -200,5 +206,5 @@ class ConversationManager:
             )
             return bool(result)
         except Exception as e:
-            logger.error(f"Error updating conversation state: {e}")
+            logger.exception(f"Error updating conversation state: {e}")
             return False

@@ -1,7 +1,7 @@
 """LiteLLM Importer for the Haive Registry System.
 
-This module provides functionality for importing LLM models and providers
-from LiteLLM's published model list.
+This module provides functionality for importing LLM models and
+providers from LiteLLM's published model list.
 """
 
 import logging
@@ -10,19 +10,21 @@ import traceback
 import uuid
 from datetime import datetime
 
+import requests
+
+from haive.dataflow.core import registry_system  # Import the singleton instance
+from haive.dataflow.models import DependencyType, EntityType, ImportStatus
+from haive.dataflow.serialization import serialize_object
+
 # Try to import requests
 try:
-    import requests
-
     REQUESTS_AVAILABLE = True
 except ImportError:
     REQUESTS_AVAILABLE = False
 
-from haive.dataflow.core import registry_system  # Import the singleton instance
 
 # Import registry models and utilities
-from haive.dataflow.models import DependencyType, EntityType, ImportStatus
-from haive.dataflow.serialization import serialize_object
+
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -173,7 +175,9 @@ def import_llm_models() -> bool:
 
             except Exception as e:
                 error_tb = traceback.format_exc()
-                logger.error(f"Error registering provider {provider}: {e}\n{error_tb}")
+                logger.exception(
+                    f"Error registering provider {provider}: {e}\n{error_tb}"
+                )
 
                 registry_system.add_import_log(
                     import_session=import_session,
@@ -464,7 +468,9 @@ def import_llm_models() -> bool:
 
                 except Exception as e:
                     error_tb = traceback.format_exc()
-                    logger.error(f"Error registering model {model_id}: {e}\n{error_tb}")
+                    logger.exception(
+                        f"Error registering model {model_id}: {e}\n{error_tb}"
+                    )
 
                     registry_system.add_import_log(
                         import_session=import_session,
@@ -642,7 +648,9 @@ def import_llm_models() -> bool:
 
                 except Exception as e:
                     error_tb = traceback.format_exc()
-                    logger.error(f"Error registering model {model_id}: {e}\n{error_tb}")
+                    logger.exception(
+                        f"Error registering model {model_id}: {e}\n{error_tb}"
+                    )
 
                     registry_system.add_import_log(
                         import_session=import_session,
@@ -657,9 +665,9 @@ def import_llm_models() -> bool:
         return True
 
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error fetching LiteLLM model data: {e}")
+        logger.exception(f"Error fetching LiteLLM model data: {e}")
         return False
     except Exception as e:
         error_tb = traceback.format_exc()
-        logger.error(f"Error importing LLM models: {e}\n{error_tb}")
+        logger.exception(f"Error importing LLM models: {e}\n{error_tb}")
         return False

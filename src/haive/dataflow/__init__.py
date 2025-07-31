@@ -42,30 +42,10 @@ This package consists of several modules:
     providers: Provider implementations for various services
 """
 
-
 # Use lazy loading for the registry system
 # Lazy import to prevent heavy initialization
-def get_registry_system():
-    """Get the registry system (lazy loaded)."""
-    from haive.dataflow.registry.core import get_registry_system
 
-    return get_registry_system()
-
-
-# For backwards compatibility
-class LazyRegistryAccess:
-    def __getattr__(self, name):
-        registry = get_registry_system()
-        return getattr(registry, name)
-
-    def __call__(self, *args, **kwargs):
-        registry = get_registry_system()
-        return registry(*args, **kwargs)
-
-
-registry_system = LazyRegistryAccess()
-
-# Import discovery functions (these should also be lazy)
+from haive.dataflow.registry.core import get_registry_system
 from haive.dataflow.registry.discovery import (
     discover_agents,
     discover_all,
@@ -92,45 +72,61 @@ from haive.dataflow.registry.models import (  # MCP Models
     MCPTransport,
     RegistryItem,
 )
-
-# Import serialization utilities
 from haive.dataflow.registry.serialization import (
     SerializationRegistry,
     deserialize_object,
     serialize_object,
 )
 
+
+# For backwards compatibility
+class LazyRegistryAccess:
+    def __getattr__(self, name):
+        registry = get_registry_system()
+        return getattr(registry, name)
+
+    def __call__(self, *args, **kwargs):
+        registry = get_registry_system()
+        return registry(*args, **kwargs)
+
+
+registry_system = LazyRegistryAccess()
+
+# Import discovery functions (these should also be lazy)
+
+# Import serialization utilities
+
 # Export for convenient imports
 __all__ = [
-    # Core registry system
-    "registry_system",
+    "ConfigType",
+    "Configuration",
+    "Dependency",
+    "DependencyType",
     # Models
     "EntityType",
-    "ConfigType",
-    "DependencyType",
-    "ImportStatus",
-    "RegistryItem",
-    "Configuration",
-    "GraphDefinition",
-    "Dependency",
     "EnvironmentVar",
+    "GraphDefinition",
     "ImportLogItem",
+    "ImportStatus",
+    "MCPPromptDefinition",
+    "MCPResourceDefinition",
+    "MCPServerConfig",
+    "MCPServerHealth",
+    "MCPToolDefinition",
     # MCP Models
     "MCPTransport",
-    "MCPServerConfig",
-    "MCPToolDefinition",
-    "MCPResourceDefinition",
-    "MCPPromptDefinition",
-    "MCPServerHealth",
+    "RegistryItem",
+    "SerializationRegistry",
+    "deserialize_object",
+    "discover_agents",
     # Discovery
     "discover_all",
-    "discover_agents",
-    "discover_tools",
-    "discover_toolkits",
     "discover_engines",
     "discover_games",
+    "discover_toolkits",
+    "discover_tools",
+    # Core registry system
+    "registry_system",
     # Serialization
     "serialize_object",
-    "deserialize_object",
-    "SerializationRegistry",
 ]

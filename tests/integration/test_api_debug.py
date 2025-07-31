@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """API debugging script to test agent and LLM endpoints"""
 
-import json
 import sys
 
 import requests

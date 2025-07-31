@@ -4,10 +4,8 @@ These tests verify the full integration between haive-dataflow
 and haive-games, including actual game discovery and API functionality.
 """
 
-import asyncio
 import sys
 from pathlib import Path
-from typing import Optional
 
 import pytest
 from fastapi import FastAPI
@@ -209,7 +207,7 @@ class TestGameSpecificAPIs:
     def test_chess_api_endpoints(self, games_api):
         """Test chess-specific endpoints."""
         app, api = games_api
-        client = TestClient(app)
+        TestClient(app)
 
         # Verify chess is available
         assert "chess" in api.discovered_games

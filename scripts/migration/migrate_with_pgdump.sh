@@ -28,13 +28,13 @@ SUPABASE_DBNAME="${SUPABASE_DBNAME:-postgres}"
 SUPABASE_DB="postgresql://${SUPABASE_USER}:${SUPABASE_PASSWORD}@${SUPABASE_HOST}:${SUPABASE_PORT}/${SUPABASE_DBNAME}?sslmode=require"
 
 echo "📡 Connection check..."
-echo "Local:    $LOCAL_DB"
+echo "Local:    ${LOCAL_DB}"
 echo "Supabase: ${SUPABASE_DB:0:50}..."
 
 # Step 1: Create schema dump (structure only)
 echo ""
 echo "🔧 Step 1: Creating schema dump..."
-pg_dump "$LOCAL_DB" \
+pg_dump "${LOCAL_DB}" \
 	--schema-only \
 	--clean \
 	--if-exists \
@@ -53,7 +53,7 @@ echo "✓ Schema exported to schema_dump.sql"
 # Step 2: Create data dump (data only)
 echo ""
 echo "📦 Step 2: Creating data dump..."
-pg_dump "$LOCAL_DB" \
+pg_dump "${LOCAL_DB}" \
 	--data-only \
 	--quote-all-identifiers \
 	--no-owner \
@@ -74,7 +74,7 @@ echo "🔧 Step 3: Setting up schema in Supabase..."
 echo "Creating proper threads table structure..."
 
 # Create the proper schema first
-psql "$SUPABASE_DB" <<'EOF'
+psql "${SUPABASE_DB}" <<'EOF'
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -306,7 +306,7 @@ rm -f schema_dump.sql data_dump.sql migrate_data.py
 # Step 7: Verify migration
 echo ""
 echo "🔍 Step 7: Verifying migration..."
-psql "$SUPABASE_DB" <<'EOF'
+psql "${SUPABASE_DB}" <<'EOF'
 SELECT 
     'threads' as table_name, COUNT(*) as count 
 FROM public.threads

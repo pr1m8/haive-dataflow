@@ -1,15 +1,22 @@
 #!/usr/bin/env python
-"""Hybrid Tools and Toolkits Importer
+"""Hybrid Tools and Toolkits Importer.
 
-This script first identifies tools using your working approach, then imports them to the database.
+This script first identifies tools using your working approach, then
+imports them to the database.
 """
+
 import importlib
 import inspect
 import logging
 import os
 import sys
+import traceback
 import uuid
 from datetime import datetime
+
+from langchain_core.tools import BaseTool
+
+from haive.dataflow.db.supabase import get_supabase_client, table
 
 # Set up logging
 logging.basicConfig(
@@ -19,22 +26,24 @@ logger = logging.getLogger(__name__)
 
 # Check for langchain dependencies
 try:
-    from langchain_core.documents import Document
-    from langchain_core.tools import BaseTool
+    import importlib.util
+
+    spec = importlib.util.find_spec("langchain_core.embeddings")
+    if spec is None:
+        raise ImportError("langchain_core.embeddings not found")
 except ImportError:
-    logger.error(
+    logger.exception(
         "langchain_core not found. Please install it with: pip install langchain-core"
     )
     sys.exit(1)
 
 # Import Supabase client
 try:
-    from haive.dataflow.db.supabase import get_supabase_client, table
 
     supabase = get_supabase_client()
     logger.info("Successfully imported Supabase client and helpers")
 except ImportError as e:
-    logger.error(f"Error importing Supabase client: {e}")
+    logger.exception(f"Error importing Supabase client: {e}")
     sys.exit(1)
 
 # --- CONFIG (using your actual paths) ---
@@ -166,7 +175,7 @@ def get_or_create_category(name: str, display_name: str | None = None) -> str:
         raise Exception(f"Failed to create category: {name}")
 
     except Exception as e:
-        logger.error(f"Error getting or creating category {name}: {e}")
+        logger.exception(f"Error getting or creating category {name}: {e}")
         # Return a default category ID to continue processing
         return str(uuid.uuid4())
 
@@ -230,7 +239,7 @@ def get_or_create_toolkit(
         raise Exception(f"Failed to create toolkit: {name}")
 
     except Exception as e:
-        logger.error(f"Error getting or creating toolkit {name}: {e}")
+        logger.exception(f"Error getting or creating toolkit {name}: {e}")
         # Return a UUID to continue processing
         return str(uuid.uuid4())
 
@@ -300,7 +309,7 @@ def get_or_create_tool(
         raise Exception(f"Failed to create tool: {name}")
 
     except Exception as e:
-        logger.error(f"Error getting or creating tool {name}: {e}")
+        logger.exception(f"Error getting or creating tool {name}: {e}")
         # Return a UUID to continue processing
         return str(uuid.uuid4())
 
@@ -333,7 +342,7 @@ def link_tool_to_toolkit(tool_id: str, toolkit_id: str) -> bool:
         return response.data is not None and len(response.data) > 0
 
     except Exception as e:
-        logger.error(f"Error linking tool {tool_id} to toolkit {toolkit_id}: {e}")
+        logger.exception(f"Error linking tool {tool_id} to toolkit {toolkit_id}: {e}")
         return False
 
 
@@ -414,7 +423,7 @@ def import_tools_to_database():
                 imported_toolkits.add(toolkit_name)
 
         except Exception as e:
-            logger.error(
+            logger.exception(
                 f"Error importing tool {getattr(tool, 'name', 'unknown')}: {e}"
             )
 
@@ -431,7 +440,7 @@ def import_tools_to_database():
                 link_tool_to_toolkit(tool_id, toolkit_id)
 
         except Exception as e:
-            logger.error(f"Error creating toolkit {toolkit_name}: {e}")
+            logger.exception(f"Error creating toolkit {toolkit_name}: {e}")
 
     logger.info(
         f"Imported {imported_tools} tools into {len(imported_toolkits)} toolkits"
@@ -449,25 +458,20 @@ def print_tool_stats():
         tools_by_module[module].append(tool)
 
     # Print summary
-    print("\n🔍 Tool Discovery Results:")
-    print(f"✅ Found {len(all_tools)} tools across {len(tools_by_module)} modules")
 
     # Print top 10 modules with most tools
-    print("\n📦 Top modules by tool count:")
     sorted_modules = sorted(
         tools_by_module.items(), key=lambda x: len(x[1]), reverse=True
     )
-    for module, tools in sorted_modules[:10]:
-        print(f"  • {module}: {len(tools)} tools")
+    for module, _tools in sorted_modules[:10]:
+        pass
 
     # Print failures if any
     if failed_modules:
-        print(f"\n⚠️ {len(failed_modules)} modules failed to load:")
-        for module, error in failed_modules[:5]:
-            print(f"  ❌ {module}: {error}")
+        for module, _error in failed_modules[:5]:
+            pass
         if len(failed_modules) > 5:
-            print(f"  ... and {len(failed_modules) - 5} more failures")
-    print("\n")
+            pass
 
 
 def main():
@@ -504,11 +508,11 @@ def main():
 
     # Test database connection
     try:
-        test_query = table(supabase, "tools.categories").select("id").limit(1).execute()
+        table(supabase, "tools.categories").select("id").limit(1).execute()
         logger.info("Database connection successful")
     except Exception as e:
-        logger.error(f"Database connection error: {e}")
-        logger.error("Skipping database import phase")
+        logger.exception(f"Database connection error: {e}")
+        logger.exception("Skipping database import phase")
         return
 
     # Import to database
@@ -521,9 +525,7 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n🛑 Process interrupted by user")
-    except Exception as e:
-        print(f"\n❌ Unhandled error: {e}")
-        import traceback
+        pass
+    except Exception:
 
         traceback.print_exc()

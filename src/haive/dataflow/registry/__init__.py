@@ -31,8 +31,6 @@ Typical usage example:
 """
 
 from haive.dataflow.registry.core import registry_system
-
-# Import discovery functions
 from haive.dataflow.registry.discovery import (
     discover_agents,
     discover_all,
@@ -53,38 +51,41 @@ from haive.dataflow.registry.models import (
     ImportStatus,
     RegistryItem,
 )
-
-# Import serialization utilities
 from haive.dataflow.registry.serialization import (
     SerializationRegistry,
     deserialize_object,
     serialize_object,
 )
 
+# Import discovery functions
+
+# Import serialization utilities
+
+
 # Export for convenient imports
 __all__ = [
-    # Core registry system
-    "registry_system",
+    "ConfigType",
+    "Configuration",
+    "Dependency",
+    "DependencyType",
     # Models
     "EntityType",
-    "ConfigType",
-    "DependencyType",
+    "EnvironmentVar",
+    "GraphDefinition",
+    "ImportLogItem",
     "ImportStatus",
     "RegistryItem",
-    "Configuration",
-    "GraphDefinition",
-    "Dependency",
-    "EnvironmentVar",
-    "ImportLogItem",
+    "SerializationRegistry",
+    "deserialize_object",
+    "discover_agents",
     # Discovery
     "discover_all",
-    "discover_agents",
-    "discover_tools",
-    "discover_toolkits",
     "discover_engines",
     "discover_games",
+    "discover_toolkits",
+    "discover_tools",
+    # Core registry system
+    "registry_system",
     # Serialization
     "serialize_object",
-    "deserialize_object",
-    "SerializationRegistry",
 ]

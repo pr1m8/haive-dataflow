@@ -1,4 +1,5 @@
 # haive_dataflow/api/middleware/auth.py
+
 import logging
 
 from fastapi import Request, Response

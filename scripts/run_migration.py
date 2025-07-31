@@ -21,7 +21,7 @@ def run_migration():
         return False
 
     try:
-        print(f"Connecting to Supabase...")
+        print("Connecting to Supabase...")
         conn = psycopg2.connect(db_url)
         cursor = conn.cursor()
 

@@ -20,7 +20,7 @@ async def test_persistence():
     persistence = SupabasePersistence()
 
     # Check the internal config
-    print(f"\nPostgreSQL Config:")
+    print("\nPostgreSQL Config:")
     print(
         f"  Connection string: {persistence.postgres_config.connection_string[:60]}..."
     )
@@ -37,7 +37,7 @@ async def test_persistence():
             async with conn.cursor() as cursor:
                 await cursor.execute("SELECT version()")
                 version = await cursor.fetchone()
-                print(f"✓ Connected to PostgreSQL!")
+                print("✓ Connected to PostgreSQL!"!")
                 print(f"  Version: {version[0][:50]}...")
 
                 # Check for our migration
@@ -61,7 +61,7 @@ async def test_persistence():
                 )
                 has_threads = (await cursor.fetchone())[0]
 
-                print(f"\n✓ Migration status:")
+                print("\n✓ Migration status:":")
                 print(f"  agent_state schema: {has_agent_state}")
                 print(f"  public.threads table: {has_threads}")
 

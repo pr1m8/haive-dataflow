@@ -1,4 +1,4 @@
-"""Auth - TODO: Add brief description
+"""Auth - TODO: Add brief description.
 
 TODO: Add detailed description of module functionality
 

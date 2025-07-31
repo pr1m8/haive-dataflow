@@ -1,5 +1,7 @@
 # src/haive/api/db.py
+
 import logging
+from inspect import signature
 from typing import Any
 
 import psycopg2
@@ -33,7 +35,7 @@ class DatabaseManager:
             logger.info("Connected to database")
             return True
         except Exception as e:
-            logger.error(f"Error connecting to database: {e}")
+            logger.exception(f"Error connecting to database: {e}")
             return False
 
     def create_schema(self) -> bool:
@@ -42,9 +44,8 @@ class DatabaseManager:
         Returns:
             True if successful, False otherwise
         """
-        if not self.connection:
-            if not self.connect():
-                return False
+        if not self.connection and not self.connect():
+            return False
 
         try:
             with self.connection.cursor() as cursor:
@@ -58,7 +59,7 @@ class DatabaseManager:
                 logger.info(f"Schema '{self.schema_name}' created or already exists")
                 return True
         except Exception as e:
-            logger.error(f"Error creating schema: {e}")
+            logger.exception(f"Error creating schema: {e}")
             self.connection.rollback()
             return False
 
@@ -68,9 +69,8 @@ class DatabaseManager:
         Returns:
             True if successful, False otherwise
         """
-        if not self.connection:
-            if not self.connect():
-                return False
+        if not self.connection and not self.connect():
+            return False
 
         try:
             with self.connection.cursor() as cursor:
@@ -135,7 +135,7 @@ class DatabaseManager:
                     sql.SQL(
                         """
                     INSERT INTO {}.agent_types (name, description)
-                    VALUES 
+                    VALUES
                         ('agent', 'Standard agent for general use'),
                         ('game', 'Game-specific agent')
                     ON CONFLICT (name) DO NOTHING
@@ -149,7 +149,7 @@ class DatabaseManager:
                 )
                 return True
         except Exception as e:
-            logger.error(f"Error creating tables: {e}")
+            logger.exception(f"Error creating tables: {e}")
             self.connection.rollback()
             return False
 
@@ -166,9 +166,8 @@ class DatabaseManager:
         Returns:
             True if successful, False otherwise
         """
-        if not self.connection:
-            if not self.connect():
-                return False
+        if not self.connection and not self.connect():
+            return False
 
         try:
             with self.connection.cursor() as cursor:
@@ -199,8 +198,6 @@ class DatabaseManager:
                 # Create a schema representation of the config class if possible
                 config_schema = {}
                 try:
-                    from inspect import signature
-
                     sig = signature(class_obj.__init__)
                     for param_name, param in sig.parameters.items():
                         if param_name not in ["self", "args", "kwargs"]:
@@ -223,7 +220,7 @@ class DatabaseManager:
                 cursor.execute(
                     sql.SQL(
                         """
-                        INSERT INTO {}.agent_configs 
+                        INSERT INTO {}.agent_configs
                             (name, class_name, module_path, agent_type_id, description, config_schema)
                         VALUES (%s, %s, %s, %s, %s, %s)
                         ON CONFLICT (name) DO UPDATE SET
@@ -249,7 +246,7 @@ class DatabaseManager:
                 logger.info(f"Agent configuration '{name}' registered in database")
                 return True
         except Exception as e:
-            logger.error(f"Error registering agent config in database: {e}")
+            logger.exception(f"Error registering agent config in database: {e}")
             self.connection.rollback()
             return False
 
@@ -262,9 +259,8 @@ class DatabaseManager:
         Returns:
             List of agent configuration dictionaries
         """
-        if not self.connection:
-            if not self.connect():
-                return []
+        if not self.connection and not self.connect():
+            return []
 
         try:
             with self.connection.cursor(cursor_factory=DictCursor) as cursor:
@@ -301,7 +297,7 @@ class DatabaseManager:
 
                 return [dict(row) for row in cursor.fetchall()]
         except Exception as e:
-            logger.error(f"Error getting agent configs from database: {e}")
+            logger.exception(f"Error getting agent configs from database: {e}")
             return []
 
     def close(self) -> None:

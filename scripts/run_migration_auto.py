@@ -9,7 +9,6 @@ import sys
 from pathlib import Path
 
 import psycopg2
-from psycopg2.extras import RealDictCursor
 
 # Add the project to Python path
 project_root = Path(__file__).parent
@@ -26,7 +25,7 @@ def get_postgres_connection_string():
 
     # Parse Supabase URL to get connection details
     url = supabase_config.url  # https://zkssazqhwcetsnbiuqik.supabase.co
-    project_id = url.split("//")[1].split(".")[0]
+    url.split("//")[1].split(".")[0]
 
     # Build connection string
     conn_str = f"postgresql://postgres:{os.getenv('SUPABASE_PASSWORD', 'ITfz5B0wU6ehVXI1')}@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
@@ -51,7 +50,7 @@ def run_sql_migration():
     try:
         # Connect to Supabase PostgreSQL
         conn_str = get_postgres_connection_string()
-        print(f"Connecting to Supabase PostgreSQL...")
+        print("Connecting to Supabase PostgreSQL...")
 
         with psycopg2.connect(conn_str) as conn:
             with conn.cursor() as cursor:

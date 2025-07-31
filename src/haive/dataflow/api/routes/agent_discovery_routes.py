@@ -8,9 +8,12 @@ This module provides FastAPI routes for discovering and managing both v1 and v2 
 import importlib
 import inspect
 import logging
-from typing import Any, Dict, List, Optional, Union
+import os
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
+from haive.core.engine.agent import config as agent_config_module
+from haive.core.utils.haive_discovery import HaiveComponentDiscovery
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -27,7 +30,7 @@ class AgentInfo(BaseModel):
     module: str = Field(..., description="Module path")
     agent_type: str = Field(..., description="Agent type (v1 or v2)")
     version: str = Field(..., description="Agent version")
-    config_class: Optional[str] = Field(None, description="Config class for v1 agents")
+    config_class: str | None = Field(None, description="Config class for v1 agents")
     category: str = Field(default="general", description="Agent category")
 
 
@@ -37,13 +40,13 @@ class AgentSchema(BaseModel):
     name: str = Field(..., description="Agent name")
     description: str = Field(..., description="Agent description")
     agent_type: str = Field(..., description="Agent type (v1 or v2)")
-    config_schema: Optional[Dict[str, Any]] = Field(
+    config_schema: dict[str, Any] | None = Field(
         None, description="Configuration schema for v1 agents"
     )
-    init_schema: Optional[Dict[str, Any]] = Field(
+    init_schema: dict[str, Any] | None = Field(
         None, description="Initialization schema for v2 agents"
     )
-    methods: List[str] = Field(
+    methods: list[str] = Field(
         default_factory=list, description="Available agent methods"
     )
 
@@ -51,7 +54,7 @@ class AgentSchema(BaseModel):
 class AgentListResponse(BaseModel):
     """Response for agent list endpoint."""
 
-    agents: List[AgentInfo] = Field(..., description="List of available agents")
+    agents: list[AgentInfo] = Field(..., description="List of available agents")
     count: int = Field(..., description="Total number of agents")
     v1_count: int = Field(..., description="Number of v1 agents")
     v2_count: int = Field(..., description="Number of v2 agents")
@@ -61,10 +64,10 @@ class AgentCreateRequest(BaseModel):
     """Request to create/instantiate an agent."""
 
     agent_name: str = Field(..., description="Name of the agent to create")
-    config: Optional[Dict[str, Any]] = Field(
+    config: dict[str, Any] | None = Field(
         None, description="Configuration for v1 agents"
     )
-    init_args: Optional[Dict[str, Any]] = Field(
+    init_args: dict[str, Any] | None = Field(
         None, description="Initialization arguments for v2 agents"
     )
 
@@ -73,19 +76,17 @@ class AgentCreateResponse(BaseModel):
     """Response from agent creation."""
 
     success: bool = Field(..., description="Whether creation was successful")
-    agent_id: Optional[str] = Field(None, description="Created agent ID")
-    agent_type: Optional[str] = Field(None, description="Type of created agent")
-    error: Optional[str] = Field(None, description="Error message if failed")
+    agent_id: str | None = Field(None, description="Created agent ID")
+    agent_type: str | None = Field(None, description="Type of created agent")
+    error: str | None = Field(None, description="Error message if failed")
 
 
-def discover_v1_agents() -> List[AgentInfo]:
+def discover_v1_agents() -> list[AgentInfo]:
     """Discover v1 agents from haive.engine.agent."""
     agents = []
 
     try:
         # Try to import haive.engine.agent modules
-        from haive.core.engine.agent import agent as agent_module
-        from haive.core.engine.agent import config as agent_config_module
 
         # Look for config classes that end with 'Config'
         for name, obj in inspect.getmembers(agent_config_module):
@@ -95,7 +96,6 @@ def discover_v1_agents() -> List[AgentInfo]:
                 and name != "BaseConfig"
                 and hasattr(obj, "__module__")
             ):
-
                 # Extract agent name from config name
                 agent_name = name.replace("Config", "").replace("Agent", "")
 
@@ -106,10 +106,10 @@ def discover_v1_agents() -> List[AgentInfo]:
                             getattr(obj, "__doc__", "V1 config-based agent").split(
                                 "\n"
                             )[0]
-                            if getattr(obj, "__doc__")
+                            if obj.__doc__
                             else "V1 config-based agent"
                         ),
-                        module=f"haive.core.engine.agent.config",
+                        module="haive.core.engine.agent.config",
                         agent_type="v1",
                         version="1.0",
                         config_class=name,
@@ -119,8 +119,6 @@ def discover_v1_agents() -> List[AgentInfo]:
 
         # Also check for generic agent with various configs
         try:
-            from haive.core.engine.agent.agent import Agent as V1Agent
-
             # Look for any config classes that could be used with the generic agent
             config_classes = []
             for name, obj in inspect.getmembers(agent_config_module):
@@ -153,13 +151,12 @@ def discover_v1_agents() -> List[AgentInfo]:
     return agents
 
 
-def discover_v2_agents() -> List[AgentInfo]:
+def discover_v2_agents() -> list[AgentInfo]:
     """Discover v2 agents from haive.agents.base.agent."""
     agents = []
 
     try:
         # Check haive.agents.base.agent
-        from haive.agents.base.agent import Agent as V2Agent
 
         agents.append(
             AgentInfo(
@@ -175,14 +172,10 @@ def discover_v2_agents() -> List[AgentInfo]:
 
         # Try to discover other v2 agents using haive discovery
         try:
-            import os
-
-            from haive.core.utils.haive_discovery import HaiveComponentDiscovery
-
             current_dir = os.path.dirname(os.path.abspath(__file__))
             haive_root = os.path.abspath(os.path.join(current_dir, "../../../../../.."))
 
-            discovery = HaiveComponentDiscovery(haive_root)
+            HaiveComponentDiscovery(haive_root)
 
             # Look for agents in haive-agents package
             agents_path = os.path.join(
@@ -190,7 +183,7 @@ def discover_v2_agents() -> List[AgentInfo]:
             )
             if os.path.exists(agents_path):
                 # Scan for agent modules
-                for root, dirs, files in os.walk(agents_path):
+                for root, _dirs, files in os.walk(agents_path):
                     for file in files:
                         if file.endswith(".py") and file != "__init__.py":
                             module_name = file[:-3]  # Remove .py
@@ -201,7 +194,9 @@ def discover_v2_agents() -> List[AgentInfo]:
                                 if relative_path == ".":
                                     module_path = f"haive.agents.{module_name}"
                                 else:
-                                    module_path = f"haive.agents.{relative_path.replace(os.sep, '.')}.{module_name}"
+                                    module_path = f"haive.agents.{
+                                        relative_path.replace(os.sep, '.')
+                                    }.{module_name}"
 
                                 module = importlib.import_module(module_path)
 
@@ -212,7 +207,6 @@ def discover_v2_agents() -> List[AgentInfo]:
                                         and name != "Agent"
                                         and obj.__module__ == module_path
                                     ):
-
                                         agents.append(
                                             AgentInfo(
                                                 name=name.lower(),
@@ -220,7 +214,7 @@ def discover_v2_agents() -> List[AgentInfo]:
                                                     getattr(
                                                         obj, "__doc__", "V2 agent"
                                                     ).split("\n")[0]
-                                                    if getattr(obj, "__doc__")
+                                                    if obj.__doc__
                                                     else "V2 agent"
                                                 ),
                                                 module=module_path,
@@ -244,7 +238,7 @@ def discover_v2_agents() -> List[AgentInfo]:
     return agents
 
 
-def discover_all_agents() -> List[AgentInfo]:
+def discover_all_agents() -> list[AgentInfo]:
     """Discover both v1 and v2 agents."""
     agents = []
 
@@ -285,13 +279,13 @@ async def list_agents() -> AgentListResponse:
             agents=agents, count=len(agents), v1_count=v1_count, v2_count=v2_count
         )
     except Exception as e:
-        logger.error(f"Failed to list agents: {e}")
+        logger.exception(f"Failed to list agents: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/search", response_model=AgentListResponse)
 async def search_agents(
-    query: str = None, agent_type: str = None, category: str = None
+    query: str | None = None, agent_type: str | None = None, category: str | None = None
 ) -> AgentListResponse:
     """Search for agents by query, type, or category.
 
@@ -331,7 +325,7 @@ async def search_agents(
             agents=agents, count=len(agents), v1_count=v1_count, v2_count=v2_count
         )
     except Exception as e:
-        logger.error(f"Failed to search agents: {e}")
+        logger.exception(f"Failed to search agents: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -414,12 +408,12 @@ async def get_agent_schema(agent_name: str) -> AgentSchema:
 
                     # Get available methods
                     methods = []
-                    for name, method in inspect.getmembers(
+                    for name, _method in inspect.getmembers(
                         agent_class, predicate=inspect.ismethod
                     ):
                         if not name.startswith("_"):
                             methods.append(name)
-                    for name, method in inspect.getmembers(
+                    for name, _method in inspect.getmembers(
                         agent_class, predicate=inspect.isfunction
                     ):
                         if not name.startswith("_"):
@@ -435,12 +429,12 @@ async def get_agent_schema(agent_name: str) -> AgentSchema:
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get agent schema: {e}")
+        logger.exception(f"Failed to get agent schema: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{agent_name}")
-async def get_agent_details(agent_name: str) -> Dict[str, Any]:
+async def get_agent_details(agent_name: str) -> dict[str, Any]:
     """Get detailed information about a specific agent.
 
     Args:
@@ -498,5 +492,5 @@ async def get_agent_details(agent_name: str) -> Dict[str, Any]:
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get agent details: {e}")
+        logger.exception(f"Failed to get agent details: {e}")
         raise HTTPException(status_code=500, detail=str(e))

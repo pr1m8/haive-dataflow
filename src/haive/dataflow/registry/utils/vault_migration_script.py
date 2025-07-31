@@ -1,14 +1,17 @@
-"""Fixed Vault Reference Migration Script
+"""Fixed Vault Reference Migration Script.
 
-This script migrates API keys and secrets to the vault schema,
-using proper schema mapping with the existing table() helper function.
+This script migrates API keys and secrets to the vault schema, using
+proper schema mapping with the existing table() helper function.
 """
 
 import json
 import logging
 import os
+import sys
 from datetime import datetime
 from typing import Any
+
+from haive.dataflow.db.supabase import get_supabase_client, sanitize_sql, table
 
 # Set up logging
 logging.basicConfig(
@@ -18,14 +21,12 @@ logger = logging.getLogger(__name__)
 
 # Import Supabase client and helper functions
 try:
-    from haive.dataflow.db.supabase import get_supabase_client, sanitize_sql, table
-
     supabase = get_supabase_client()
 except ImportError:
-    logger.error(
+    logger.exception(
         "Cannot import Supabase client. Make sure it's properly installed and configured."
     )
-    exit(1)
+    sys.exit(1)
 
 
 def execute_sql(sql: str) -> Any:
@@ -45,7 +46,7 @@ def execute_sql(sql: str) -> Any:
         return response
 
     except Exception as e:
-        logger.error(f"Error executing SQL: {e}")
+        logger.exception(f"Error executing SQL: {e}")
         return None
 
 
@@ -79,7 +80,7 @@ def ensure_vault_reference_column(table_name: str) -> bool:
 
         # If we get here, column doesn't exist, so add it
         add_column_sql = f"""
-        ALTER TABLE {table_name} 
+        ALTER TABLE {table_name}
         ADD COLUMN IF NOT EXISTS vault_secret_id UUID REFERENCES vault.secrets(id)
         """
 
@@ -96,7 +97,7 @@ def ensure_vault_reference_column(table_name: str) -> bool:
         # If this is engines.engines, also add config_vault_refs column
         if table_name == "engines.engines":
             add_refs_sql = """
-            ALTER TABLE engines.engines 
+            ALTER TABLE engines.engines
             ADD COLUMN IF NOT EXISTS config_vault_refs JSONB DEFAULT '{}'::jsonb
             """
 
@@ -106,15 +107,15 @@ def ensure_vault_reference_column(table_name: str) -> bool:
 
             if hasattr(refs_result, "error") and refs_result.error:
                 logger.error(
-                    f"Failed to add config_vault_refs to engines.engines: {refs_result.error}"
-                )
+                    f"Failed to add config_vault_refs to engines.engines: {
+                        refs_result.error}")
             else:
                 logger.info("Added config_vault_refs column to engines.engines")
 
         return True
 
     except Exception as e:
-        logger.error(f"Error ensuring vault_reference column on {table_name}: {e}")
+        logger.exception(f"Error ensuring vault_reference column on {table_name}: {e}")
         logger.info(
             f"Please run this SQL in your database: ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS vault_secret_id UUID REFERENCES vault.secrets(id);"
         )
@@ -137,7 +138,7 @@ def get_existing_vault_secrets() -> dict[str, str]:
 
         return secrets_map
     except Exception as e:
-        logger.error(f"Error fetching existing vault secrets: {e}")
+        logger.exception(f"Error fetching existing vault secrets: {e}")
         return {}
 
 
@@ -169,7 +170,7 @@ def create_vault_secret(
 
         return None
     except Exception as e:
-        logger.error(f"Error creating vault secret {name}: {e}")
+        logger.exception(f"Error creating vault secret {name}: {e}")
         return None
 
 
@@ -261,20 +262,19 @@ def migrate_environment_variables() -> int:
 
                 if update_response.data and len(update_response.data) > 0:
                     logger.info(
-                        f"Updated environment variable {env_name} to reference vault secret {secret_id}"
-                    )
+                        f"Updated environment variable {env_name} to reference vault secret {secret_id}")
                     migrated_count += 1
                 else:
                     logger.error(f"Failed to update environment variable {env_name}")
 
             except Exception as env_error:
-                logger.error(f"Error processing environment variable: {env_error}")
+                logger.exception(f"Error processing environment variable: {env_error}")
 
         logger.info(f"Completed migration of {migrated_count} environment variables")
         return migrated_count
 
     except Exception as e:
-        logger.error(f"Error migrating environment variables: {e}")
+        logger.exception(f"Error migrating environment variables: {e}")
         return 0
 
 
@@ -367,14 +367,13 @@ def migrate_component_env_mappings() -> int:
 
                 if update_response.data and len(update_response.data) > 0:
                     logger.info(
-                        f"Updated mapping {mapping_id} to reference vault secret {vault_secret_id}"
-                    )
+                        f"Updated mapping {mapping_id} to reference vault secret {vault_secret_id}")
                     migrated_count += 1
                 else:
                     logger.error(f"Failed to update mapping {mapping_id}")
 
             except Exception as mapping_error:
-                logger.error(f"Error processing component env mapping: {mapping_error}")
+                logger.exception(f"Error processing component env mapping: {mapping_error}")
 
         logger.info(
             f"Completed migration of {migrated_count} component environment mappings"
@@ -382,7 +381,7 @@ def migrate_component_env_mappings() -> int:
         return migrated_count
 
     except Exception as e:
-        logger.error(f"Error migrating component environment mappings: {e}")
+        logger.exception(f"Error migrating component environment mappings: {e}")
         return 0
 
 
@@ -480,20 +479,19 @@ def migrate_provider_api_keys() -> int:
 
                 if update_response.data and len(update_response.data) > 0:
                     logger.info(
-                        f"Updated provider {provider_name} to reference vault secret {secret_id}"
-                    )
+                        f"Updated provider {provider_name} to reference vault secret {secret_id}")
                     migrated_count += 1
                 else:
                     logger.error(f"Failed to update provider {provider_name}")
 
             except Exception as provider_error:
-                logger.error(f"Error processing provider: {provider_error}")
+                logger.exception(f"Error processing provider: {provider_error}")
 
         logger.info(f"Completed migration of {migrated_count} providers")
         return migrated_count
 
     except Exception as e:
-        logger.error(f"Error migrating provider API keys: {e}")
+        logger.exception(f"Error migrating provider API keys: {e}")
         return 0
 
 
@@ -545,7 +543,7 @@ def migrate_engine_api_keys() -> int:
                 if isinstance(config, str):
                     try:
                         config = json.loads(config)
-                    except:
+                    except BaseException:
                         config = {}
 
                 # Look for API keys in the config
@@ -613,7 +611,7 @@ def migrate_engine_api_keys() -> int:
                     if isinstance(config_vault_refs, str):
                         try:
                             config_vault_refs = json.loads(config_vault_refs)
-                        except:
+                        except BaseException:
                             config_vault_refs = {}
 
                     config_vault_refs[key] = secret_id
@@ -633,21 +631,20 @@ def migrate_engine_api_keys() -> int:
 
                     if update_response.data and len(update_response.data) > 0:
                         logger.info(
-                            f"Updated engine {engine_name} to reference vault secret {secret_id} for key {key}"
-                        )
+                            f"Updated engine {engine_name} to reference vault secret {secret_id} for key {key}")
                     else:
                         logger.error(f"Failed to update engine {engine_name}")
 
                 migrated_count += 1
 
             except Exception as engine_error:
-                logger.error(f"Error processing engine: {engine_error}")
+                logger.exception(f"Error processing engine: {engine_error}")
 
         logger.info(f"Completed migration of {migrated_count} engines")
         return migrated_count
 
     except Exception as e:
-        logger.error(f"Error migrating engine API keys: {e}")
+        logger.exception(f"Error migrating engine API keys: {e}")
         return 0
 
 
@@ -671,7 +668,7 @@ def add_vault_helper_functions() -> bool:
             SELECT decrypted_secret INTO secret_value
             FROM vault.decrypted_secrets
             WHERE id = secret_id;
-            
+
             RETURN secret_value;
         END;
         $$;
@@ -701,7 +698,7 @@ def add_vault_helper_functions() -> bool:
             SELECT decrypted_secret INTO secret_value
             FROM vault.decrypted_secrets
             WHERE name = secret_name;
-            
+
             RETURN secret_value;
         END;
         $$;
@@ -722,7 +719,7 @@ def add_vault_helper_functions() -> bool:
         return True
 
     except Exception as e:
-        logger.error(f"Error creating vault helper functions: {e}")
+        logger.exception(f"Error creating vault helper functions: {e}")
 
         # Print the SQL for manual execution
         logger.info(
@@ -742,11 +739,11 @@ def add_vault_helper_functions() -> bool:
             SELECT decrypted_secret INTO secret_value
             FROM vault.decrypted_secrets
             WHERE id = secret_id;
-            
+
             RETURN secret_value;
         END;
         $$;
-        
+
         -- Function to get a secret value by name
         CREATE OR REPLACE FUNCTION get_vault_secret_by_name(secret_name TEXT)
         RETURNS TEXT
@@ -759,7 +756,7 @@ def add_vault_helper_functions() -> bool:
             SELECT decrypted_secret INTO secret_value
             FROM vault.decrypted_secrets
             WHERE name = secret_name;
-            
+
             RETURN secret_value;
         END;
         $$;
@@ -824,4 +821,4 @@ def main():
 
 if __name__ == "__main__":
     exit_code = main()
-    exit(exit_code)
+    sys.exit(exit_code)

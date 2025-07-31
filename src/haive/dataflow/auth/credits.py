@@ -1,4 +1,5 @@
 # haive_dataflow/auth/credits.py
+
 import logging
 from datetime import datetime
 from decimal import Decimal
@@ -66,7 +67,7 @@ class CreditsManager:
             available_credits = response.data[0].get("available_credits", 0)
             return available_credits >= required_credits
         except Exception as e:
-            logger.error(f"Error checking credits: {e}")
+            logger.exception(f"Error checking credits: {e}")
             return False
 
     async def deduct_credits(self, user_id: str, amount: float) -> bool:
@@ -87,7 +88,7 @@ class CreditsManager:
 
             return response.data.get("success", False)
         except Exception as e:
-            logger.error(f"Error deducting credits: {e}")
+            logger.exception(f"Error deducting credits: {e}")
             return False
 
     async def log_usage(self, usage: UsageRecord) -> bool:
@@ -120,5 +121,5 @@ class CreditsManager:
 
             return bool(response.data)
         except Exception as e:
-            logger.error(f"Error logging usage: {e}")
+            logger.exception(f"Error logging usage: {e}")
             return False

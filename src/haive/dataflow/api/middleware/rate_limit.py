@@ -1,4 +1,5 @@
 # haive_dataflow/api/middleware/rate_limit.py
+
 import json
 import logging
 import time
@@ -55,9 +56,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 content=json.dumps(
                     {
                         "error": "Rate limit exceeded",
-                        "detail": f"Maximum {self.rate_limit} requests per {self.window} seconds",
-                    }
-                ),
+                        "detail": f"Maximum {
+                            self.rate_limit} requests per {
+                            self.window} seconds",
+                    }),
                 status_code=429,
                 media_type="application/json",
             )

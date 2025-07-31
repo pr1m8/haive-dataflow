@@ -75,14 +75,14 @@ html = """
     </head>
     <body>
         <h1>Chess WebSocket Client</h1>
-        
+
         <div>
             <label for="gameId">Game ID:</label>
             <input type="text" id="gameId" value="test123">
             <button onclick="connect()">Connect</button>
             <button onclick="disconnect()">Disconnect</button>
         </div>
-        
+
         <div style="display: flex; margin-top: 20px;">
             <div>
                 <div class="chessboard" id="board"></div>
@@ -91,7 +91,7 @@ html = """
                     <button onclick="aiMove()">AI Move</button>
                 </div>
             </div>
-            
+
             <div style="margin-left: 20px; flex: 1;">
                 <h3>Game Info</h3>
                 <div id="gameInfo">
@@ -99,12 +99,12 @@ html = """
                     <p>Turn: <span id="turn">-</span></p>
                     <p>Game Status: <span id="gameStatus">-</span></p>
                 </div>
-                
+
                 <h3>Log</h3>
                 <div class="log" id="log"></div>
             </div>
         </div>
-        
+
         <script>
             // Game data
             let ws = null;
@@ -114,13 +114,13 @@ html = """
             let turnElement = document.getElementById('turn');
             let gameStatusElement = document.getElementById('gameStatus');
             let logElement = document.getElementById('log');
-            
+
             // Chess pieces mapping
             const pieceMap = {
                 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',  // White pieces
                 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'   // Black pieces
             };
-            
+
             // Initialize the board
             function initBoard() {
                 boardElement.innerHTML = '';
@@ -134,21 +134,21 @@ html = """
                     }
                 }
             }
-            
+
             // Update board from FEN
             function updateBoard(fen) {
                 if (!fen) return;
-                
+
                 const boardFen = fen.split(' ')[0];
                 const rows = boardFen.split('/');
-                
+
                 for (let rowIndex = 0; rowIndex < 8; rowIndex++) {
                     let colIndex = 0;
                     const row = rows[rowIndex];
-                    
+
                     for (let i = 0; i < row.length; i++) {
                         const char = row[i];
-                        
+
                         if (isNaN(char)) {
                             // It's a piece
                             const square = document.querySelector(`.square[data-row="${rowIndex}"][data-col="${colIndex}"]`);
@@ -163,7 +163,7 @@ html = """
                     }
                 }
             }
-            
+
             // Add to log
             function log(message) {
                 const entry = document.createElement('div');
@@ -171,31 +171,31 @@ html = """
                 logElement.appendChild(entry);
                 logElement.scrollTop = logElement.scrollHeight;
             }
-            
+
             // Connect WebSocket
             function connect() {
                 const gameId = document.getElementById('gameId').value || 'test123';
                 const wsUrl = `ws://${window.location.host}/ws/chess/${gameId}`;
-                
+
                 if (ws) {
                     ws.close();
                 }
-                
+
                 log(`Connecting to ${wsUrl}...`);
                 ws = new WebSocket(wsUrl);
-                
+
                 ws.onopen = function(event) {
                     statusElement.textContent = 'Connected';
                     log('Connection established');
                     getState();
                 };
-                
+
                 ws.onmessage = function(event) {
                     log(`Received: ${event.data}`);
-                    
+
                     try {
                         const data = JSON.parse(event.data);
-                        
+
                         if (data.type === 'state_update') {
                             gameState = data.state;
                             updateBoard(gameState.board_fen);
@@ -208,18 +208,18 @@ html = """
                         log(`Error parsing message: ${e.message}`);
                     }
                 };
-                
+
                 ws.onclose = function(event) {
                     statusElement.textContent = 'Disconnected';
                     log('Connection closed');
                 };
-                
+
                 ws.onerror = function(event) {
                     statusElement.textContent = 'Error';
                     log('WebSocket error');
                 };
             }
-            
+
             // Disconnect WebSocket
             function disconnect() {
                 if (ws) {
@@ -227,7 +227,7 @@ html = """
                     ws = null;
                 }
             }
-            
+
             // Get game state
             function getState() {
                 if (ws && ws.readyState === WebSocket.OPEN) {
@@ -240,7 +240,7 @@ html = """
                     log('WebSocket not connected');
                 }
             }
-            
+
             // Request AI move
             function aiMove() {
                 if (ws && ws.readyState === WebSocket.OPEN) {
@@ -253,7 +253,7 @@ html = """
                     log('WebSocket not connected');
                 }
             }
-            
+
             // Initialize
             initBoard();
         </script>

@@ -56,6 +56,7 @@ Typical usage example:
 """
 
 import asyncio
+import contextlib
 import importlib.util
 import json
 import logging
@@ -74,12 +75,13 @@ from fastapi import (
     WebSocketDisconnect,
 )
 from fastapi.websockets import WebSocketState
+from haive.core.engine.agent.agent import AGENT_REGISTRY
 from pydantic import BaseModel, Field
+
+from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
 
 from .auth.dependencies import require_auth
 from .auth.supabase import SupabaseAuth
-
-# Authentication imports
 from .engine.agent.config import AgentConfig
 from .engine.aug_llm import AugLLMConfig
 from .models.llm.base import (
@@ -91,6 +93,9 @@ from .models.llm.base import (
     OpenAILLMConfig,
 )
 from .models.llm.provider_types import LLMProvider
+
+# Authentication imports
+
 
 logger = logging.getLogger(__name__)
 
@@ -237,8 +242,8 @@ class ConnectionManager:
     def __init__(self):
         """Initialize the connection manager.
 
-        Creates empty dictionaries for tracking connections and metadata,
-        and initializes the asyncio lock for thread safety.
+        Creates empty dictionaries for tracking connections and
+        metadata, and initializes the asyncio lock for thread safety.
         """
         self.active_connections: dict[str, list[WebSocket]] = {}
         self.thread_metadata: dict[str, dict[str, Any]] = {}
@@ -285,11 +290,11 @@ class ConnectionManager:
             logger.info(f"WebSocket connected to thread {thread_id}")
             return True
         except Exception as e:
-            logger.error(f"Error connecting WebSocket: {e}")
+            logger.exception(f"Error connecting WebSocket: {e}")
             return False
 
     async def disconnect(self, websocket: WebSocket, thread_id: str):
-        """Disconnect a WebSocket from a thread"""
+        """Disconnect a WebSocket from a thread."""
         async with self._lock:
             if thread_id in self.active_connections:
                 if websocket in self.active_connections[thread_id]:
@@ -302,7 +307,7 @@ class ConnectionManager:
                         del self.thread_metadata[thread_id]
 
     async def broadcast_to_thread(self, thread_id: str, message: WSMessage):
-        """Broadcast message to all connections in a thread"""
+        """Broadcast message to all connections in a thread."""
         if thread_id in self.active_connections:
             disconnected = []
             for connection in self.active_connections[thread_id]:
@@ -312,7 +317,7 @@ class ConnectionManager:
                     else:
                         disconnected.append(connection)
                 except Exception as e:
-                    logger.error(f"Error broadcasting to WebSocket: {e}")
+                    logger.exception(f"Error broadcasting to WebSocket: {e}")
                     disconnected.append(connection)
 
             # Clean up disconnected sockets
@@ -320,7 +325,7 @@ class ConnectionManager:
                 await self.disconnect(conn, thread_id)
 
     async def update_activity(self, thread_id: str):
-        """Update last activity timestamp for a thread"""
+        """Update last activity timestamp for a thread."""
         if thread_id in self.thread_metadata:
             self.thread_metadata[thread_id][
                 "last_activity"
@@ -333,9 +338,8 @@ manager = ConnectionManager()
 
 # Authentication helper function
 def get_user_from_token(token: str) -> str | None:
-    """Validate JWT token and return user ID"""
+    """Validate JWT token and return user ID."""
     # Development mode bypass
-    import os
 
     haive_env = os.getenv("HAIVE_ENV")
     logger.info(f"HAIVE_ENV: {haive_env}, token: {token[:20]}...")
@@ -348,7 +352,7 @@ def get_user_from_token(token: str) -> str | None:
         user_id = auth.get_user_id(token)
         return user_id
     except Exception as e:
-        logger.error(f"Token validation error: {e}")
+        logger.exception(f"Token validation error: {e}")
         return None
 
 
@@ -356,7 +360,7 @@ def get_user_from_token(token: str) -> str | None:
 async def load_agent_config(
     agent_name: str, user_id: str, thread_id: str
 ) -> AgentConfig | None:
-    """Load agent configuration from package"""
+    """Load agent configuration from package."""
     try:
         # Look for agent configuration
         agents_path = "/home/will/Projects/haive/backend/haive/packages/haive-agents"
@@ -368,7 +372,7 @@ async def load_agent_config(
 
         # Try to load config file
         config_file = os.path.join(agent_path, "config.py")
-        state_file = os.path.join(agent_path, "state.py")
+        os.path.join(agent_path, "state.py")
         agent_file = os.path.join(agent_path, "agent.py")
 
         # Check for required files
@@ -391,7 +395,6 @@ async def load_agent_config(
                     and issubclass(item, AgentConfig)
                     and item != AgentConfig
                 ):
-
                     # Create instance with context information
                     config_instance = item()
                     break
@@ -442,7 +445,6 @@ async def load_agent_config(
                         ):
                             # Register agent class for this config
                             item.config_class = type(config_instance)
-                            from haive.core.engine.agent.agent import AGENT_REGISTRY
 
                             AGENT_REGISTRY[type(config_instance)] = item
                             logger.info(f"Registered agent class: {item_name}")
@@ -451,16 +453,16 @@ async def load_agent_config(
                     logger.warning(f"Failed to load agent module: {e}")
 
             logger.info(
-                f"Loaded agent config: {config_instance.__class__.__name__} for thread {thread_id}"
-            )
+                f"Loaded agent config: {
+                    config_instance.__class__.__name__} for thread {thread_id}")
             return config_instance
 
         except Exception as e:
-            logger.error(f"Error loading config module: {e}")
+            logger.exception(f"Error loading config module: {e}")
             return None
 
     except Exception as e:
-        logger.error(f"Error loading agent config: {e}")
+        logger.exception(f"Error loading agent config: {e}")
         return None
 
 
@@ -468,7 +470,7 @@ async def load_agent_config(
 async def configure_agent(
     config: AgentConfig, chat_config: AgentChatConfig
 ) -> AgentConfig:
-    """Configure agent with LLM settings"""
+    """Configure agent with LLM settings."""
     try:
         # Get environment API key based on provider
         env_key_map = {
@@ -511,7 +513,8 @@ async def configure_agent(
 
         # Create AugLLM configuration with context
         aug_llm_config = AugLLMConfig(
-            llm_config=llm_config, prompt_template=None  # Use default template
+            llm_config=llm_config,
+            prompt_template=None,  # Use default template
         )
 
         # Preserve metadata when updating engine
@@ -536,7 +539,7 @@ async def configure_agent(
         return config
 
     except Exception as e:
-        logger.error(f"Error configuring agent: {e}")
+        logger.exception(f"Error configuring agent: {e}")
         raise
 
 
@@ -551,7 +554,7 @@ async def websocket_chat_endpoint(
     ),
     config: str | None = Query(None, description="JSON encoded chat configuration"),
 ):
-    """WebSocket endpoint for real-time chat with an agent
+    """WebSocket endpoint for real-time chat with an agent.
 
     Args:
         websocket: WebSocket connection
@@ -597,8 +600,6 @@ async def websocket_chat_endpoint(
         # Set up Supabase checkpointing for authenticated users
         checkpointer = None
         if chat_config.persistent and user_id:
-            from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
-
             # Create Supabase persistence adapter
             persistence = SupabasePersistence()
 
@@ -712,7 +713,7 @@ async def websocket_chat_endpoint(
                             if chat_config.stream_format == "text":
                                 # Extract text content only
                                 if isinstance(chunk, dict):
-                                    if "messages" in chunk and chunk["messages"]:
+                                    if chunk.get("messages"):
                                         messages = chunk["messages"]
                                         if messages and hasattr(
                                             messages[-1], "content"
@@ -737,18 +738,17 @@ async def websocket_chat_endpoint(
                                         else "dict"
                                     ),
                                 }
-                            else:  # auto format
-                                # Default behavior - extract messages for message mode
-                                if (
-                                    chat_config.stream_mode == "messages"
-                                    and isinstance(chunk, dict)
-                                    and "messages" in chunk
-                                ):
-                                    messages = chunk["messages"]
-                                    if messages and hasattr(messages[-1], "content"):
-                                        content = messages[-1].content
-                                else:
-                                    content = chunk
+                            # Default behavior - extract messages for message mode
+                            elif (
+                                chat_config.stream_mode == "messages"
+                                and isinstance(chunk, dict)
+                                and "messages" in chunk
+                            ):
+                                messages = chunk["messages"]
+                                if messages and hasattr(messages[-1], "content"):
+                                    content = messages[-1].content
+                            else:
+                                content = chunk
 
                             if content is not None:
                                 response_msg = WSMessage(
@@ -800,7 +800,7 @@ async def websocket_chat_endpoint(
                                 )
                                 await websocket.send_json(state_msg.dict())
                         except Exception as e:
-                            logger.error(f"Error getting state: {e}")
+                            logger.exception(f"Error getting state: {e}")
 
                 except json.JSONDecodeError:
                     error_msg = WSMessage(
@@ -810,7 +810,7 @@ async def websocket_chat_endpoint(
                     await websocket.send_json(error_msg.dict())
 
                 except Exception as e:
-                    logger.error(f"Error processing message: {e}")
+                    logger.exception(f"Error processing message: {e}")
                     error_msg = WSMessage(
                         type=WSMessageType.ERROR, content={"error": str(e)}
                     )
@@ -819,32 +819,26 @@ async def websocket_chat_endpoint(
         except WebSocketDisconnect:
             logger.info(f"WebSocket disconnected for thread {thread_id}")
         except Exception as e:
-            logger.error(f"WebSocket error: {e}")
+            logger.exception(f"WebSocket error: {e}")
             error_msg = WSMessage(type=WSMessageType.ERROR, content={"error": str(e)})
-            try:
+            with contextlib.suppress(BaseException):
                 await websocket.send_json(error_msg.dict())
-            except:
-                pass
         finally:
             # Cleanup
             await manager.disconnect(websocket, thread_id)
-            try:
+            with contextlib.suppress(BaseException):
                 await websocket.close()
-            except:
-                pass
 
     except Exception as e:
-        logger.error(f"Fatal error in WebSocket chat: {e}")
-        try:
+        logger.exception(f"Fatal error in WebSocket chat: {e}")
+        with contextlib.suppress(BaseException):
             await websocket.close(code=1011, reason="Internal server error")
-        except:
-            pass
 
 
 # Add REST endpoint to reset thread using authentication
 @router.post("/chat/thread/{thread_id}/reset")
 async def reset_thread(thread_id: str, user_id: str = Depends(require_auth)):
-    """Reset/clear a chat thread"""
+    """Reset/clear a chat thread."""
     try:
         # Verify thread ownership
         if thread_id in manager.thread_metadata:
@@ -865,5 +859,5 @@ async def reset_thread(thread_id: str, user_id: str = Depends(require_auth)):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error resetting thread: {e}")
+        logger.exception(f"Error resetting thread: {e}")
         raise HTTPException(status_code=500, detail=str(e))

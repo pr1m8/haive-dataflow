@@ -99,7 +99,7 @@ async def test_websocket_and_database():
                 print("✗ Thread not found in public.threads")
 
             # Check if checkpoint was created in agent_state.checkpoints
-            print(f"\nChecking for checkpoints...")
+            print("\nChecking for checkpoints...")
             await cursor.execute(
                 """
                 SELECT checkpoint_id, checkpoint_data, metadata, created_at

@@ -1,16 +1,17 @@
 """Lazy-loading Registry System for Haive.
 
-This module provides a lazy-loading version of the registry system that only
-initializes the Supabase connection when actually needed, preventing heavy
-initialization at import time.
+This module provides a lazy-loading version of the registry system that
+only initializes the Supabase connection when actually needed,
+preventing heavy initialization at import time.
 
-The lazy registry system maintains the same interface as the original but
-defers expensive operations until they're actually used.
+The lazy registry system maintains the same interface as the original
+but defers expensive operations until they're actually used.
 """
 
 import logging
-import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
+
+from haive.dataflow.db.supabase import get_supabase_client
 
 from .registry.models import EntityType
 
@@ -21,7 +22,8 @@ class LazyRegistrySystem:
     """Lazy-loading registry system that initializes components on-demand.
 
     This class provides the same interface as RegistrySystem but defers
-    expensive initialization (like Supabase connection) until actually needed.
+    expensive initialization (like Supabase connection) until actually
+    needed.
     """
 
     def __init__(self):
@@ -47,7 +49,6 @@ class LazyRegistrySystem:
         # Try to initialize Supabase client only when needed
         try:
             # Import Supabase client
-            from haive.dataflow.db.supabase import get_supabase_client
 
             self._supabase = get_supabase_client()
             logger.info("Supabase connection initialized for registry system")
@@ -71,7 +72,6 @@ class LazyRegistrySystem:
 
         # This would contain the schema initialization logic
         # For now, we'll skip it to avoid heavy operations
-        pass
 
     def register_entity(
         self,
@@ -80,7 +80,7 @@ class LazyRegistrySystem:
         description: str = "",
         module_path: str = "",
         class_name: str = "",
-        metadata: Dict[str, Any] = None,
+        metadata: dict[str, Any] | None = None,
         **kwargs,
     ) -> str:
         """Register a new entity (lazy initialization)."""
@@ -104,7 +104,7 @@ class LazyRegistrySystem:
         logger.debug(f"Registered entity: {name} ({type.value})")
         return entity_id
 
-    def get_entities_by_type(self, entity_type: EntityType) -> List[Dict[str, Any]]:
+    def get_entities_by_type(self, entity_type: EntityType) -> list[dict[str, Any]]:
         """Get all entities of a specific type (lazy initialization)."""
         self._ensure_initialized()
 
@@ -115,7 +115,7 @@ class LazyRegistrySystem:
             if entity["type"] == entity_type.value
         ]
 
-    def get_entity(self, entity_id: str) -> Optional[Dict[str, Any]]:
+    def get_entity(self, entity_id: str) -> dict[str, Any] | None:
         """Get a specific entity by ID (lazy initialization)."""
         self._ensure_initialized()
 
@@ -124,9 +124,9 @@ class LazyRegistrySystem:
     def search_entities(
         self,
         query: str,
-        entity_type: Optional[EntityType] = None,
-        metadata_filter: Optional[Dict[str, Any]] = None,
-    ) -> List[Dict[str, Any]]:
+        entity_type: EntityType | None = None,
+        metadata_filter: dict[str, Any] | None = None,
+    ) -> list[dict[str, Any]]:
         """Search entities by query (lazy initialization)."""
         self._ensure_initialized()
 
@@ -159,7 +159,7 @@ class LazyRegistrySystem:
         return results
 
     def add_configuration(
-        self, registry_id: str, config_type: str, config_data: Dict[str, Any]
+        self, registry_id: str, config_type: str, config_data: dict[str, Any]
     ) -> str:
         """Add configuration to an entity (lazy initialization)."""
         self._ensure_initialized()
@@ -175,7 +175,7 @@ class LazyRegistrySystem:
 
         return config_id
 
-    def get_configurations(self, registry_id: str) -> List[Dict[str, Any]]:
+    def get_configurations(self, registry_id: str) -> list[dict[str, Any]]:
         """Get all configurations for an entity (lazy initialization)."""
         self._ensure_initialized()
 

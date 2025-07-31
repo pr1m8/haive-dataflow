@@ -5,7 +5,6 @@ import asyncio
 import json
 
 import websockets
-from langchain_core.messages import HumanMessage
 
 
 async def test_supabase_persistence():

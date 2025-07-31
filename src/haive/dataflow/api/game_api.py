@@ -15,27 +15,37 @@ allowing for easy integration of new games.
 import asyncio
 import logging
 import os
-
-# Fix imports for local development
+import platform
 import sys
 import uuid
 from datetime import datetime
 from typing import Any, Optional
 
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from haive.games.chess.agent import ChessAgent
+from haive.games.chess.state import ChessState
+from haive.games.connect4.agent import Connect4Agent
+from haive.games.connect4.state import Connect4State
+from haive.games.tic_tac_toe.agent import TicTacToeAgent
+from haive.games.tic_tac_toe.state import TicTacToeState
 from pydantic import BaseModel, Field, create_model
+
+from .api.game_socket import GameSocketServer
+from .engine.agent.agent import Agent
+from .persistence.supabase_config import SupabaseCheckpointerConfig
+from .schema.state_schema import StateSchema
+
+# Fix imports for local development
+
 
 module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
 if module_path not in sys.path:
     sys.path.append(module_path)
 
-from .api.game_socket import GameSocketServer
 
 # Now import the modules
-from .engine.agent.agent import Agent
-from .persistence.supabase_config import SupabaseCheckpointerConfig
-from .schema.state_schema import StateSchema
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -137,7 +147,7 @@ class GameAPI:
 
         @app.post(f"{self.route_prefix}/", response_model=self.response_model)
         async def create_game(request: GameRequest):
-            """Create a new game instance"""
+            """Create a new game instance."""
             try:
                 # Generate thread ID if not provided
                 thread_id = (
@@ -197,7 +207,7 @@ class GameAPI:
             response_model=self.response_model,
         )
         async def make_move(thread_id: str, move_data: dict[str, Any]):
-            """Make a move in a game"""
+            """Make a move in a game."""
             try:
                 # Get agent
                 agent = self.socket_server.get_or_create_agent(thread_id)
@@ -224,7 +234,7 @@ class GameAPI:
             response_model=self.response_model,
         )
         async def make_ai_move(thread_id: str):
-            """Let AI make a move"""
+            """Let AI make a move."""
             try:
                 # Get agent
                 agent = self.socket_server.get_or_create_agent(thread_id)
@@ -249,7 +259,7 @@ class GameAPI:
             f"{self.route_prefix}/{{thread_id}}", response_model=self.response_model
         )
         async def get_game(thread_id: str):
-            """Get current game state"""
+            """Get current game state."""
             try:
                 # Get agent
                 agent = self.socket_server.get_or_create_agent(thread_id)
@@ -272,7 +282,7 @@ class GameAPI:
 
         @app.post(f"{self.route_prefix}/{{thread_id}}/register-user")
         async def register_user(thread_id: str, user_data: dict[str, Any]):
-            """Register user ID for Supabase RLS"""
+            """Register user ID for Supabase RLS."""
             try:
                 user_id = user_data.get("user_id")
                 if not user_id:
@@ -314,12 +324,8 @@ class GameAPI:
 
     def run(self, host: str = "0.0.0.0", port: int = 8000):
         """Run the API server."""
-        import uvicorn
-
         # Fix for Windows asyncio issues
         if __name__ == "__main__":
-            import platform
-
             if platform.system() == "Windows":
                 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
@@ -385,17 +391,12 @@ class GameAPIFactory:
             A configured GameAPI instance for chess
         """
         # Fix imports for packages directory structure
-        import os
-        import sys
 
         packages_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../../../../..")
         )
         if packages_path not in sys.path:
             sys.path.append(packages_path)
-
-        from haive.games.chess.agent import ChessAgent
-        from haive.games.chess.state import ChessState
 
         # Create a custom response model for chess
         ChessResponse = create_model(
@@ -426,9 +427,6 @@ class GameAPIFactory:
         Returns:
             A configured GameAPI instance for Connect4
         """
-        from haive.games.connect4.agent import Connect4Agent
-        from haive.games.connect4.state import Connect4State
-
         return GameAPIFactory.create_api(
             app_name="Connect4",
             agent_class=Connect4Agent,
@@ -444,9 +442,6 @@ class GameAPIFactory:
         Returns:
             A configured GameAPI instance for Tic Tac Toe
         """
-        from haive.games.tic_tac_toe.agent import TicTacToeAgent
-        from haive.games.tic_tac_toe.state import TicTacToeState
-
         return GameAPIFactory.create_api(
             app_name="TicTacToe",
             agent_class=TicTacToeAgent,
@@ -458,16 +453,11 @@ class GameAPIFactory:
 
 # Example usage
 if __name__ == "__main__":
-    import uvicorn
-    from fastapi import FastAPI
-
     # Create a combined API with multiple games
     app = FastAPI(title="Game API Hub")
 
     try:
         # Import chess components
-        from haive.games.chess.agent import ChessAgent
-        from haive.games.chess.state import ChessState
 
         # Create chess API routes
         chess_api = GameAPIFactory.create_api(
@@ -480,14 +470,11 @@ if __name__ == "__main__":
 
         # Mount chess app routes to main app
         app.mount("/chess", chess_api.app)
-        print("Chess API mounted successfully")
     except ImportError:
-        print("Chess game not available")
+        pass
 
     try:
         # Import Connect4 components
-        from haive.games.connect4.agent import Connect4Agent
-        from haive.games.connect4.state import Connect4State
 
         # Create Connect4 API routes
         connect4_api = GameAPIFactory.create_api(
@@ -500,9 +487,8 @@ if __name__ == "__main__":
 
         # Mount Connect4 app routes to main app
         app.mount("/connect4", connect4_api.app)
-        print("Connect4 API mounted successfully")
     except ImportError:
-        print("Connect4 game not available")
+        pass
 
     # Run the server
     uvicorn.run(app, host="0.0.0.0", port=8000)

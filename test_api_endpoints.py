@@ -34,8 +34,6 @@ Notes:
 """Test script to verify API endpoints are working."""
 
 import asyncio
-import json
-import signal
 import subprocess
 import sys
 import time

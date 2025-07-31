@@ -3,7 +3,6 @@
 
 import asyncio
 import json
-import os
 from datetime import datetime, timedelta
 from uuid import uuid4
 
@@ -141,7 +140,7 @@ async def test_websocket_with_auth():
                 print("✗ Thread not found in public.threads")
 
             # Check agent_state.checkpoints
-            print(f"\nChecking for agent checkpoints...")
+            print("\nChecking for agent checkpoints...")
             await cursor.execute(
                 """
                 SELECT COUNT(*), MIN(created_at), MAX(created_at)

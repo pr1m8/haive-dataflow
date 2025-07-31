@@ -47,17 +47,15 @@ Typical usage example:
 
 import json
 import logging
+import os
+import re
 from contextlib import asynccontextmanager
 from typing import Any
 
-from haive.dataflow.config.environment import (
-    get_postgres_config,
-    get_supabase_server_config,
-)
+from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
 
-from .config.environment import (
-    get_supabase_server_config,
-)
+from haive.dataflow.config.environment import get_supabase_server_config
+
 from .persistence.factory import (
     acreate_postgres_checkpointer,
     aget_postgres_checkpoint,
@@ -87,8 +85,8 @@ class SupabasePersistence:
     def __init__(self):
         """Initialize the persistence adapter.
 
-        Loads the PostgreSQL and Supabase configurations from environment
-        variables and prepares the adapter for use.
+        Loads the PostgreSQL and Supabase configurations from
+        environment variables and prepares the adapter for use.
         """
         # Get configurations
         self.supabase_config = get_supabase_server_config()
@@ -97,15 +95,12 @@ class SupabasePersistence:
         self.postgres_config = self._create_supabase_postgres_config()
 
     def _create_supabase_postgres_config(self):
-        """Create PostgreSQL config that connects to Supabase instead of localhost."""
-        import os
-
+        """Create PostgreSQL config that connects to Supabase instead of
+        localhost.
+        """
         # Use Supabase connection string from environment - check multiple possible env vars
         # Priority: Use the zkssazqhwcetsnbiuqik instance where we ran the migration
         # First try to get from .env file directly to avoid env var override
-        import re
-
-        from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
 
         env_path = os.path.join(os.path.dirname(__file__), "../../../../../../.env")
         supabase_uri = None
@@ -137,17 +132,16 @@ class SupabasePersistence:
             return PostgresCheckpointerConfig(
                 connection_string=supabase_uri, setup_needed=True
             )
-        else:
-            # Fall back to individual parameters (if needed)
-            return PostgresCheckpointerConfig(
-                db_host=os.getenv("SUPABASE_HOST", "localhost"),
-                db_port=int(os.getenv("SUPABASE_PORT", "6543")),
-                db_name=os.getenv("SUPABASE_DBNAME", "postgres"),
-                db_user=os.getenv("SUPABASE_USER", "postgres"),
-                db_pass=os.getenv("SUPABASE_PASSWORD", ""),
-                ssl_mode="require",
-                setup_needed=True,
-            )
+        # Fall back to individual parameters (if needed)
+        return PostgresCheckpointerConfig(
+            db_host=os.getenv("SUPABASE_HOST", "localhost"),
+            db_port=int(os.getenv("SUPABASE_PORT", "6543")),
+            db_name=os.getenv("SUPABASE_DBNAME", "postgres"),
+            db_user=os.getenv("SUPABASE_USER", "postgres"),
+            db_pass=os.getenv("SUPABASE_PASSWORD", ""),
+            ssl_mode="require",
+            setup_needed=True,
+        )
 
     @asynccontextmanager
     async def rls_context(self, connection, user_id: str):
@@ -191,7 +185,7 @@ class SupabasePersistence:
                 async with connection.cursor() as cursor:
                     await cursor.execute("RESET auth.uid")
             except Exception as e:
-                logger.error(f"Error clearing RLS context: {e}")
+                logger.exception(f"Error clearing RLS context: {e}")
 
     async def register_thread(
         self, thread_id: str, user_id: str, metadata: dict[str, Any] | None = None
@@ -249,7 +243,7 @@ class SupabasePersistence:
 
             return success
         except Exception as e:
-            logger.error(f"Error registering thread: {e}")
+            logger.exception(f"Error registering thread: {e}")
             return False
 
     async def get_state(self, thread_id: str, user_id: str) -> Any | None:
@@ -277,7 +271,7 @@ class SupabasePersistence:
                     state = await aget_postgres_checkpoint(self.postgres_config, config)
                     return state
         except Exception as e:
-            logger.error(f"Error getting state: {e}")
+            logger.exception(f"Error getting state: {e}")
             return None
 
     async def update_state(
@@ -318,7 +312,7 @@ class SupabasePersistence:
                     )
                     return bool(result)
         except Exception as e:
-            logger.error(f"Error updating state: {e}")
+            logger.exception(f"Error updating state: {e}")
             return False
 
     async def get_thread_info(
@@ -348,7 +342,7 @@ class SupabasePersistence:
                         await cursor.execute(
                             """
                             SELECT id, user_id, agent_name, metadata, created_at, updated_at
-                            FROM public.threads 
+                            FROM public.threads
                             WHERE id = %s
                         """,
                             (thread_id,),
@@ -367,7 +361,7 @@ class SupabasePersistence:
                         return None
 
         except Exception as e:
-            logger.error(f"Error getting thread info: {e}")
+            logger.exception(f"Error getting thread info: {e}")
             return None
 
     async def get_checkpointer(self):
@@ -393,8 +387,6 @@ class SupabasePersistence:
             }
             ```
         """
-        from haive.core.persistence.factory import acreate_postgres_checkpointer
-
         return await acreate_postgres_checkpointer(self.postgres_config)
 
     async def get_user_threads(
@@ -424,7 +416,7 @@ class SupabasePersistence:
                         await cursor.execute(
                             """
                             SELECT id, agent_name, name, metadata, created_at, updated_at
-                            FROM public.threads 
+                            FROM public.threads
                             WHERE user_id = %s
                             ORDER BY updated_at DESC
                             LIMIT %s
@@ -446,5 +438,5 @@ class SupabasePersistence:
                         ]
 
         except Exception as e:
-            logger.error(f"Error getting user threads: {e}")
+            logger.exception(f"Error getting user threads: {e}")
             return []

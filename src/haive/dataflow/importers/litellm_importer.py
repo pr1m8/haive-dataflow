@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-"""Fixed LiteLLM Importer Module
+"""Fixed LiteLLM Importer Module.
 
-This module imports LLM and embedding models from LiteLLM data and
-other sources into Supabase, properly handling all models without limits.
+This module imports LLM and embedding models from LiteLLM data and other
+sources into Supabase, properly handling all models without limits.
 """
 
+import argparse
 import json
 import logging
 import os
@@ -13,6 +14,8 @@ from datetime import datetime
 from typing import Any
 
 import requests
+
+from haive.dataflow.db.supabase import get_supabase_client, table
 
 # Set up logging
 logging.basicConfig(
@@ -24,13 +27,11 @@ logger = logging.getLogger(__name__)
 
 # Import Supabase client and helpers
 try:
-    from haive.dataflow.db.supabase import get_supabase_client, table
-
     supabase = get_supabase_client()
     logger.info("Successfully imported Supabase client and helpers")
 except ImportError as e:
-    logger.error(f"Error importing Supabase client: {e}")
-    logger.error("Make sure src.haive.dataflow.db.supabase is in your Python path")
+    logger.exception(f"Error importing Supabase client: {e}")
+    logger.exception("Make sure src.haive.dataflow.db.supabase is in your Python path")
     sys.exit(1)
 
 # Define constants
@@ -72,7 +73,7 @@ def get_or_create_provider_type(type_name: str, display_name: str) -> str | None
 
         return None
     except Exception as e:
-        logger.error(f"Error getting or creating provider type {type_name}: {e}")
+        logger.exception(f"Error getting or creating provider type {type_name}: {e}")
         return None
 
 
@@ -150,12 +151,15 @@ def get_or_create_provider(
 
         return None
     except Exception as e:
-        logger.error(f"Error getting or creating provider {provider_name}: {e}")
+        logger.exception(f"Error getting or creating provider {provider_name}: {e}")
         return None
 
 
 def import_llm_models() -> int:
-    """Import LLM models from LiteLLM. Returns the number of models imported."""
+    """Import LLM models from LiteLLM.
+
+    Returns the number of models imported.
+    """
     try:
         # Fetch the data
         response = requests.get(LITELLM_URL)
@@ -356,24 +360,28 @@ def import_llm_models() -> int:
                     logger.info(f"Imported {models_imported} LLM models so far...")
 
             except Exception as e:
-                logger.error(f"Error processing model {model_id}: {e}")
+                logger.exception(f"Error processing model {model_id}: {e}")
 
         logger.info(
-            f"LLM import completed: {models_imported} models imported from {len(providers_processed)} providers"
+            f"LLM import completed: {models_imported} models imported from {
+                len(providers_processed)
+            } providers"
         )
         return models_imported
 
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error fetching LiteLLM model data: {e}")
+        logger.exception(f"Error fetching LiteLLM model data: {e}")
         return 0
     except Exception as e:
-        logger.error(f"Error importing LLM models: {e}")
+        logger.exception(f"Error importing LLM models: {e}")
         return 0
 
 
 def import_from_env() -> list[dict[str, Any]]:
     """Extract embedding models from environment variables.
-    Look for vars like OPENAI_EMBEDDING_MODEL, AZURE_EMBEDDING_MODEL, etc.
+
+    Look for vars like OPENAI_EMBEDDING_MODEL, AZURE_EMBEDDING_MODEL,
+    etc.
     """
     embedding_models = []
 
@@ -461,9 +469,9 @@ def import_from_env() -> list[dict[str, Any]]:
                     "supports_batch": True,
                     "supports_query_mapping": provider == "cohere",
                     "input_cost_per_token": 0.0000001 if provider == "openai" else 0.0,
-                    "description": f"{provider.capitalize()} embedding model: {model_name}",
-                }
-            )
+                    "description": f"{
+                        provider.capitalize()} embedding model: {model_name}",
+                })
 
     # Add default embedding models if none found in environment
     if not embedding_models:
@@ -506,7 +514,10 @@ def import_from_env() -> list[dict[str, Any]]:
 
 
 def import_embedding_models() -> int:
-    """Import embedding models. Returns the number of models imported."""
+    """Import embedding models.
+
+    Returns the number of models imported.
+    """
     try:
         # Get embedding models from environment or use defaults
         embedding_models = import_from_env()
@@ -624,17 +635,19 @@ def import_embedding_models() -> int:
                 models_imported += 1
 
             except Exception as e:
-                logger.error(
-                    f"Error processing embedding model {model_info.get('model_id')}: {e}"
-                )
+                logger.exception(
+                    f"Error processing embedding model {
+                        model_info.get('model_id')}: {e}")
 
         logger.info(
-            f"Embedding import completed: {models_imported} models imported from {len(providers_processed)} providers"
+            f"Embedding import completed: {models_imported} models imported from {
+                len(providers_processed)
+            } providers"
         )
         return models_imported
 
     except Exception as e:
-        logger.error(f"Error importing embedding models: {e}")
+        logger.exception(f"Error importing embedding models: {e}")
         return 0
 
 
@@ -661,7 +674,7 @@ def add_import_log(
         logger.info(f"Added import log for {entity_name}")
 
     except Exception as e:
-        logger.error(f"Error adding import log: {e}")
+        logger.exception(f"Error adding import log: {e}")
 
 
 def main():
@@ -692,7 +705,6 @@ def main():
 
 if __name__ == "__main__":
     # Parse command line arguments
-    import argparse
 
     parser = argparse.ArgumentParser(
         description="Import LLM and embedding models to Supabase"

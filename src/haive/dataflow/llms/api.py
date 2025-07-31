@@ -1,13 +1,14 @@
 """API endpoints for LLM model information and availability.
 
-This module provides FastAPI endpoints to access and manage LLM model data
-stored in Supabase. It helps bridge the client application with the database
-while providing additional server-side logic.
+This module provides FastAPI endpoints to access and manage LLM model
+data stored in Supabase. It helps bridge the client application with the
+database while providing additional server-side logic.
 """
 
 import os
 from typing import Any
 
+import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -196,10 +197,7 @@ async def read_models(provider: str | None = None, capability: str | None = None
         filtered_models = []
 
         for model in models:
-            if (
-                model.get("capabilities")
-                and model["capabilities"].get(capability_key) == True
-            ):
+            if model.get("capabilities") and model["capabilities"].get(capability_key):
                 filtered_models.append(model)
 
         return filtered_models
@@ -325,13 +323,11 @@ async def get_modes():
         return {"modes": []}
 
     # Extract unique modes
-    modes = list(set(item["mode"] for item in response.data if item.get("mode")))
+    modes = list({item["mode"] for item in response.data if item.get("mode")})
 
     return {"modes": modes}
 
 
 # Run the application with uvicorn
 if __name__ == "__main__":
-    import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)

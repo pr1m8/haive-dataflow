@@ -4,20 +4,18 @@ This module provides FastAPI routes for discovering and managing agents
 using the haive-core discovery system.
 """
 
+import inspect
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from .utils.haive_discovery import ComponentInfo, HaiveComponentDiscovery
+
 # Import discovery system
-from .utils.haive_discovery import (
-    ComponentInfo,
-    HaiveComponentDiscovery,
-    discover_all,
-    find_components_by_name,
-)
+
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +31,9 @@ class AgentInfo(BaseModel):
     module: str = Field(..., description="Module path")
     agent_type: str = Field(..., description="Agent type (v1 or v2)")
     version: str = Field(..., description="Agent version")
-    config_class: Optional[str] = Field(None, description="Config class for v1 agents")
+    config_class: str | None = Field(None, description="Config class for v1 agents")
     category: str = Field(default="general", description="Agent category")
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
@@ -46,16 +44,16 @@ class AgentSchema(BaseModel):
     name: str = Field(..., description="Agent name")
     description: str = Field(..., description="Agent description")
     agent_type: str = Field(..., description="Agent type (v1 or v2)")
-    config_schema: Optional[Dict[str, Any]] = Field(
+    config_schema: dict[str, Any] | None = Field(
         None, description="Configuration schema for v1 agents"
     )
-    init_schema: Optional[Dict[str, Any]] = Field(
+    init_schema: dict[str, Any] | None = Field(
         None, description="Initialization schema for v2 agents"
     )
-    methods: List[str] = Field(
+    methods: list[str] = Field(
         default_factory=list, description="Available agent methods"
     )
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict, description="Additional metadata"
     )
 
@@ -63,7 +61,7 @@ class AgentSchema(BaseModel):
 class AgentListResponse(BaseModel):
     """Response for agent list endpoint."""
 
-    agents: List[AgentInfo] = Field(..., description="List of available agents")
+    agents: list[AgentInfo] = Field(..., description="List of available agents")
     count: int = Field(..., description="Total number of agents")
     v1_count: int = Field(..., description="Number of v1 agents")
     v2_count: int = Field(..., description="Number of v2 agents")
@@ -76,10 +74,10 @@ class AgentCreateRequest(BaseModel):
     """Request to create/instantiate an agent."""
 
     agent_name: str = Field(..., description="Name of the agent to create")
-    config: Optional[Dict[str, Any]] = Field(
+    config: dict[str, Any] | None = Field(
         None, description="Configuration for v1 agents"
     )
-    init_args: Optional[Dict[str, Any]] = Field(
+    init_args: dict[str, Any] | None = Field(
         None, description="Initialization arguments for v2 agents"
     )
 
@@ -88,14 +86,14 @@ class AgentCreateResponse(BaseModel):
     """Response from agent creation."""
 
     success: bool = Field(..., description="Whether creation was successful")
-    agent_id: Optional[str] = Field(None, description="Created agent ID")
-    agent_type: Optional[str] = Field(None, description="Type of created agent")
-    error: Optional[str] = Field(None, description="Error message if failed")
+    agent_id: str | None = Field(None, description="Created agent ID")
+    agent_type: str | None = Field(None, description="Type of created agent")
+    error: str | None = Field(None, description="Error message if failed")
 
 
 # Cache for discovered agents
-_cached_agents: Optional[List[ComponentInfo]] = None
-_discovery_instance: Optional[HaiveComponentDiscovery] = None
+_cached_agents: list[ComponentInfo] | None = None
+_discovery_instance: HaiveComponentDiscovery | None = None
 
 
 def get_discovery_instance() -> HaiveComponentDiscovery:
@@ -109,7 +107,7 @@ def get_discovery_instance() -> HaiveComponentDiscovery:
     return _discovery_instance
 
 
-def discover_all_agents(force_refresh: bool = False) -> List[ComponentInfo]:
+def discover_all_agents(force_refresh: bool = False) -> list[ComponentInfo]:
     """Discover all agents using the unified discovery system."""
     global _cached_agents
 
@@ -174,12 +172,12 @@ def discover_all_agents(force_refresh: bool = False) -> List[ComponentInfo]:
             elif (
                 component.name.endswith("Config")
                 and "agent" in component.module_path.lower()
-            ):
-                if component.name not in ["BaseConfig", "AgentConfig"]:
-                    agent_components.append(component)
-                    logger.info(
-                        f"✅ Found agent config: {component.name} in {component.module_path}"
-                    )
+            ) and component.name not in ["BaseConfig", "AgentConfig"]:
+                agent_components.append(component)
+                logger.info(
+                    f"✅ Found agent config: {
+                        component.name} in {
+                        component.module_path}")
 
         logger.info(f"📊 Total agents discovered: {len(agent_components)}")
         _cached_agents = agent_components
@@ -259,13 +257,13 @@ async def list_agents(force_refresh: bool = False) -> AgentListResponse:
             discovery_method="haive-core unified discovery",
         )
     except Exception as e:
-        logger.error(f"Failed to list agents: {e}")
+        logger.exception(f"Failed to list agents: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/search", response_model=AgentListResponse)
 async def search_agents(
-    query: str = None, agent_type: str = None, category: str = None
+    query: str | None = None, agent_type: str | None = None, category: str | None = None
 ) -> AgentListResponse:
     """Search for agents by query, type, or category.
 
@@ -323,7 +321,7 @@ async def search_agents(
             discovery_method="haive-core unified discovery",
         )
     except Exception as e:
-        logger.error(f"Failed to search agents: {e}")
+        logger.exception(f"Failed to search agents: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -374,7 +372,6 @@ async def get_agent_schema(agent_name: str) -> AgentSchema:
             schema_info.methods = matching_component.metadata["methods"]
         elif matching_component.class_obj:
             # Try to extract methods from class
-            import inspect
 
             methods = []
             for name, method in inspect.getmembers(matching_component.class_obj):
@@ -389,12 +386,12 @@ async def get_agent_schema(agent_name: str) -> AgentSchema:
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get agent schema: {e}")
+        logger.exception(f"Failed to get agent schema: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{agent_name}")
-async def get_agent_details(agent_name: str) -> Dict[str, Any]:
+async def get_agent_details(agent_name: str) -> dict[str, Any]:
     """Get detailed information about a specific agent.
 
     Args:
@@ -450,12 +447,12 @@ async def get_agent_details(agent_name: str) -> Dict[str, Any]:
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get agent details: {e}")
+        logger.exception(f"Failed to get agent details: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/refresh")
-async def refresh_agent_cache() -> Dict[str, Any]:
+async def refresh_agent_cache() -> dict[str, Any]:
     """Refresh the agent discovery cache.
 
     Returns:
@@ -483,12 +480,12 @@ async def refresh_agent_cache() -> Dict[str, Any]:
             "discovery_method": "haive-core unified discovery",
         }
     except Exception as e:
-        logger.error(f"Failed to refresh agent cache: {e}")
+        logger.exception(f"Failed to refresh agent cache: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/stats/summary")
-async def get_agent_stats() -> Dict[str, Any]:
+async def get_agent_stats() -> dict[str, Any]:
     """Get summary statistics about discovered agents.
 
     Returns:
@@ -536,5 +533,5 @@ async def get_agent_stats() -> Dict[str, Any]:
         return stats
 
     except Exception as e:
-        logger.error(f"Failed to get agent stats: {e}")
+        logger.exception(f"Failed to get agent stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))

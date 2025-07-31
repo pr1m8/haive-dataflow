@@ -18,6 +18,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
 
+from .api.game_router import discover_game_agents, game_agents, get_router
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
@@ -36,7 +38,6 @@ for path in [haive_root, packages_dir, haive_games_path]:
         sys.path.insert(0, path)
 
 # Import after setting up paths
-from .api.game_router import discover_game_agents, game_agents, get_router
 
 
 def create_app():
@@ -79,8 +80,10 @@ def create_app():
     app.include_router(game_router)
 
     logger.info(
-        f"Discovered and registered routes for {len(game_agents)} games: {list(game_agents.keys())}"
-    )
+        f"Discovered and registered routes for {
+            len(game_agents)} games: {
+            list(
+                game_agents.keys())}")
 
     return app
 

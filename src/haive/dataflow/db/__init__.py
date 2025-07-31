@@ -1,4 +1,4 @@
-"""Db - TODO: Add brief description
+"""Db - TODO: Add brief description.
 
 TODO: Add detailed description of module functionality
 

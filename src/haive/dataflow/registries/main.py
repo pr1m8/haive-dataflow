@@ -7,6 +7,9 @@ import traceback
 
 from dotenv import load_dotenv
 
+from haive.dataflow.importers.embeddings_importer import EMBEDDING_MODELS
+from haive.dataflow.registries.model_registry import ModelRegistry
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -39,7 +42,7 @@ def ensure_registry_schema(client):
 
         return True
     except Exception as e:
-        logger.error(f"Error ensuring registry schema: {e}")
+        logger.exception(f"Error ensuring registry schema: {e}")
         traceback.print_exc()
         return False
 
@@ -47,12 +50,12 @@ def ensure_registry_schema(client):
 def ensure_provider_types(client):
     """Ensure provider types exist in database."""
     try:
-
         # First run a simple check to see if the provider_types table exists
         check_sql = "SELECT to_regclass('models.provider_types')"
         check_result = client.rpc("execute_sql", {"sql": check_sql}).execute()
 
-        # Create the table if it doesn't exist (to_regclass returns null for non-existent tables)
+        # Create the table if it doesn't exist (to_regclass returns null for
+        # non-existent tables)
         if not check_result.data or check_result.data[0].get("to_regclass") is None:
             logger.info("Creating provider_types table...")
 
@@ -114,7 +117,7 @@ def ensure_provider_types(client):
         logger.info("Provider types setup complete")
         return True
     except Exception as e:
-        logger.error(f"Error ensuring provider types: {e}")
+        logger.exception(f"Error ensuring provider types: {e}")
         traceback.print_exc()
         return False
 
@@ -148,11 +151,9 @@ def main():
 
         # Try to import embedding models data
         try:
-            from haive.dataflow.importers.embeddings_importer import EMBEDDING_MODELS
-
             logger.info(
-                f"  ✅ Found {len(EMBEDDING_MODELS)} embedding models in embeddings_importer"
-            )
+                f"  ✅ Found {
+                    len(EMBEDDING_MODELS)} embedding models in embeddings_importer")
 
             # Show a sample of embedding models
             sample_size = min(3, len(EMBEDDING_MODELS))
@@ -167,8 +168,6 @@ def main():
 
         # Try to import LiteLLM
         try:
-            from haive.dataflow.importers.litellm_importer import import_llm_models
-
             logger.info(
                 "  ✅ LiteLLM importer is available (imports models from GitHub)"
             )
@@ -177,7 +176,6 @@ def main():
 
         # Now create model registry and test its functionality
         logger.info("\n🔍 Testing model registry client:")
-        from haive.dataflow.registries.model_registry import ModelRegistry
 
         # Create the model registry client
         client = ModelRegistry()
@@ -210,7 +208,9 @@ def main():
         all_embed_models = client.get_embedding_models()
 
         logger.info(
-            f"  Found {len(available_embed_models)} available embedding models (out of {len(all_embed_models)} total)"
+            f"  Found {len(available_embed_models)} available embedding models (out of {
+                len(all_embed_models)
+            } total)"
         )
 
         # Get LLM models (available and all)
@@ -218,7 +218,9 @@ def main():
         all_llm_models = client.get_llm_models()
 
         logger.info(
-            f"  Found {len(available_llm_models)} available LLM models (out of {len(all_llm_models)} total)"
+            f"  Found {len(available_llm_models)} available LLM models (out of {
+                len(all_llm_models)
+            } total)"
         )
 
         # Print sample model info for first available embedding model
@@ -232,8 +234,12 @@ def main():
                 f"  Max tokens: {sample_embed.get('max_input_tokens', 'Unknown')}"
             )
             logger.info(
-                f"  Pricing: {sample_embed.get('pricing', {}).get('input_cost_per_token', 'Unknown')} per token"
-            )
+                f"  Pricing: {
+                    sample_embed.get(
+                        'pricing',
+                        {}).get(
+                        'input_cost_per_token',
+                        'Unknown')} per token")
 
         # Print sample model info for first available LLM model
         if available_llm_models:
@@ -252,22 +258,18 @@ def main():
                     logger.info("  Capabilities:")
                     for cap, value in capabilities.items():
                         if (
-                            cap != "id"
-                            and cap != "model_id"
-                            and cap != "created_at"
-                            and cap != "updated_at"
-                        ):
-                            if value:
-                                logger.info(f"    - {cap}: {value}")
+                            cap not in {"id", "model_id", "created_at", "updated_at"}
+                        ) and value:
+                            logger.info(f"    - {cap}: {value}")
 
         logger.info("\n✅ Registry test completed")
 
     except ImportError as e:
-        logger.error(f"Failed to import registry components: {e}")
+        logger.exception(f"Failed to import registry components: {e}")
         traceback.print_exc()
         logger.info("Make sure your Python path includes the project directory")
     except Exception as e:
-        logger.error(f"Test failed with error: {e}")
+        logger.exception(f"Test failed with error: {e}")
         traceback.print_exc()
 
 

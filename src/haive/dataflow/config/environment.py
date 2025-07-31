@@ -1,5 +1,7 @@
 # haive_dataflow/config/environment.py
+
 import os
+from urllib.parse import quote_plus
 
 from pydantic import BaseModel, Field, SecretStr
 
@@ -45,8 +47,6 @@ class PostgresConfig(BaseModel):
 
     def get_connection_uri(self) -> str:
         """Get database connection URI."""
-        from urllib.parse import quote_plus
-
         password = quote_plus(self.password.get_secret_value())
 
         uri = f"postgresql://{self.user}:{password}@{self.host}:{self.port}/{self.database}"

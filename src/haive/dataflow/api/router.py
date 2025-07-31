@@ -1,11 +1,14 @@
 # src/haive/api/router.py
+
 import json
 import logging
 import uuid
+from inspect import signature
 from typing import Any
 
 from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi.responses import StreamingResponse
+from langchain_core.messages import HumanMessage
 
 from .api.registry import agent_registry
 
@@ -39,8 +42,6 @@ def create_agent_router(prefix: str = "/agents") -> APIRouter:
 
         # Try to extract fields from the config class
         try:
-            from inspect import signature
-
             sig = signature(config_class.__init__)
             params = {}
             for name, param in sig.parameters.items():
@@ -67,7 +68,9 @@ def create_agent_router(prefix: str = "/agents") -> APIRouter:
             None, description="Optional initial state"
         ),
     ):
-        """Create a new thread with optional configuration and initial state."""
+        """Create a new thread with optional configuration and initial
+        state.
+        """
         agent = agent_registry.get_or_create_agent(agent_name, **config)
         if not agent:
             raise HTTPException(status_code=404, detail=f"Agent {agent_name} not found")
@@ -79,7 +82,7 @@ def create_agent_router(prefix: str = "/agents") -> APIRouter:
             try:
                 await agent.arun(input_data=initial_state, thread_id=thread_id)
             except Exception as e:
-                logger.error(f"Error initializing thread: {e}")
+                logger.exception(f"Error initializing thread: {e}")
                 raise HTTPException(status_code=500, detail=str(e))
 
         return {"thread_id": thread_id, "agent_name": agent_name, "config": config}
@@ -111,7 +114,7 @@ def create_agent_router(prefix: str = "/agents") -> APIRouter:
 
             return state
         except Exception as e:
-            logger.error(f"Error getting thread state: {e}")
+            logger.exception(f"Error getting thread state: {e}")
             raise HTTPException(status_code=500, detail=str(e))
 
     # Run agent with input
@@ -145,7 +148,7 @@ def create_agent_router(prefix: str = "/agents") -> APIRouter:
                     # Send a final "done" message
                     yield f"data: {json.dumps({'done': True, 'thread_id': thread_id})}\n\n"
                 except Exception as e:
-                    logger.error(f"Error streaming agent response: {e}")
+                    logger.exception(f"Error streaming agent response: {e}")
                     yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
             return StreamingResponse(stream_generator(), media_type="text/event-stream")
@@ -155,7 +158,7 @@ def create_agent_router(prefix: str = "/agents") -> APIRouter:
             result = await agent.arun(input_data=input_data, thread_id=thread_id)
             return result
         except Exception as e:
-            logger.error(f"Error running agent {agent_name}: {e}")
+            logger.exception(f"Error running agent {agent_name}: {e}")
             raise HTTPException(status_code=500, detail=str(e))
 
     # Convenience endpoint for text input
@@ -186,8 +189,6 @@ def create_agent_router(prefix: str = "/agents") -> APIRouter:
 
         # Format appropriately
         if has_messages:
-            from langchain_core.messages import HumanMessage
-
             input_data = {"messages": [HumanMessage(content=text)]}
         else:
             # Try common input field names
@@ -221,7 +222,7 @@ def create_agent_router(prefix: str = "/agents") -> APIRouter:
                     ]
                     return {"types": types}
             except Exception as e:
-                logger.error(f"Error getting agent types: {e}")
+                logger.exception(f"Error getting agent types: {e}")
                 raise HTTPException(status_code=500, detail=f"Database error: {e!s}")
         else:
             # Fallback to in-memory tracking
@@ -241,7 +242,7 @@ def create_agent_router(prefix: str = "/agents") -> APIRouter:
                 configs = agent_registry.db.get_agent_configs(agent_type)
                 return {"agents": configs}
             except Exception as e:
-                logger.error(f"Error getting agents by type: {e}")
+                logger.exception(f"Error getting agents by type: {e}")
                 raise HTTPException(status_code=500, detail=f"Database error: {e!s}")
         else:
             # Fallback to in-memory tracking
@@ -257,7 +258,7 @@ def create_agent_router(prefix: str = "/agents") -> APIRouter:
                 configs = agent_registry.db.get_agent_configs()
                 return {"configs": configs}
             except Exception as e:
-                logger.error(f"Error getting agent configs: {e}")
+                logger.exception(f"Error getting agent configs: {e}")
                 raise HTTPException(status_code=500, detail=f"Database error: {e!s}")
         else:
             # Fallback to in-memory data

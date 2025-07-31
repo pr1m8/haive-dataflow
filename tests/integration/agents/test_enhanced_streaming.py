@@ -126,8 +126,8 @@ async def test_progressive_updates(token):
     uri += f"&config={json.dumps(config)}"
 
     async with websockets.connect(uri) as websocket:
-        welcome = json.loads(await websocket.recv())
-        print(f"Connected for progressive updates")
+        json.loads(await websocket.recv())
+        print("Connected for progressive updates")
 
         message = {
             "type": "message",

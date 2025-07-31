@@ -2,7 +2,6 @@
 
 import json
 import subprocess
-import time
 
 
 def test_websocket_with_curl():

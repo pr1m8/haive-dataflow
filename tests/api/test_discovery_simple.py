@@ -50,7 +50,6 @@ def test_discovery_system_availability():
 
     try:
         # Test basic import
-        from haive.core.utils.haive_discovery.component_info import ComponentInfo
         from haive.core.utils.haive_discovery.haive_discovery import (
             HaiveComponentDiscovery,
         )
@@ -123,7 +122,7 @@ def test_manual_discovery():
     agents_path = packages_dir / "haive-agents" / "src" / "haive" / "agents"
     if agents_path.exists():
         agent_count = 0
-        for root, dirs, files in os.walk(agents_path):
+        for _root, _dirs, files in os.walk(agents_path):
             for file in files:
                 if file.endswith(".py") and file != "__init__.py":
                     if "agent" in file.lower():
@@ -134,7 +133,7 @@ def test_manual_discovery():
     tools_path = packages_dir / "haive-tools" / "src" / "haive" / "tools"
     if tools_path.exists():
         tool_count = 0
-        for root, dirs, files in os.walk(tools_path):
+        for _root, _dirs, files in os.walk(tools_path):
             for file in files:
                 if file.endswith(".py") and file != "__init__.py":
                     tool_count += 1
@@ -144,7 +143,7 @@ def test_manual_discovery():
     games_path = packages_dir / "haive-games" / "src" / "haive" / "games"
     if games_path.exists():
         game_count = 0
-        for root, dirs, files in os.walk(games_path):
+        for _root, _dirs, files in os.walk(games_path):
             for file in files:
                 if file == "agent.py":
                     game_count += 1

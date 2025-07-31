@@ -20,6 +20,7 @@ import os
 import sys
 
 from dotenv import load_dotenv
+from game_api import GameAPIFactory
 
 # Set up logging
 logging.basicConfig(
@@ -57,8 +58,6 @@ def run_chess_api(port: int = 8000):
     """Run the chess API server."""
     try:
         # Fix imports for local development
-        import os
-        import sys
 
         # Add the parent directories to the path
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -73,7 +72,6 @@ def run_chess_api(port: int = 8000):
             sys.path.insert(0, packages_dir)
 
         # Import locally
-        from game_api import GameAPIFactory
 
         # Create chess API
         chess_api = GameAPIFactory.create_chess_api()
@@ -84,8 +82,10 @@ def run_chess_api(port: int = 8000):
         chess_api.run(host="0.0.0.0", port=port)
 
     except ImportError as e:
-        logger.error(f"Failed to import required modules: {e}")
-        logger.error("Make sure haive.games.chess and haive.dataflow.api are installed")
+        logger.exception(f"Failed to import required modules: {e}")
+        logger.exception(
+            "Make sure haive.games.chess and haive.dataflow.api are installed"
+        )
         sys.exit(1)
     except Exception as e:
         logger.error(f"Error starting chess API: {e}", exc_info=True)

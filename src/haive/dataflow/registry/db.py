@@ -15,13 +15,13 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from haive.dataflow.db.supabase import get_supabase_client
+
 # Set up logging
 logger = logging.getLogger(__name__)
 
 # Try to import the Supabase client
 try:
-    from haive.dataflow.db.supabase import get_supabase_client
-
     SUPABASE_AVAILABLE = True
     logger.info("Supabase client available for registry persistence")
 except ImportError:
@@ -69,8 +69,8 @@ class RegistryDB:
     """Database operations for the registry system.
 
     This class provides methods for interacting with the database,
-    including creating and querying registry items, schemas, and
-    agent graphs.
+    including creating and querying registry items, schemas, and agent
+    graphs.
     """
 
     _instance = None
@@ -78,7 +78,7 @@ class RegistryDB:
     def __new__(cls):
         """Singleton pattern to ensure only one instance exists."""
         if cls._instance is None:
-            cls._instance = super(RegistryDB, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             cls._instance._supabase_client = None
             cls._instance._tables_created = False
 
@@ -130,7 +130,7 @@ class RegistryDB:
             logger.info("Created all necessary tables in Supabase")
 
         except Exception as e:
-            logger.error(f"Error creating tables: {e}")
+            logger.exception(f"Error creating tables: {e}")
             logger.debug(traceback.format_exc())
 
     def _create_registry_table(self, table_name: str):
@@ -163,7 +163,7 @@ class RegistryDB:
             # exposed through Supabase or another method
 
         except Exception as e:
-            logger.error(f"Error creating registry table {table_name}: {e}")
+            logger.exception(f"Error creating registry table {table_name}: {e}")
 
     def _create_schema_tables(self):
         """Create tables for component schemas."""
@@ -190,7 +190,7 @@ class RegistryDB:
             logger.info(f"Would create table {table_name} if using SQL directly")
 
         except Exception as e:
-            logger.error(f"Error creating schema tables: {e}")
+            logger.exception(f"Error creating schema tables: {e}")
 
     def _create_agent_graph_tables(self):
         """Create tables for agent graphs."""
@@ -216,7 +216,7 @@ class RegistryDB:
             logger.info(f"Would create table {table_name} if using SQL directly")
 
         except Exception as e:
-            logger.error(f"Error creating agent graph tables: {e}")
+            logger.exception(f"Error creating agent graph tables: {e}")
 
     def upsert_registry_item(self, item: RegistrySchema) -> str | None:
         """Create or update a registry item in the database.
@@ -258,7 +258,7 @@ class RegistryDB:
             return None
 
         except Exception as e:
-            logger.error(f"Error upserting registry item: {e}")
+            logger.exception(f"Error upserting registry item: {e}")
             logger.debug(traceback.format_exc())
             return None
 
@@ -300,7 +300,7 @@ class RegistryDB:
             return None
 
         except Exception as e:
-            logger.error(f"Error getting registry item: {e}")
+            logger.exception(f"Error getting registry item: {e}")
             logger.debug(traceback.format_exc())
             return None
 
@@ -338,7 +338,7 @@ class RegistryDB:
             return items
 
         except Exception as e:
-            logger.error(f"Error listing registry items: {e}")
+            logger.exception(f"Error listing registry items: {e}")
             logger.debug(traceback.format_exc())
             return []
 
@@ -383,7 +383,7 @@ class RegistryDB:
             return None
 
         except Exception as e:
-            logger.error(f"Error upserting schema definition: {e}")
+            logger.exception(f"Error upserting schema definition: {e}")
             logger.debug(traceback.format_exc())
             return None
 
@@ -434,7 +434,7 @@ class RegistryDB:
             return schemas
 
         except Exception as e:
-            logger.error(f"Error getting schema definitions: {e}")
+            logger.exception(f"Error getting schema definitions: {e}")
             logger.debug(traceback.format_exc())
             return []
 
@@ -478,7 +478,7 @@ class RegistryDB:
             return None
 
         except Exception as e:
-            logger.error(f"Error upserting agent graph: {e}")
+            logger.exception(f"Error upserting agent graph: {e}")
             logger.debug(traceback.format_exc())
             return None
 
@@ -519,7 +519,7 @@ class RegistryDB:
             return None
 
         except Exception as e:
-            logger.error(f"Error getting agent graph: {e}")
+            logger.exception(f"Error getting agent graph: {e}")
             logger.debug(traceback.format_exc())
             return None
 

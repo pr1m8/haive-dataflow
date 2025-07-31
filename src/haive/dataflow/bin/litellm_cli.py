@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Haive Vault CLI
+"""Haive Vault CLI.
 
 A command-line utility for managing vault secrets and model imports.
 
@@ -18,14 +18,26 @@ import logging
 import sys
 from datetime import datetime
 
+from haive.dataflow.registry.importers.litellm_importer import (
+    import_embedding_models,
+    import_llm_models,
+    update_availability_status,
+)
+from haive.dataflow.registry.utils.vault_migration_script import (
+    add_vault_helper_functions,
+    generate_report,
+    migrate_component_env_mappings,
+    migrate_engine_api_keys,
+    migrate_env_vars_to_vault,
+    migrate_provider_api_keys,
+)
+
 # Try to import tqdm for progress bars
 try:
-    from tqdm import tqdm
 
     TQDM_AVAILABLE = True
 except ImportError:
     TQDM_AVAILABLE = False
-    print("tqdm not available. Install with 'pip install tqdm' for progress bars.")
 
 # Set up logging
 logging.basicConfig(
@@ -44,13 +56,6 @@ logger = logging.getLogger(__name__)
 def run_migrate():
     """Run the migration script."""
     try:
-        from haive.dataflow.registry.utils.vault_migration_script import (
-            add_vault_helper_functions,
-            migrate_component_env_mappings,
-            migrate_engine_api_keys,
-            migrate_env_vars_to_vault,
-            migrate_provider_api_keys,
-        )
 
         logger.info("Starting vault reference migration...")
 
@@ -77,12 +82,12 @@ def run_migrate():
         logger.info("Migration completed successfully")
 
     except ImportError:
-        logger.error(
+        logger.exception(
             "Could not import vault migration script. Make sure it's in the current directory."
         )
         return 1
     except Exception as e:
-        logger.error(f"Error during migration: {e}")
+        logger.exception(f"Error during migration: {e}")
         return 1
 
     return 0
@@ -93,11 +98,6 @@ def run_import(
 ):
     """Run the model importer."""
     try:
-        from haive.dataflow.registry.importers.litellm_importer import (
-            import_embedding_models,
-            import_llm_models,
-            update_availability_status,
-        )
 
         # Override TQDM_AVAILABLE if progress bars are explicitly disabled
         if no_progress and "TQDM_AVAILABLE" in globals():
@@ -134,12 +134,12 @@ def run_import(
             TQDM_AVAILABLE = orig_value
 
     except ImportError:
-        logger.error(
+        logger.exception(
             "Could not import unified importer script. Make sure it's in the current directory."
         )
         return 1
     except Exception as e:
-        logger.error(f"Error during import: {e}")
+        logger.exception(f"Error during import: {e}")
         return 1
 
     return 0
@@ -148,19 +148,18 @@ def run_import(
 def run_verify():
     """Run the verification script."""
     try:
-        from haive.dataflow.registry.utils.vault_migration_script import generate_report
 
         logger.info("Starting vault secret verification...")
         generate_report()
         logger.info("Verification complete")
 
     except ImportError:
-        logger.error(
+        logger.exception(
             "Could not import verification script. Make sure it's in the current directory."
         )
         return 1
     except Exception as e:
-        logger.error(f"Error during verification: {e}")
+        logger.exception(f"Error during verification: {e}")
         return 1
 
     return 0
@@ -171,9 +170,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
     # Migrate command
-    migrate_parser = subparsers.add_parser(
-        "migrate", help="Migrate API keys and secrets to the vault"
-    )
+    subparsers.add_parser("migrate", help="Migrate API keys and secrets to the vault")
 
     # Import command
     import_parser = subparsers.add_parser(
@@ -195,9 +192,7 @@ def main():
     )
 
     # Verify command
-    verify_parser = subparsers.add_parser(
-        "verify", help="Verify vault secret references"
-    )
+    subparsers.add_parser("verify", help="Verify vault secret references")
 
     # Parse arguments
     args = parser.parse_args()

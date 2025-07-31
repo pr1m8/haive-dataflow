@@ -2,7 +2,6 @@
 """Migrate existing threads table to use proper id structure."""
 
 import asyncio
-import os
 
 import asyncpg
 
@@ -45,12 +44,12 @@ async def migrate_threads_structure():
             print(f"  - {col['column_name']} ({col['data_type']}) {nullable}{default}")
 
         # 2. Backup existing data
-        print(f"\n💾 Backing up existing threads data...")
+        print("\n💾 Backing up existing threads data..."..")
         existing_threads = await conn.fetch("SELECT * FROM public.threads")
         print(f"✓ Found {len(existing_threads)} existing threads to migrate")
 
         # 3. Drop foreign key constraints temporarily
-        print(f"\n🔗 Dropping foreign key constraints...")
+        print("\n🔗 Dropping foreign key constraints..."..")
 
         # Get existing foreign keys that reference threads.thread_id
         fk_constraints = await conn.fetch(
@@ -84,7 +83,7 @@ async def migrate_threads_structure():
             print(f"  ✓ Dropped {constraint_name} from {table_name}")
 
         # 4. Create new threads table with proper structure
-        print(f"\n🔧 Creating new threads table structure...")
+        print("\n🔧 Creating new threads table structure..."..")
 
         await conn.execute("DROP TABLE IF EXISTS public.threads_new")
         await conn.execute(
@@ -106,7 +105,7 @@ async def migrate_threads_structure():
         print("✓ Created new threads table")
 
         # 5. Migrate existing data
-        print(f"\n📦 Migrating existing thread data...")
+        print("\n📦 Migrating existing thread data..."..")
 
         for thread in existing_threads:
             # Convert thread_id to UUID for id, keep original as legacy_thread_id
@@ -127,13 +126,13 @@ async def migrate_threads_structure():
         print(f"✓ Migrated {len(existing_threads)} threads")
 
         # 6. Replace old table with new one
-        print(f"\n🔄 Replacing old table...")
+        print("\n🔄 Replacing old table..."..")
         await conn.execute("DROP TABLE public.threads")
         await conn.execute("ALTER TABLE public.threads_new RENAME TO threads")
         print("✓ Replaced threads table")
 
         # 7. Update foreign key relationships
-        print(f"\n🔗 Recreating foreign key relationships...")
+        print("\n🔗 Recreating foreign key relationships..."..")
 
         # First, add a mapping table to help with the migration
         await conn.execute(
@@ -200,7 +199,7 @@ async def migrate_threads_structure():
         )
 
         # 8. Drop old columns and rename new ones
-        print(f"\n🗑️  Cleaning up old columns...")
+        print("\n🗑️  Cleaning up old columns..."s...")
 
         await conn.execute("ALTER TABLE public.checkpoints DROP COLUMN thread_id")
         await conn.execute(
@@ -218,7 +217,7 @@ async def migrate_threads_structure():
         )
 
         # 9. Recreate foreign key constraints
-        print(f"\n🔗 Creating new foreign key constraints...")
+        print("\n🔗 Creating new foreign key constraints..."..")
 
         await conn.execute(
             """
@@ -248,7 +247,7 @@ async def migrate_threads_structure():
         await conn.execute("ALTER TABLE public.threads DROP COLUMN legacy_thread_id")
 
         # 11. Create indexes
-        print(f"\n📊 Creating indexes...")
+        print("\n📊 Creating indexes..."..")
         await conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_threads_user_id ON public.threads(user_id)"
         )
@@ -260,7 +259,7 @@ async def migrate_threads_structure():
         )
 
         # 12. Set up RLS policies
-        print(f"\n🔒 Setting up RLS policies...")
+        print("\n🔒 Setting up RLS policies..."..")
         await conn.execute("ALTER TABLE public.threads ENABLE ROW LEVEL SECURITY")
 
         await conn.execute(
@@ -273,7 +272,7 @@ async def migrate_threads_structure():
         )
 
         await conn.close()
-        print(f"\n🎉 Migration completed successfully!")
+        print("\n🎉 Migration completed successfully!"y!")
 
         return True
 
@@ -288,7 +287,7 @@ async def migrate_threads_structure():
 async def verify_migration():
     """Verify the migration was successful."""
 
-    print(f"\n🔍 Verifying Migration")
+    print("\n🔍 Verifying Migration"on")
     print("=" * 50)
 
     db_config = {
@@ -336,7 +335,7 @@ async def verify_migration():
         """
         )
 
-        print(f"\n🔗 Foreign key relationships:")
+        print("\n🔗 Foreign key relationships:"s:")
         for fk in fks:
             print(
                 f"  {fk['table_from']}.{fk['column_from']} ➝ {fk['table_to']}.{fk['column_to']}"
@@ -348,7 +347,7 @@ async def verify_migration():
             "SELECT COUNT(*) FROM public.checkpoints"
         )
 
-        print(f"\n📊 Data counts:")
+        print("\n📊 Data counts:"s:")
         print(f"  - Threads: {thread_count}")
         print(f"  - Checkpoints: {checkpoint_count}")
 
@@ -374,13 +373,13 @@ async def main():
         verification_success = await verify_migration()
 
         if verification_success:
-            print(f"\n🎊 SUCCESS: Migration completed and verified!")
+            print("\n🎊 SUCCESS: Migration completed and verified!"d!")
         else:
-            print(f"\n⚠️  WARNING: Migration completed but verification failed")
+            print("\n⚠️  WARNING: Migration completed but verification failed"led")
     else:
-        print(f"\n❌ FAILED: Migration failed")
+        print("\n❌ FAILED: Migration failed"d")
 
-    print(f"\n" + "=" * 60)
+    print("\n" + "=" * 60)
 
 
 if __name__ == "__main__":

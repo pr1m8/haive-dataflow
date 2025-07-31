@@ -37,19 +37,22 @@ Note:
     unified discovery system from haive-core for consistency.
 """
 
-import asyncio
+import contextlib
 import logging
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
+import uvicorn
 from fastapi import APIRouter, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
-# Import discovery system
 from .utils.haive_discovery import ComponentInfo, HaiveComponentDiscovery
+
+# Import discovery system
+
 
 # Configure logging
 logging.basicConfig(
@@ -58,9 +61,9 @@ logging.basicConfig(
 logger = logging.getLogger("game-router")
 
 # Module-level registries
-active_connections: Dict[str, Set[WebSocket]] = {}  # game_type -> {websockets}
-active_games: Dict[str, Dict[str, Any]] = {}  # game_id -> game_state
-game_agents: Dict[str, Dict[str, Any]] = {}  # game_type -> agent_info
+active_connections: dict[str, set[WebSocket]] = {}  # game_type -> {websockets}
+active_games: dict[str, dict[str, Any]] = {}  # game_id -> game_state
+game_agents: dict[str, dict[str, Any]] = {}  # game_type -> agent_info
 
 # Get haive root path
 HAIVE_ROOT = Path(__file__).parents[6]
@@ -116,7 +119,7 @@ def discover_game_agents() -> None:
         logger.error(f"Error discovering game agents: {e}", exc_info=True)
 
 
-def _process_game_components(components: List[ComponentInfo]) -> None:
+def _process_game_components(components: list[ComponentInfo]) -> None:
     """Process discovered components to identify game agents.
 
     Args:
@@ -160,7 +163,7 @@ def _process_game_components(components: List[ComponentInfo]) -> None:
     _discover_by_module_pattern(components)
 
 
-def _discover_by_module_pattern(components: List[ComponentInfo]) -> None:
+def _discover_by_module_pattern(components: list[ComponentInfo]) -> None:
     """Discover games by module organization pattern.
 
     Args:
@@ -209,7 +212,7 @@ def _discover_by_module_pattern(components: List[ComponentInfo]) -> None:
             logger.info(f"Registered game module: {game_name}")
 
 
-def create_game_instance(game_type: str, game_id: str) -> Dict[str, Any]:
+def create_game_instance(game_type: str, game_id: str) -> dict[str, Any]:
     """Create or retrieve a game instance.
 
     Args:
@@ -233,7 +236,7 @@ def create_game_instance(game_type: str, game_id: str) -> Dict[str, Any]:
         different agent implementations.
     """
     if game_type not in game_agents:
-        raise ValueError(f"Unknown game type: {game_type}")
+        raise TypeError(f"Unknown game type: {game_type}")
 
     # Create unique key for this game
     game_key = f"{game_type}:{game_id}"
@@ -256,7 +259,7 @@ def create_game_instance(game_type: str, game_id: str) -> Dict[str, Any]:
     return active_games[game_key]
 
 
-def _instantiate_agent(agent_info: Dict[str, Any], game_type: str, game_id: str) -> Any:
+def _instantiate_agent(agent_info: dict[str, Any], game_type: str, game_id: str) -> Any:
     """Instantiate a game agent with appropriate initialization.
 
     Args:
@@ -306,7 +309,7 @@ def _instantiate_agent(agent_info: Dict[str, Any], game_type: str, game_id: str)
     raise RuntimeError(f"Failed to create agent instance for {game_type}")
 
 
-def get_game_instance(game_type: str, game_id: str) -> Optional[Dict[str, Any]]:
+def get_game_instance(game_type: str, game_id: str) -> dict[str, Any] | None:
     """Retrieve an existing game instance.
 
     Args:
@@ -338,7 +341,7 @@ def create_game_router(game_type: str) -> APIRouter:
         - POST: /{game_type}/games - Create new game
     """
     if game_type not in game_agents:
-        raise ValueError(f"Unknown game type: {game_type}")
+        raise TypeError(f"Unknown game type: {game_type}")
 
     router = APIRouter(tags=[f"{game_type} Game"])
     agent_info = game_agents[game_type]
@@ -395,7 +398,7 @@ def create_game_router(game_type: str) -> APIRouter:
 
 
 async def _handle_game_websocket(
-    websocket: WebSocket, game_type: str, game_id: str, agent_info: Dict[str, Any]
+    websocket: WebSocket, game_type: str, game_id: str, agent_info: dict[str, Any]
 ) -> None:
     """Handle WebSocket connection for a game session.
 
@@ -413,7 +416,7 @@ async def _handle_game_websocket(
         await websocket.accept()
         logger.info(f"WebSocket connection accepted for {game_type} game: {game_id}")
     except Exception as e:
-        logger.error(f"Failed to accept WebSocket connection: {e}")
+        logger.exception(f"Failed to accept WebSocket connection: {e}")
         return
 
     # Register connection
@@ -436,12 +439,10 @@ async def _handle_game_websocket(
         logger.info(f"WebSocket disconnected for {game_type} game: {game_id}")
     except Exception as e:
         logger.error(f"WebSocket error for {game_type}:{game_id}: {e}", exc_info=True)
-        try:
+        with contextlib.suppress(BaseException):
             await websocket.send_json(
-                {"type": "error", "message": f"Server error: {str(e)}"}
+                {"type": "error", "message": f"Server error: {e!s}"}
             )
-        except:
-            pass
     finally:
         # Clean up connection
         if game_type in active_connections:
@@ -450,8 +451,8 @@ async def _handle_game_websocket(
 
 
 async def _initialize_game_session(
-    websocket: WebSocket, game_type: str, game_id: str, agent_info: Dict[str, Any]
-) -> Optional[Dict[str, Any]]:
+    websocket: WebSocket, game_type: str, game_id: str, agent_info: dict[str, Any]
+) -> dict[str, Any] | None:
     """Initialize a game session and send initial state.
 
     Args:
@@ -490,11 +491,11 @@ async def _initialize_game_session(
         return game
 
     except Exception as e:
-        logger.error(f"Failed to initialize game: {e}")
+        logger.exception(f"Failed to initialize game: {e}")
         await websocket.send_json(
             {
                 "type": "error",
-                "message": f"Failed to initialize game: {str(e)}",
+                "message": f"Failed to initialize game: {e!s}",
                 "game_type": game_type,
             }
         )
@@ -533,12 +534,12 @@ async def _handle_game_messages(
                 )
 
         except Exception as e:
-            logger.error(f"Error processing WebSocket message: {e}")
+            logger.exception(f"Error processing WebSocket message: {e}")
             try:
                 await websocket.send_json(
-                    {"type": "error", "message": f"Error processing message: {str(e)}"}
+                    {"type": "error", "message": f"Error processing message: {e!s}"}
                 )
-            except:
+            except BaseException:
                 break
 
 
@@ -557,14 +558,14 @@ async def _handle_get_state(
             }
         )
     except Exception as e:
-        logger.error(f"Error getting state: {e}")
+        logger.exception(f"Error getting state: {e}")
         await websocket.send_json(
-            {"type": "error", "message": f"Failed to get state: {str(e)}"}
+            {"type": "error", "message": f"Failed to get state: {e!s}"}
         )
 
 
 async def _handle_make_move(
-    websocket: WebSocket, agent: Any, game_type: str, game_id: str, data: Dict[str, Any]
+    websocket: WebSocket, agent: Any, game_type: str, game_id: str, data: dict[str, Any]
 ) -> None:
     """Handle make_move message."""
     try:
@@ -582,9 +583,9 @@ async def _handle_make_move(
             }
         )
     except Exception as e:
-        logger.error(f"Error making move: {e}")
+        logger.exception(f"Error making move: {e}")
         await websocket.send_json(
-            {"type": "error", "message": f"Failed to make move: {str(e)}"}
+            {"type": "error", "message": f"Failed to make move: {e!s}"}
         )
 
 
@@ -604,9 +605,9 @@ async def _handle_ai_move(
             }
         )
     except Exception as e:
-        logger.error(f"Error making AI move: {e}")
+        logger.exception(f"Error making AI move: {e}")
         await websocket.send_json(
-            {"type": "error", "message": f"Failed to make AI move: {str(e)}"}
+            {"type": "error", "message": f"Failed to make AI move: {e!s}"}
         )
 
 
@@ -663,7 +664,7 @@ def get_router() -> APIRouter:
             router.include_router(game_router, prefix=f"/{game_type}")
             logger.info(f"Registered routes for {game_type}")
         except Exception as e:
-            logger.error(f"Error creating router for {game_type}: {e}")
+            logger.exception(f"Error creating router for {game_type}: {e}")
 
     return router
 
@@ -685,10 +686,7 @@ def get_index_html() -> str:
         )
 
         game_links.append(
-            f"<li>"
-            f'<a href="/games/{game_type}">{game_type.title()}</a>'
-            f" - {description}"
-            f"</li>"
+            f'<li><a href="/games/{game_type}">{game_type.title()}</a> - {description}</li>'
         )
 
     return f"""
@@ -711,9 +709,9 @@ def get_index_html() -> str:
             <h1>🎮 Haive Games</h1>
             <p>Select a game to play:</p>
             <ul>
-                {"".join(game_links) if game_links else '<li>No games discovered. Check server logs.</li>'}
+                {"".join(game_links) if game_links else "<li>No games discovered. Check server logs.</li>"}
             </ul>
-            
+
             <div class="discovery-info">
                 <h3>📊 Discovery Information</h3>
                 <p>Games discovered: {len(game_agents)}</p>
@@ -761,20 +759,20 @@ def get_game_client_html(game_type: str) -> str:
         </head>
         <body>
             <h1>🎮 {game_type.title()} Game</h1>
-            
+
             <div class="container">
                 <div class="game-area">
                     <div id="gameBoard" class="game-board">
                         <p>Game board will appear here after connection.</p>
                     </div>
-                    
+
                     <div class="metadata">
                         <strong>Game Information:</strong><br>
-                        Module: {agent_info.get('module', 'Unknown')}<br>
+                        Module: {agent_info.get("module", "Unknown")}<br>
                         {f"Description: {component_info.description}" if component_info and component_info.description else ""}
                     </div>
                 </div>
-                
+
                 <div class="controls">
                     <h3>🎯 Game Controls</h3>
                     <div>
@@ -783,23 +781,23 @@ def get_game_client_html(game_type: str) -> str:
                         <button onclick="connect()">Connect</button>
                         <button onclick="disconnect()">Disconnect</button>
                     </div>
-                    
+
                     <div class="game-info">
                         <p>Status: <span id="status" class="status-disconnected">Disconnected</span></p>
                         <p>Turn: <span id="turn">-</span></p>
                         <p>Game Status: <span id="gameStatus">-</span></p>
                     </div>
-                    
+
                     <div>
                         <button onclick="getState()">Get State</button>
                         <button onclick="aiMove()">AI Move</button>
                     </div>
-                    
+
                     <h3>📋 Log</h3>
                     <div class="log" id="log"></div>
                 </div>
             </div>
-            
+
             <script>
                 // Game client JavaScript code
                 {_get_game_client_javascript()}
@@ -819,14 +817,14 @@ def _get_game_client_javascript() -> str:
     // Game variables
     let ws = null;
     let gameState = null;
-    
+
     // DOM elements
     const boardElement = document.getElementById('gameBoard');
     const statusElement = document.getElementById('status');
     const turnElement = document.getElementById('turn');
     const gameStatusElement = document.getElementById('gameStatus');
     const logElement = document.getElementById('log');
-    
+
     // Log messages
     function log(message, type = 'info') {
         const entry = document.createElement('div');
@@ -840,43 +838,43 @@ def _get_game_client_javascript() -> str:
         logElement.appendChild(entry);
         logElement.scrollTop = logElement.scrollHeight;
     }
-    
+
     // Connect to WebSocket
     function connect() {
         const gameId = document.getElementById('gameId').value;
-        
+
         if (!gameId) {
             log('Please enter a game ID', 'error');
             return;
         }
-        
+
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const gameType = window.location.pathname.split('/').filter(x => x)[1];
         const wsUrl = `${protocol}//${window.location.host}/ws/${gameType}/${gameId}`;
-        
+
         if (ws) {
             ws.close();
         }
-        
+
         log(`Connecting to ${wsUrl}...`);
         ws = new WebSocket(wsUrl);
-        
+
         ws.onopen = function(event) {
             statusElement.textContent = 'Connected';
             statusElement.className = 'status-connected';
             log('Connection established', 'success');
         };
-        
+
         ws.onmessage = function(event) {
             try {
                 const data = JSON.parse(event.data);
                 log(`Received: ${data.type}`);
-                
+
                 if (data.type === 'state_update') {
                     gameState = data.state;
                     updateBoardDisplay(gameState);
                     updateGameInfo(gameState);
-                    
+
                     if (data.last_action) {
                         log(`Last action: ${data.last_action}`, 'success');
                     }
@@ -888,20 +886,20 @@ def _get_game_client_javascript() -> str:
                 log(`Error parsing message: ${e.message}`, 'error');
             }
         };
-        
+
         ws.onclose = function(event) {
             statusElement.textContent = 'Disconnected';
             statusElement.className = 'status-disconnected';
             log('Connection closed');
         };
-        
+
         ws.onerror = function(event) {
             statusElement.textContent = 'Error';
             statusElement.className = 'status-disconnected';
             log('WebSocket error', 'error');
         };
     }
-    
+
     // Disconnect WebSocket
     function disconnect() {
         if (ws) {
@@ -910,7 +908,7 @@ def _get_game_client_javascript() -> str:
             log('Disconnected');
         }
     }
-    
+
     // Get game state
     function getState() {
         if (ws && ws.readyState === WebSocket.OPEN) {
@@ -923,7 +921,7 @@ def _get_game_client_javascript() -> str:
             log('WebSocket not connected', 'error');
         }
     }
-    
+
     // Request AI move
     function aiMove() {
         if (ws && ws.readyState === WebSocket.OPEN) {
@@ -936,39 +934,39 @@ def _get_game_client_javascript() -> str:
             log('WebSocket not connected', 'error');
         }
     }
-    
+
     // Show error message
     function showError(message) {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
         errorDiv.textContent = message;
         boardElement.insertBefore(errorDiv, boardElement.firstChild);
-        
+
         // Remove after 5 seconds
         setTimeout(() => {
             errorDiv.remove();
         }, 5000);
     }
-    
+
     // Update game info display
     function updateGameInfo(state) {
         turnElement.textContent = state.current_player || state.turn || '-';
         gameStatusElement.textContent = state.game_status || state.status || 'Active';
     }
-    
+
     // Update board display based on game state
     function updateBoardDisplay(state) {
         // Clear previous errors
         const errors = boardElement.querySelectorAll('.error-message');
         errors.forEach(e => e.remove());
-        
+
         // Simple display of game state as JSON
         boardElement.innerHTML = `<pre>${JSON.stringify(state, null, 2)}</pre>`;
-        
+
         // TODO: Implement game-specific visualization
         // This would be customized per game type
     }
-    
+
     // Auto-connect on page load
     window.addEventListener('load', () => {
         log('Page loaded. Click Connect to start.');
@@ -1048,8 +1046,6 @@ def create_game_router_app() -> FastAPI:
 
 def main():
     """Run the API server as standalone application."""
-    import uvicorn
-
     # Create app
     app = create_game_router_app()
 

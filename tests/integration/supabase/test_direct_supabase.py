@@ -18,14 +18,14 @@ async def test_supabase_connection():
     supabase_uri = os.getenv("SUPABASE_DATABASE_URI")
 
     if supabase_uri:
-        print(f"✓ Using oecoeyomphckolkywbzz instance (pooler connection)")
+        print("✓ Using oecoeyomphckolkywbzz instance (pooler connection)")")
     else:
         # Try the SSL version
         supabase_uri = os.getenv("SUPABASE_DATABASE_URI_SSL")
         if supabase_uri and "[PASSWORD_NEEDED]" in supabase_uri:
             password = "ITfz5B0wU6ehVXI1"
             supabase_uri = supabase_uri.replace("[PASSWORD_NEEDED]", password)
-            print(f"✓ Using zkssazqhwcetsnbiuqik instance with password")
+            print("✓ Using zkssazqhwcetsnbiuqik instance with password"d")
 
     if not supabase_uri:
         print("❌ No Supabase connection string found")
@@ -97,7 +97,7 @@ async def test_supabase_connection():
                 )
 
         # Test insert into threads table
-        print(f"\n🧪 Testing insert into threads table...")
+        print("\n🧪 Testing insert into threads table..."..")
         test_thread_id = f"test-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
         test_user_id = "test-user-123"
 
@@ -133,7 +133,7 @@ async def test_supabase_connection():
             print(f"❌ Failed to insert test thread: {e}")
 
         # Test checkpoints table
-        print(f"\n🔄 Testing checkpoints table...")
+        print("\n🔄 Testing checkpoints table..."..")
         try:
             # Check if we can insert a checkpoint
             checkpoint_id = f"checkpoint-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
@@ -168,7 +168,7 @@ async def test_supabase_connection():
             print(f"❌ Failed to test checkpoints: {e}")
 
         # Show recent activity
-        print(f"\n📊 Recent activity:")
+        print("\n📊 Recent activity:"y:")
 
         recent_threads = await conn.fetch(
             """
@@ -237,7 +237,7 @@ async def test_persistence_adapter():
         if success:
             print(f"✓ Successfully registered thread via adapter: {thread_id}")
         else:
-            print(f"❌ Failed to register thread via adapter")
+            print("❌ Failed to register thread via adapter"r")
             return False
 
         # Test state update
@@ -255,9 +255,9 @@ async def test_persistence_adapter():
         )
 
         if update_success:
-            print(f"✓ Successfully updated state via adapter")
+            print("✓ Successfully updated state via adapter"r")
         else:
-            print(f"❌ Failed to update state via adapter")
+            print("❌ Failed to update state via adapter"r")
             return False
 
         # Test state retrieval
@@ -266,12 +266,12 @@ async def test_persistence_adapter():
         )
 
         if retrieved_state:
-            print(f"✓ Successfully retrieved state via adapter")
+            print("✓ Successfully retrieved state via adapter"r")
             print(
                 f"  State keys: {list(retrieved_state.keys()) if isinstance(retrieved_state, dict) else 'not a dict'}"
             )
         else:
-            print(f"❌ Failed to retrieve state via adapter")
+            print("❌ Failed to retrieve state via adapter"r")
             return False
 
         print("\n🎉 Persistence adapter test completed successfully!")

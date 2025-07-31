@@ -1,4 +1,4 @@
-"""Persistence - TODO: Add brief description
+"""Persistence - TODO: Add brief description.
 
 TODO: Add detailed description of module functionality
 

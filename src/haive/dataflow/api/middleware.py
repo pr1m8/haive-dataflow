@@ -1,4 +1,5 @@
 # haive/dataflow/api/middleware.py
+
 import json
 import logging
 import time
@@ -28,8 +29,9 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         # Log start of request
         start_time = time.time()
         logger.info(
-            f"Request {request_id} started: {request.method} {request.url.path} (User: {user_id})"
-        )
+            f"Request {request_id} started: {
+                request.method} {
+                request.url.path} (User: {user_id})")
 
         # Process request
         try:
@@ -52,7 +54,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             # Log error
             process_time = time.time() - start_time
-            logger.error(
+            logger.exception(
                 f"Request {request_id} failed: {request.method} {request.url.path} "
                 f"- Error: {e!s} - Time: {process_time:.4f}s"
             )
@@ -103,9 +105,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 content=json.dumps(
                     {
                         "error": "Rate limit exceeded",
-                        "detail": f"Maximum {self.rate_limit} requests per {self.window} seconds",
-                    }
-                ),
+                        "detail": f"Maximum {
+                            self.rate_limit} requests per {
+                            self.window} seconds",
+                    }),
                 status_code=429,
                 media_type="application/json",
             )

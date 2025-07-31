@@ -1,13 +1,15 @@
 """Database schema management for the Haive Registry System.
 
-This module provides functions for creating and managing the database schema
-for the registry system. It handles schema creation, migrations, and
-upgrades as needed.
+This module provides functions for creating and managing the database
+schema for the registry system. It handles schema creation, migrations,
+and upgrades as needed.
 """
 
 import logging
 import os
 from pathlib import Path
+
+from haive.dataflow.db.supabase import get_supabase_client
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -21,8 +23,6 @@ os.makedirs(SCHEMA_DIR, exist_ok=True)
 
 # Try to import Supabase client
 try:
-    from haive.dataflow.db.supabase import get_supabase_client
-
     SUPABASE_AVAILABLE = True
 except ImportError:
     SUPABASE_AVAILABLE = False
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS components.llm_models (
   provider TEXT NOT NULL, -- 'azure', 'anthropic', 'openai', etc.
   model_name TEXT NOT NULL,
   description TEXT,
-  config_data JSONB NOT NULL, 
+  config_data JSONB NOT NULL,
   is_default BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -247,14 +247,14 @@ def execute_schema_sql(client=None, schema_sql: str | None = None) -> bool:
                         logger.error(f"Error executing SQL: {result.error}")
                         return False
                 except Exception as e:
-                    logger.error(f"Error executing SQL statement: {e}")
+                    logger.exception(f"Error executing SQL statement: {e}")
                     logger.debug(f"Statement: {stmt}")
                     return False
 
         logger.info("Schema created successfully")
         return True
     except Exception as e:
-        logger.error(f"Error executing schema SQL: {e}")
+        logger.exception(f"Error executing schema SQL: {e}")
         return False
 
 
@@ -284,12 +284,9 @@ def check_schema_exists(client=None) -> bool:
         ).execute()
 
         # Check if we got any results
-        if hasattr(result, "data") and result.data and len(result.data) > 0:
-            return True
-
-        return False
+        return bool(hasattr(result, "data") and result.data and len(result.data) > 0)
     except Exception as e:
-        logger.error(f"Error checking if schema exists: {e}")
+        logger.exception(f"Error checking if schema exists: {e}")
         return False
 
 
@@ -321,12 +318,9 @@ def check_table_exists(table_name: str, schema: str = "registry", client=None) -
         ).execute()
 
         # Check if we got any results
-        if hasattr(result, "data") and result.data and len(result.data) > 0:
-            return True
-
-        return False
+        return bool(hasattr(result, "data") and result.data and len(result.data) > 0)
     except Exception as e:
-        logger.error(f"Error checking if table {schema}.{table_name} exists: {e}")
+        logger.exception(f"Error checking if table {schema}.{table_name} exists: {e}")
         return False
 
 
@@ -388,13 +382,13 @@ def setup_schema(client=None) -> bool:
         # Create the schema
         return execute_schema_sql(supabase)
     except Exception as e:
-        logger.error(f"Error setting up schema: {e}")
+        logger.exception(f"Error setting up schema: {e}")
         return False
 
 
 def setup_execute_sql_function(client=None) -> bool:
-    """Set up the execute_sql function in the database.
-    This function is needed to execute arbitrary SQL statements.
+    """Set up the execute_sql function in the database. This function is needed
+    to execute arbitrary SQL statements.
 
     Args:
         client: Optional Supabase client
@@ -460,7 +454,8 @@ def setup_execute_sql_function(client=None) -> bool:
 
             if hasattr(result, "error") and result.error:
                 # If we got an error that the function doesn't exist, we need to create it
-                # using a different approach - this would require direct PostgreSQL access
+                # using a different approach - this would require direct PostgreSQL
+                # access
                 logger.error(f"Error creating execute_sql function: {result.error}")
                 logger.warning(
                     "Unable to create execute_sql function. This may require direct database access."
@@ -470,13 +465,13 @@ def setup_execute_sql_function(client=None) -> bool:
             logger.info("execute_sql function created successfully")
             return True
         except Exception as e:
-            logger.error(f"Error creating execute_sql function: {e}")
+            logger.exception(f"Error creating execute_sql function: {e}")
             logger.warning(
                 "Unable to create execute_sql function. This may require direct database access."
             )
             return False
     except Exception as e:
-        logger.error(f"Error setting up execute_sql function: {e}")
+        logger.exception(f"Error setting up execute_sql function: {e}")
         return False
 
 
@@ -506,7 +501,7 @@ def initialize_database(client=None) -> bool:
         # Set up schema
         return setup_schema(supabase)
     except Exception as e:
-        logger.error(f"Error initializing database: {e}")
+        logger.exception(f"Error initializing database: {e}")
         return False
 
 

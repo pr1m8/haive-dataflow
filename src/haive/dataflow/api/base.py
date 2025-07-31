@@ -1,21 +1,15 @@
 import os
 from typing import Any
 
+import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel, ConfigDict, Field
-
-# Load environment variables
-load_dotenv(".env")
-
-# Import necessary LLM configurations
-import traceback
-
-import uvicorn
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.tools import Tool
+from pydantic import BaseModel, ConfigDict, Field
 
 from .engine.aug_llm import AugLLMConfig
 from .models.llm.base import (
@@ -28,18 +22,24 @@ from .models.llm.base import (
 )
 from .models.llm.provider_types import LLMProvider
 
+# Load environment variables
+load_dotenv(".env")
+
+# Import necessary LLM configurations
+
+
 # Create FastAPI app with more detailed metadata
 app = FastAPI(
     title="Dynamic LLM Generation API",
     description="""
     A flexible API for generating responses using configurable Language Models (LLMs).
-    
+
     ## Features
     - Support multiple LLM providers
     - Configurable system prompts
     - Dynamic temperature settings
     - Optional tool integration
-    
+
     ## Supported Providers and Models
     ### Azure OpenAI
     - GPT-4 Turbo
@@ -134,7 +134,7 @@ AI_MODELS = {
 
 
 class ToolConfig(BaseModel):
-    """Configuration for a tool to be used with the LLM"""
+    """Configuration for a tool to be used with the LLM."""
 
     name: str = Field(..., description="Name of the tool", example="calculator")
     description: str | None = Field(
@@ -156,7 +156,7 @@ class ToolConfig(BaseModel):
 
 
 class LLMConfigRequest(BaseModel):
-    """Request model for LLM configuration"""
+    """Request model for LLM configuration."""
 
     provider: LLMProvider = Field(
         default=LLMProvider.AZURE,
@@ -217,7 +217,7 @@ class LLMConfigRequest(BaseModel):
 
 
 class LLMGenerationResponse(BaseModel):
-    """Response model for LLM generation"""
+    """Response model for LLM generation."""
 
     response: str = Field(..., description="Generated response from the LLM")
     model: str = Field(..., description="Model used for generation")
@@ -235,7 +235,7 @@ class LLMGenerationResponse(BaseModel):
 
 
 def get_env_api_key(provider: LLMProvider) -> str | None:
-    """Retrieve API key from environment variables based on provider"""
+    """Retrieve API key from environment variables based on provider."""
     env_key_map = {
         LLMProvider.AZURE.value: "AZURE_OPENAI_API_KEY",
         LLMProvider.OPENAI.value: "OPENAI_API_KEY",
@@ -264,7 +264,7 @@ async def generate_response(
         ..., description="The input query or message to generate a response for"
     ),
 ):
-    """Generate a response using dynamically configured LLM
+    """Generate a response using dynamically configured LLM.
 
     Args:
         request: LLM configuration details
@@ -327,7 +327,6 @@ async def generate_response(
         # Add tools if provided
         if request.tools:
             # Convert tool configurations to actual tool objects
-            from langchain_core.tools import Tool
 
             tools = []
             for tool_config in request.tools:
@@ -360,8 +359,6 @@ async def generate_response(
         raise
     except Exception as e:
         # Log the full traceback
-        print(f"Error in generate_response: {e}")
-        print(traceback.format_exc())
 
         # Raise an HTTP exception with more detailed error
         raise HTTPException(status_code=500, detail=str(e))

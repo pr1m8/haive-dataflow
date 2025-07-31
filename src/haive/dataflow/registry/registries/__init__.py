@@ -1,4 +1,4 @@
-"""Registries - TODO: Add brief description
+"""Registries - TODO: Add brief description.
 
 TODO: Add detailed description of module functionality
 

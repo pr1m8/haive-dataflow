@@ -84,7 +84,7 @@ async def test_agent_non_streaming(token):
     # Add config to URL
     uri += f"&config={json.dumps(config)}"
 
-    print(f"\n\nTesting non-streaming mode...")
+    print("\n\nTesting non-streaming mode...")
     print(f"Connecting to {uri}")
 
     async with websockets.connect(uri) as websocket:

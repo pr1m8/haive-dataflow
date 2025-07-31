@@ -1,7 +1,7 @@
 """Base provider class for the Haive Registry System.
 
-This module defines the base provider class that all specific
-entity providers inherit from.
+This module defines the base provider class that all specific entity
+providers inherit from.
 """
 
 import importlib
@@ -11,13 +11,17 @@ import pkgutil
 from abc import ABC, abstractmethod
 from typing import Any
 
-from haive.dataflow.core import registry_system
+from pydantic import BaseModel
 
-# Import models
+from haive.dataflow.core import registry_system
 from haive.dataflow.models import ConfigType, DependencyType, EntityType, ImportStatus
 
-# Set up logging
 from .utils.logging import setup_discovery_logger
+
+# Import models
+
+# Set up logging
+
 
 logger = setup_discovery_logger("providers")
 
@@ -25,8 +29,8 @@ logger = setup_discovery_logger("providers")
 class EntityProvider(ABC):
     """Base class for entity providers.
 
-    Entity providers are responsible for discovering, registering, and managing
-    specific types of entities in the registry system.
+    Entity providers are responsible for discovering, registering, and
+    managing specific types of entities in the registry system.
     """
 
     def __init__(self, entity_type: EntityType):
@@ -80,7 +84,7 @@ class EntityProvider(ABC):
                 return []
 
             # Walk through the package
-            for loader, module_name, is_pkg in pkgutil.walk_packages([base_dir]):
+            for _loader, module_name, is_pkg in pkgutil.walk_packages([base_dir]):
                 full_module_name = f"{base_path}.{module_name}"
                 discovered_modules.append(full_module_name)
 
@@ -92,10 +96,10 @@ class EntityProvider(ABC):
             return discovered_modules
 
         except ImportError as e:
-            logger.error(f"Error importing base module {base_path}: {e}")
+            logger.exception(f"Error importing base module {base_path}: {e}")
             return []
         except Exception as e:
-            logger.error(f"Error discovering modules in {base_path}: {e}")
+            logger.exception(f"Error discovering modules in {base_path}: {e}")
             return []
 
     def is_pydantic_model(self, obj: Any) -> bool:
@@ -108,8 +112,6 @@ class EntityProvider(ABC):
             True if it's a Pydantic model, False otherwise
         """
         try:
-            from pydantic import BaseModel
-
             return inspect.isclass(obj) and issubclass(obj, BaseModel)
         except (ImportError, TypeError):
             return False

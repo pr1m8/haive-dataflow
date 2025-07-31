@@ -107,7 +107,7 @@ async def test_postgres_connection():
                     # Test basic query
                     await cursor.execute("SELECT version()")
                     version = await cursor.fetchone()
-                    print(f"✓ Connected to PostgreSQL!")
+                    print("✓ Connected to PostgreSQL!"!")
                     print(f"  Version: {version[0]}")
 
                     # Check if we can see the agent_state schema
@@ -183,7 +183,7 @@ async def test_supabase_persistence():
         print(f"  Config user: {persistence.postgres_config.db_user}")
 
         # Try to get a checkpointer
-        checkpointer = await persistence.get_checkpointer()
+        await persistence.get_checkpointer()
         print("✓ Got checkpointer from persistence adapter")
 
     except Exception as e:

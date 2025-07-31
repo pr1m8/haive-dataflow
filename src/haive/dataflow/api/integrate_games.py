@@ -19,6 +19,7 @@ import logging
 import os
 import sys
 
+import game_router
 from fastapi import FastAPI
 
 # Configure logging
@@ -67,8 +68,6 @@ def add_game_routes(app: FastAPI, prefix: str = "/games"):
 
     # Import game_router after setting up paths
     try:
-        import game_router
-
         # Discover game agents
         game_router.discover_game_agents()
 
@@ -84,13 +83,15 @@ def add_game_routes(app: FastAPI, prefix: str = "/games"):
         app.include_router(games_router, prefix=prefix)
 
         logger.info(
-            f"Added routes for {len(game_router.game_agents)} games: {list(game_router.game_agents.keys())}"
+            f"Added routes for {len(game_router.game_agents)} games: {
+                list(game_router.game_agents.keys())
+            }"
         )
 
         return app
 
     except ImportError as e:
-        logger.error(f"Failed to import game_router module: {e}")
+        logger.exception(f"Failed to import game_router module: {e}")
         return app
     except Exception as e:
         logger.error(f"Error adding game routes: {e}", exc_info=True)

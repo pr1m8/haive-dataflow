@@ -49,7 +49,7 @@ async def check_public_schema():
                     f"SELECT COUNT(*) FROM public.{table_name}"
                 )
                 print(f"  - {table_name}: {column_count} columns, {row_count} rows")
-            except Exception as e:
+            except Exception:
                 print(f"  - {table_name}: {column_count} columns, error counting rows")
 
         # Check for threads table specifically
@@ -63,12 +63,12 @@ async def check_public_schema():
         )
 
         if threads_table:
-            print(f"\n🧵 threads table structure:")
+            print("\n🧵 threads table structure:"e:")
             for col in threads_table:
                 nullable = "NULL" if col["is_nullable"] == "YES" else "NOT NULL"
                 print(f"  - {col['column_name']} ({col['data_type']}) {nullable}")
         else:
-            print(f"\n❌ No 'threads' table found in public schema")
+            print("\n❌ No 'threads' table found in public schema"a")
 
         # Check foreign key relationships
         fks = await conn.fetch(
@@ -91,13 +91,13 @@ async def check_public_schema():
         )
 
         if fks:
-            print(f"\n🔗 Foreign key relationships in public schema:")
+            print("\n🔗 Foreign key relationships in public schema:"a:")
             for fk in fks:
                 print(
                     f"  {fk['table_from']}.{fk['column_from']} ➝ {fk['table_to']}.{fk['column_to']}"
                 )
         else:
-            print(f"\n📝 No foreign key relationships found in public schema")
+            print("\n📝 No foreign key relationships found in public schema"ma")
 
         await conn.close()
         return True
@@ -263,7 +263,7 @@ async def main():
 
         if create_success:
             # Check again to show final state
-            print(f"\n📊 Final State:")
+            print("\n📊 Final State:"e:")
             await check_public_schema()
 
     print("\n" + "=" * 60)

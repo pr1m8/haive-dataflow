@@ -44,22 +44,17 @@ Typical usage example:
 import asyncio
 import logging
 import os
+import traceback
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from pydantic import BaseModel, ConfigDict, Field
-
-logger = logging.getLogger(__name__)
-import traceback
-
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.tools import Tool
+from pydantic import BaseModel, ConfigDict, Field
 
-# Import authentication dependencies
 from .auth.middleware import require_auth
 from .engine.aug_llm import AugLLMConfig
-
-# Import necessary LLM configurations
 from .models.llm.base import (
     AnthropicLLMConfig,
     AzureLLMConfig,
@@ -69,6 +64,13 @@ from .models.llm.base import (
     OpenAILLMConfig,
 )
 from .models.llm.provider_types import LLMProvider
+
+logger = logging.getLogger(__name__)
+
+
+# Import authentication dependencies
+
+# Import necessary LLM configurations
 
 # Create router with prefix and tags
 router = APIRouter(
@@ -107,7 +109,7 @@ AI_MODELS = {
 
 
 class ToolConfig(BaseModel):
-    """Configuration for a tool to be used with the LLM"""
+    """Configuration for a tool to be used with the LLM."""
 
     name: str = Field(..., description="Name of the tool", example="calculator")
     description: str | None = Field(
@@ -129,7 +131,7 @@ class ToolConfig(BaseModel):
 
 
 class LLMConfigRequest(BaseModel):
-    """Request model for LLM configuration"""
+    """Request model for LLM configuration."""
 
     provider: LLMProvider = Field(
         default=LLMProvider.AZURE,
@@ -188,7 +190,7 @@ class LLMConfigRequest(BaseModel):
 
 
 class LLMGenerationResponse(BaseModel):
-    """Response model for LLM generation"""
+    """Response model for LLM generation."""
 
     response: str = Field(..., description="Generated response from the LLM")
     model: str = Field(..., description="Model used for generation")
@@ -206,7 +208,7 @@ class LLMGenerationResponse(BaseModel):
 
 
 def get_env_api_key(provider: LLMProvider) -> str | None:
-    """Retrieve API key from environment variables based on provider"""
+    """Retrieve API key from environment variables based on provider."""
     env_key_map = {
         LLMProvider.AZURE.value: "AZURE_OPENAI_API_KEY",
         LLMProvider.OPENAI.value: "OPENAI_API_KEY",
@@ -233,15 +235,13 @@ async def generate_response(
     ),
     user_id: str = Depends(require_auth),  # Add authentication dependency
 ):
-    """Generate a response using dynamically configured LLM
+    """Generate a response using dynamically configured LLM.
 
     Args:
         request: LLM configuration details
         query: User's input query
         user_id: Authenticated user ID
     """
-    import logging
-
     logger = logging.getLogger(__name__)
     logger.warning(f"Received request: {request}")
     logger.warning(f"Query parameter: {query}")
@@ -303,7 +303,6 @@ async def generate_response(
         # Add tools if provided
         if request.tools:
             # Convert tool configurations to actual tool objects
-            from langchain_core.tools import Tool
 
             tools = []
             for tool_config in request.tools:
@@ -336,8 +335,6 @@ async def generate_response(
         raise
     except Exception as e:
         # Log the full traceback
-        print(f"Error in generate_response: {e}")
-        print(traceback.format_exc())
 
         # Raise an HTTP exception with more detailed error
         raise HTTPException(status_code=500, detail=str(e))
@@ -349,7 +346,7 @@ async def generate_response(
     description="Submit a single query to multiple LLM configurations for comparison",
 )
 async def batch_generate(request: Request, user_id: str = Depends(require_auth)):
-    """Generate responses from multiple LLM configurations in parallel
+    """Generate responses from multiple LLM configurations in parallel.
 
     Args:
         request: The HTTP request containing the configurations
@@ -384,9 +381,9 @@ async def batch_generate(request: Request, user_id: str = Depends(require_auth))
                 validated_config = LLMConfigRequest(**config)
                 validated_configs.append(validated_config)
             except Exception as e:
-                logger.error(f"Validation error in config #{i+1}: {e!s}")
+                logger.exception(f"Validation error in config #{i + 1}: {e!s}")
                 raise HTTPException(
-                    status_code=422, detail=f"Invalid configuration #{i+1}: {e!s}"
+                    status_code=422, detail=f"Invalid configuration #{i + 1}: {e!s}"
                 )
 
         # Process each configuration in parallel
@@ -446,8 +443,6 @@ async def batch_generate(request: Request, user_id: str = Depends(require_auth))
 
                 # Add tools if needed
                 if config.tools:
-                    from langchain_core.tools import Tool
-
                     tools = []
                     for tool_config in config.tools:
                         tool = Tool(
@@ -479,8 +474,8 @@ async def batch_generate(request: Request, user_id: str = Depends(require_auth))
                 }
 
             except Exception as e:
-                logger.error(f"Error processing config #{config_index}: {e!s}")
-                logger.error(traceback.format_exc())
+                logger.exception(f"Error processing config #{config_index}: {e!s}")
+                logger.exception(traceback.format_exc())
                 return {"index": config_index, "error": str(e), "success": False}
 
         # Run all configurations in parallel
@@ -495,6 +490,6 @@ async def batch_generate(request: Request, user_id: str = Depends(require_auth))
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error in batch_generate: {e!s}")
-        logger.error(traceback.format_exc())
+        logger.exception(f"Error in batch_generate: {e!s}")
+        logger.exception(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))

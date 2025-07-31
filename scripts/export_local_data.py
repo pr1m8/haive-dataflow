@@ -180,10 +180,10 @@ async def export_local_data():
         with open("local_postgres_export.json", "w") as f:
             json.dump(export_data, f, indent=2, default=str)
 
-        print(f"\n💾 Data exported to: local_postgres_export.json")
+        print("\n💾 Data exported to: local_postgres_export.json"on")
 
         # 6. Create individual SQL insert files for Supabase
-        print(f"\n📝 Creating SQL import files...")
+        print("\n📝 Creating SQL import files..."..")
 
         # Threads SQL
         with open("supabase_import_threads.sql", "w") as f:
@@ -204,17 +204,17 @@ VALUES (
 """
                 )
 
-        print(f"✓ Created supabase_import_threads.sql")
+        print("✓ Created supabase_import_threads.sql"l")
 
         # Summary
-        print(f"\n📊 Export Summary:")
+        print("\n📊 Export Summary:"y:")
         print(f"  - Threads: {len(threads_data)}")
         print(f"  - Checkpoints: {len(checkpoints_data)}")
         print(f"  - Writes: {len(writes_data)}")
         print(f"  - Blobs: {len(blobs_data)}")
-        print(f"  - Files created:")
-        print(f"    • local_postgres_export.json (complete data)")
-        print(f"    • supabase_import_threads.sql (ready to run in Supabase)")
+        print("  - Files created:")
+        print("    • local_postgres_export.json (complete data)")")
+        print("    • supabase_import_threads.sql (ready to run in Supabase)")")
 
         await conn.close()
         return True
@@ -236,15 +236,15 @@ async def main():
     success = await export_local_data()
 
     if success:
-        print(f"\n🎉 Export completed successfully!")
-        print(f"\nNext steps:")
-        print(f"1. Run SUPABASE_SCHEMA_SETUP.sql in your Supabase SQL editor")
-        print(f"2. Run supabase_import_threads.sql in your Supabase SQL editor")
-        print(f"3. Use local_postgres_export.json for any additional data needs")
+        print("\n🎉 Export completed successfully!"y!")
+        print("\nNext steps:")
+        print("1. Run SUPABASE_SCHEMA_SETUP.sql in your Supabase SQL editor")
+        print("2. Run supabase_import_threads.sql in your Supabase SQL editor")
+        print("3. Use local_postgres_export.json for any additional data needs")
     else:
-        print(f"\n❌ Export failed")
+        print("\n❌ Export failed"d")
 
-    print(f"\n" + "=" * 60)
+    print("\n" + "=" * 60)
 
 
 if __name__ == "__main__":

@@ -1,13 +1,16 @@
 import asyncio
 import logging
+import platform
 import uuid
 from datetime import datetime
 from typing import Any, Literal
 
+import uvicorn
 from fastapi import HTTPException
 from haive_games.tic_tac_toe.agent import TicTacToeAgent
 from haive_games.tic_tac_toe.config import TicTacToeConfig
 from haive_games.tic_tac_toe.state import TicTacToeState
+from haive_games.tic_tac_toe.state_manager import TicTacToeStateManager
 from pydantic import BaseModel, Field
 
 from .api.game_agent import AgentResponseBase, GenericAgentAPI
@@ -61,7 +64,7 @@ class TicTacToeAPI(GenericAgentAPI[TicTacToeAgent, TicTacToeConfig]):
 
         @app.post("/games/", response_model=TicTacToeResponse)
         async def create_game(request: TicTacToeRequest):
-            """Create a new Tic Tac Toe game"""
+            """Create a new Tic Tac Toe game."""
             try:
                 thread_id = request.thread_id or f"tictactoe_{uuid.uuid4().hex[:8]}"
 
@@ -73,8 +76,6 @@ class TicTacToeAPI(GenericAgentAPI[TicTacToeAgent, TicTacToeConfig]):
                         **(request.config_overrides or {}),
                     },
                 )
-
-                from haive_games.tic_tac_toe.state_manager import TicTacToeStateManager
 
                 initial_state = TicTacToeStateManager.initialize(
                     first_player=request.first_player,
@@ -99,7 +100,7 @@ class TicTacToeAPI(GenericAgentAPI[TicTacToeAgent, TicTacToeConfig]):
 
         @app.post("/games/{thread_id}/move", response_model=TicTacToeResponse)
         async def make_move(thread_id: str, move: TicTacToeMoveRequest):
-            """Make a move in a Tic Tac Toe game"""
+            """Make a move in a Tic Tac Toe game."""
             try:
                 agent = self.agent_manager.get_or_create_agent(thread_id)
 
@@ -126,7 +127,7 @@ class TicTacToeAPI(GenericAgentAPI[TicTacToeAgent, TicTacToeConfig]):
 
         @app.get("/games/{thread_id}/ai-move", response_model=TicTacToeResponse)
         async def ai_move(thread_id: str):
-            """Let AI make a move"""
+            """Let AI make a move."""
             try:
                 agent = self.agent_manager.get_or_create_agent(thread_id)
                 state = agent.run({}, thread_id=thread_id)
@@ -144,7 +145,7 @@ class TicTacToeAPI(GenericAgentAPI[TicTacToeAgent, TicTacToeConfig]):
 
         @app.get("/games/{thread_id}", response_model=TicTacToeResponse)
         async def get_game(thread_id: str):
-            """Get current game state"""
+            """Get current game state."""
             try:
                 agent = self.agent_manager.get_or_create_agent(thread_id)
                 state = agent.run({}, thread_id=thread_id)
@@ -169,12 +170,8 @@ tictactoe_api = TicTacToeAPI()
 
 
 def run():
-    """Run the Tic Tac Toe API server"""
-    import uvicorn
-
+    """Run the Tic Tac Toe API server."""
     if __name__ == "__main__":
-        import platform
-
         if platform.system() == "Windows":
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 

@@ -14,26 +14,32 @@ that follows the standard Haive agent interface.
 """
 
 import asyncio
+import contextlib
 import json
 import logging
 import os
-
-# Fix imports for local development
 import sys
 from datetime import datetime
 from typing import Any
 
+import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from haive.core.engine.agent.agent import Agent
+from haive.core.schema.state_schema import StateSchema
+from haive.games.connect4.agent import Connect4Agent
+from haive.games.connect4.state import Connect4State
+from haive.games.tic_tac_toe.agent import TicTacToeAgent
+from haive.games.tic_tac_toe.state import TicTacToeState
+
+# Fix imports for local development
+
 
 module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
 if module_path not in sys.path:
     sys.path.append(module_path)
 
 # Now import the modules
-import contextlib
 
-from haive.core.engine.agent.agent import Agent
-from haive.core.schema.state_schema import StateSchema
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -143,7 +149,7 @@ class GameSocketServer:
                 logger.error(f"WebSocket error: {e}", exc_info=True)
 
                 # Try to send error message
-                try:
+                with contextlib.suppress(BaseException):
                     await websocket.send_json(
                         {
                             "type": "error",
@@ -152,8 +158,6 @@ class GameSocketServer:
                             "timestamp": datetime.now().isoformat(),
                         }
                     )
-                except:
-                    pass
 
     async def _handle_make_move(
         self, websocket: WebSocket, thread_id: str, message: dict[str, Any]
@@ -292,8 +296,9 @@ class GameSocketServer:
     def _is_game_ongoing(self, state: dict[str, Any]) -> bool:
         """Check if the game is still ongoing based on state.
 
-        This is a generic implementation that works with most game state schemas.
-        Games with different state structures can override this method.
+        This is a generic implementation that works with most game state
+        schemas. Games with different state structures can override this
+        method.
         """
         # Common game status fields
         if "game_status" in state:
@@ -357,7 +362,7 @@ class GameSocketServer:
                 try:
                     await websocket.send_json(message)
                 except Exception as e:
-                    logger.error(f"Error broadcasting to {thread_id}: {e}")
+                    logger.exception(f"Error broadcasting to {thread_id}: {e}")
 
     def cleanup(self, thread_id: str | None = None):
         """Clean up resources."""
@@ -368,10 +373,8 @@ class GameSocketServer:
                 if hasattr(agent, "checkpointer") and hasattr(
                     agent.checkpointer, "conn"
                 ):
-                    try:
+                    with contextlib.suppress(BaseException):
                         agent.checkpointer.conn.close()
-                    except:
-                        pass
                 del self.agents[thread_id]
         else:
             # Clean up all
@@ -379,10 +382,8 @@ class GameSocketServer:
                 if hasattr(agent, "checkpointer") and hasattr(
                     agent.checkpointer, "conn"
                 ):
-                    try:
+                    with contextlib.suppress(BaseException):
                         agent.checkpointer.conn.close()
-                    except:
-                        pass
             self.agents = {}
 
 
@@ -394,8 +395,6 @@ class GameSocketFactory:
 
     Example:
         ```python
-        from haive.games.chess.agent import ChessAgent
-        from haive.games.chess.state import ChessState
 
         # Create a chess socket server
         chess_socket = GameSocketFactory.create_chess_socket(app)
@@ -446,8 +445,6 @@ class GameSocketFactory:
             A configured GameSocketServer instance for chess
         """
         # Fix imports for packages directory structure
-        import os
-        import sys
 
         packages_path = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "../../../../..")
@@ -476,8 +473,6 @@ class GameSocketFactory:
             A configured GameSocketServer instance for Connect4
         """
         # Import here to avoid circular imports
-        from haive.games.connect4.agent import Connect4Agent
-        from haive.games.connect4.state import Connect4State
 
         return GameSocketFactory.create_socket(
             app=app,
@@ -497,8 +492,6 @@ class GameSocketFactory:
             A configured GameSocketServer instance for Tic Tac Toe
         """
         # Import here to avoid circular imports
-        from haive.games.tic_tac_toe.agent import TicTacToeAgent
-        from haive.games.tic_tac_toe.state import TicTacToeState
 
         return GameSocketFactory.create_socket(
             app=app,
@@ -510,31 +503,25 @@ class GameSocketFactory:
 
 # Example usage
 if __name__ == "__main__":
-    import uvicorn
-    from fastapi import FastAPI
-
     app = FastAPI()
 
     try:
         # Create chess socket server
         chess_socket = GameSocketFactory.create_chess_socket(app)
-        print("Chess socket server created successfully")
     except ImportError:
-        print("Chess game not available")
+        pass
 
     try:
         # Create Connect4 socket server
         connect4_socket = GameSocketFactory.create_connect4_socket(app)
-        print("Connect4 socket server created successfully")
     except ImportError:
-        print("Connect4 game not available")
+        pass
 
     try:
         # Create Tic Tac Toe socket server
         tictactoe_socket = GameSocketFactory.create_tic_tac_toe_socket(app)
-        print("Tic Tac Toe socket server created successfully")
     except ImportError:
-        print("Tic Tac Toe game not available")
+        pass
 
     # Run the server
     uvicorn.run(app, host="0.0.0.0", port=8000)

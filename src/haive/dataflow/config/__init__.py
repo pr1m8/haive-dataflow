@@ -1,4 +1,4 @@
-"""Config - TODO: Add brief description
+"""Config - TODO: Add brief description.
 
 TODO: Add detailed description of module functionality
 

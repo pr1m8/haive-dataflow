@@ -9,7 +9,7 @@ cloud-based persistence.
 
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from pydantic import BaseModel, Field
 
@@ -212,7 +212,7 @@ async def test_supabase_checkpointer(user_id: str = "test-user"):
             checkpoint=test_checkpoint,
             metadata={"test": True},
         )
-        print(f"✓ Stored test checkpoint")
+        print("✓ Stored test checkpoint"t")
 
         # Test checkpoint retrieval
         retrieved = await checkpointer.aget(
@@ -225,9 +225,9 @@ async def test_supabase_checkpointer(user_id: str = "test-user"):
         )
 
         if retrieved:
-            print(f"✓ Retrieved checkpoint successfully")
+            print("✓ Retrieved checkpoint successfully"y")
         else:
-            print(f"✗ Failed to retrieve checkpoint")
+            print("✗ Failed to retrieve checkpoint"t")
 
         print("=== Supabase Checkpointer Test Complete ===")
 

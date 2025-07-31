@@ -1,7 +1,8 @@
 """Models for the Haive Registry System.
 
-This module defines the core models used by the registry system to represent
-different types of entities, configurations, dependencies, etc.
+This module defines the core models used by the registry system to
+represent different types of entities, configurations, dependencies,
+etc.
 """
 
 import uuid

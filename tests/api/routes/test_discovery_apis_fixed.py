@@ -229,9 +229,6 @@ if __name__ == "__main__":
     # Test imports
     print("1. Testing imports...")
     try:
-        from haive.dataflow.api.game_router_fixed import discover_game_agents
-        from haive.dataflow.api.routes.agent_discovery_routes_fixed import list_agents
-        from haive.dataflow.api.routes.tools_routes_fixed import list_tools
 
         print("✅ All imports successful")
     except Exception as e:

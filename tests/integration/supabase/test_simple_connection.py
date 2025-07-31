@@ -2,7 +2,6 @@
 """Simple direct connection test to debug Supabase."""
 
 import asyncio
-import os
 
 import asyncpg
 

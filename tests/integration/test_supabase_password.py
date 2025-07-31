@@ -12,7 +12,7 @@ async def test_connection():
     # Connection with the password user provided
     uri = "postgresql://postgres.zkssazqhwcetsnbiuqik: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@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
 
-    print(f"Testing connection to zkssazqhwcetsnbiuqik...")
+    print("Testing connection to zkssazqhwcetsnbiuqik...")
     print(f"URI: {uri[:60]}...")
 
     try:
@@ -23,7 +23,7 @@ async def test_connection():
         async with conn.cursor() as cursor:
             await cursor.execute("SELECT version()")
             version = await cursor.fetchone()
-            print(f"✓ Connected successfully!")
+            print("✓ Connected successfully!"!")
             print(f"  PostgreSQL version: {version[0][:50]}...")
 
             # Check for agent_state schema

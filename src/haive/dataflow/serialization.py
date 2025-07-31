@@ -1,7 +1,7 @@
 """Serialization utilities for the Haive Registry System.
 
-This module provides tools for serializing and deserializing complex Python objects
-for storage in the registry database.
+This module provides tools for serializing and deserializing complex
+Python objects for storage in the registry database.
 """
 
 import logging
@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 class SerializationRegistry:
     """Registry for serializers and deserializers.
 
-    This registry allows the system to handle complex Python objects by registering
-    custom serializers and deserializers for specific types.
+    This registry allows the system to handle complex Python objects by
+    registering custom serializers and deserializers for specific types.
     """
 
     _serializers = {}
@@ -113,7 +113,7 @@ class SerializationRegistry:
                 logger.warning(f"Error in serializer for {type_name}: {e}")
 
         # Handle built-in types
-        if isinstance(obj, (str, int, float, bool, type(None))):
+        if isinstance(obj, str | int | float | bool | type(None)):
             return obj
 
         # Handle dictionaries
@@ -121,7 +121,7 @@ class SerializationRegistry:
             return {key: cls.serialize(value) for key, value in obj.items()}
 
         # Handle lists and tuples
-        if isinstance(obj, (list, tuple)):
+        if isinstance(obj, list | tuple):
             serialized = [cls.serialize(item) for item in obj]
             if isinstance(obj, tuple):
                 return {"__type__": "tuple", "data": serialized}
@@ -141,7 +141,7 @@ class SerializationRegistry:
             return {"__type__": obj_type_name, "data": cls.serialize(data)}
 
         # Handle functions and methods
-        if isinstance(obj, (types.FunctionType, types.MethodType)):
+        if isinstance(obj, types.FunctionType | types.MethodType):
             return {
                 "__type__": "function",
                 "data": {
@@ -180,7 +180,7 @@ class SerializationRegistry:
             Deserialized object
         """
         # Handle None and primitive types
-        if data is None or isinstance(data, (str, int, float, bool)):
+        if data is None or isinstance(data, str | int | float | bool):
             return data
 
         # Handle typed objects
@@ -201,7 +201,7 @@ class SerializationRegistry:
 
             # Handle sets
             if type_name == "set":
-                return set(cls.deserialize(item) for item in type_data)
+                return {cls.deserialize(item) for item in type_data}
 
             # Handle functions
             if type_name == "function":
@@ -212,8 +212,9 @@ class SerializationRegistry:
                     return getattr(module, type_data["name"])
                 except Exception as e:
                     logger.warning(
-                        f"Error deserializing function {type_data['module']}.{type_data['name']}: {e}"
-                    )
+                        f"Error deserializing function {
+                            type_data['module']}.{
+                            type_data['name']}: {e}")
                     return None
 
             # Handle classes
@@ -225,8 +226,9 @@ class SerializationRegistry:
                     return getattr(module, type_data["name"])
                 except Exception as e:
                     logger.warning(
-                        f"Error deserializing class {type_data['module']}.{type_data['name']}: {e}"
-                    )
+                        f"Error deserializing class {
+                            type_data['module']}.{
+                            type_data['name']}: {e}")
                     return None
 
             # Handle string representations

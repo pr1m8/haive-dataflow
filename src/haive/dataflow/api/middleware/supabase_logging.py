@@ -1,4 +1,5 @@
 # haive/dataflow/api/middleware/supabase_logging.py
+
 import asyncio
 import json
 import logging
@@ -10,11 +11,12 @@ from typing import Any
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
-
-# Import Supabase client
 from supabase import create_client
 
 from .config.environment import get_supabase_server_config
+
+# Import Supabase client
+
 
 logger = logging.getLogger(__name__)
 
@@ -101,8 +103,8 @@ class SupabaseLogger:
             return bool(response.data)
         except Exception as e:
             # Log error but don't fail the request
-            logger.error(f"Error logging to Supabase: {e!s}")
-            logger.error(traceback.format_exc())
+            logger.exception(f"Error logging to Supabase: {e!s}")
+            logger.exception(traceback.format_exc())
             return False
 
     async def log_llm_request(
@@ -167,12 +169,13 @@ class SupabaseLogger:
             return bool(response.data)
         except Exception as e:
             # Log error but don't fail the request
-            logger.error(f"Error logging LLM request to Supabase: {e!s}")
-            logger.error(traceback.format_exc())
+            logger.exception(f"Error logging LLM request to Supabase: {e!s}")
+            logger.exception(traceback.format_exc())
             return False
 
     def _sanitize_data(self, data: Any) -> Any:
-        """Sanitize data for logging (remove sensitive fields, truncate large values).
+        """Sanitize data for logging (remove sensitive fields, truncate large
+        values).
 
         Args:
             data: Data to sanitize
@@ -207,7 +210,7 @@ class SupabaseLogger:
                     result[key] = [
                         (
                             self._sanitize_data(item)
-                            if isinstance(item, (dict, list))
+                            if isinstance(item, dict | list)
                             else item
                         )
                         for item in value
@@ -217,7 +220,7 @@ class SupabaseLogger:
             return result
         if isinstance(data, list):
             return [
-                self._sanitize_data(item) if isinstance(item, (dict, list)) else item
+                self._sanitize_data(item) if isinstance(item, dict | list) else item
                 for item in data
             ]
         return data
@@ -265,7 +268,7 @@ class SupabaseLoggingMiddleware(BaseHTTPMiddleware):
                 # Try to parse as JSON
                 try:
                     request_body = json.loads(body_bytes.decode())
-                except:
+                except BaseException:
                     # Not valid JSON, store as string
                     body_str = body_bytes.decode()
                     if len(body_str) > 1000:
@@ -299,11 +302,11 @@ class SupabaseLoggingMiddleware(BaseHTTPMiddleware):
                 response_body_str = response_body_bytes.decode()
                 try:
                     response_body = json.loads(response_body_str)
-                except:
+                except BaseException:
                     if len(response_body_str) > 1000:
                         response_body_str = response_body_str[:1000] + "... [truncated]"
                     response_body = {"raw": response_body_str}
-            except:
+            except BaseException:
                 response_body = {"binary": "[binary data]"}
 
             # Create a new response with the same data
@@ -333,11 +336,11 @@ class SupabaseLoggingMiddleware(BaseHTTPMiddleware):
             # Log error to console
             process_time = time.time() - start_time
             error_msg = str(e)
-            logger.error(
+            logger.exception(
                 f"Request {request_id} failed: {request.method} {request.url.path} "
                 f"- Error: {error_msg} - Time: {process_time:.4f}s"
             )
-            logger.error(traceback.format_exc())
+            logger.exception(traceback.format_exc())
 
             # Set status code for log entry
             status_code = 500

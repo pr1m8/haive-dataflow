@@ -1,16 +1,27 @@
 """Tools API routes for discovering and listing available tools.
 
-This module provides FastAPI routes for discovering and listing all available
-tools in the Haive ecosystem. It scans the haive-tools package and returns
-information about available tools and toolkits.
+This module provides FastAPI routes for discovering and listing all
+available tools in the Haive ecosystem. It scans the haive-tools package
+and returns information about available tools and toolkits.
 """
 
+import importlib
 import inspect
 import logging
-from typing import Any, Dict, List, Optional
+import os
+import pkgutil
+from typing import Any
 
+import haive.tools
+import haive.tools.tools
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field, create_model
+from haive.core.utils.haive_discovery import HaiveComponentDiscovery
+from haive.core.utils.haive_discovery.enhanced_tool_discovery import (
+    EnhancedToolAnalyzer,
+)
+from haive.tools import toolkits as toolkits_module
+from haive.tools import tools as tools_module
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +42,7 @@ class ToolInfo(BaseModel):
 class ToolsListResponse(BaseModel):
     """Response for tools list endpoint."""
 
-    tools: List[ToolInfo] = Field(..., description="List of available tools")
+    tools: list[ToolInfo] = Field(..., description="List of available tools")
     count: int = Field(..., description="Total number of tools")
 
 
@@ -40,8 +51,8 @@ class ToolSchema(BaseModel):
 
     name: str = Field(..., description="Tool name")
     description: str = Field(..., description="Tool description")
-    input_schema: Dict[str, Any] = Field(..., description="Input parameters schema")
-    output_schema: Optional[Dict[str, Any]] = Field(
+    input_schema: dict[str, Any] = Field(..., description="Input parameters schema")
+    output_schema: dict[str, Any] | None = Field(
         None, description="Output schema if available"
     )
 
@@ -50,7 +61,7 @@ class ToolInvokeRequest(BaseModel):
     """Request to invoke a tool."""
 
     tool_name: str = Field(..., description="Name of the tool to invoke")
-    arguments: Dict[str, Any] = Field(..., description="Arguments to pass to the tool")
+    arguments: dict[str, Any] = Field(..., description="Arguments to pass to the tool")
 
 
 class ToolInvokeResponse(BaseModel):
@@ -58,18 +69,15 @@ class ToolInvokeResponse(BaseModel):
 
     success: bool = Field(..., description="Whether invocation was successful")
     result: Any = Field(None, description="Result from the tool")
-    error: Optional[str] = Field(None, description="Error message if failed")
+    error: str | None = Field(None, description="Error message if failed")
 
 
-def discover_tools() -> List[ToolInfo]:
+def discover_tools() -> list[ToolInfo]:
     """Discover all available tools from haive-tools package."""
     tools = []
 
     try:
         # Try using haive discovery system first
-        import os
-
-        from haive.core.utils.haive_discovery import HaiveComponentDiscovery
 
         # Get haive root directory
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -108,9 +116,6 @@ def discover_tools() -> List[ToolInfo]:
         # Fall back to manual discovery
         try:
             # Import haive.tools to get available tools
-            import haive.tools
-            from haive.tools import toolkits as toolkits_module
-            from haive.tools import tools as tools_module
 
             # Discover individual tools
             if hasattr(tools_module, "__all__"):
@@ -157,16 +162,14 @@ def discover_tools() -> List[ToolInfo]:
                         logger.warning(f"Failed to load toolkit {toolkit_name}: {e}")
 
         except ImportError as e2:
-            logger.error(f"Failed to import haive.tools: {e2}")
+            logger.exception(f"Failed to import haive.tools: {e2}")
 
             # Try to discover by scanning the package structure
-            import importlib
-            import pkgutil
 
             # Scan tools directory
             try:
                 tools_path = haive.tools.tools.__path__
-                for importer, modname, ispkg in pkgutil.iter_modules(tools_path):
+                for _importer, modname, ispkg in pkgutil.iter_modules(tools_path):
                     if not ispkg and not modname.startswith("_"):
                         try:
                             module = importlib.import_module(
@@ -197,7 +200,7 @@ def discover_tools() -> List[ToolInfo]:
             # Scan toolkits directory
             try:
                 toolkits_path = haive.tools.toolkits.__path__
-                for importer, modname, ispkg in pkgutil.iter_modules(toolkits_path):
+                for _importer, modname, ispkg in pkgutil.iter_modules(toolkits_path):
                     if not modname.startswith("_"):
                         try:
                             module = importlib.import_module(
@@ -228,10 +231,10 @@ def discover_tools() -> List[ToolInfo]:
                 logger.warning(f"Failed to scan toolkits directory: {e}")
 
         except Exception as e:
-            logger.error(f"Failed to scan package structure: {e}")
+            logger.exception(f"Failed to scan package structure: {e}")
 
     except ImportError as e:
-        logger.error(f"Failed to import haive.tools: {e}")
+        logger.exception(f"Failed to import haive.tools: {e}")
         # Return some hardcoded tools as fallback
         tools = [
             ToolInfo(
@@ -296,7 +299,7 @@ def discover_tools() -> List[ToolInfo]:
     return unique_tools
 
 
-def simple_discover_tools() -> List[ToolInfo]:
+def simple_discover_tools() -> list[ToolInfo]:
     """Simple tool discovery that always works."""
     tools = [
         ToolInfo(
@@ -317,17 +320,13 @@ def simple_discover_tools() -> List[ToolInfo]:
 
     # Try to add real tools
     try:
-        import importlib
-        import pkgutil
 
-        import haive.tools.tools
-
-        for importer, modname, ispkg in pkgutil.iter_modules(
+        for _importer, modname, ispkg in pkgutil.iter_modules(
             haive.tools.tools.__path__
         ):
             if not ispkg and not modname.startswith("_") and modname != "__init__":
                 try:
-                    module = importlib.import_module(f"haive.tools.tools.{modname}")
+                    importlib.import_module(f"haive.tools.tools.{modname}")
                     tools.append(
                         ToolInfo(
                             name=modname,
@@ -337,9 +336,9 @@ def simple_discover_tools() -> List[ToolInfo]:
                             category="tool",
                         )
                     )
-                except:
+                except BaseException:
                     pass
-    except:
+    except BaseException:
         pass
 
     return tools
@@ -357,13 +356,13 @@ async def list_tools() -> ToolsListResponse:
         logger.info(f"Returning {len(tools)} tools: {[t.name for t in tools]}")
         return ToolsListResponse(tools=tools, count=len(tools))
     except Exception as e:
-        logger.error(f"Failed to list tools: {e}")
+        logger.exception(f"Failed to list tools: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/search", response_model=ToolsListResponse)
 async def search_tools(
-    query: str = None, category: str = None, tool_type: str = None
+    query: str | None = None, category: str | None = None, tool_type: str | None = None
 ) -> ToolsListResponse:
     """Search for tools by query, category, or type.
 
@@ -398,14 +397,13 @@ async def search_tools(
 
         return ToolsListResponse(tools=tools, count=len(tools))
     except Exception as e:
-        logger.error(f"Failed to search tools: {e}")
+        logger.exception(f"Failed to search tools: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def get_tool_schema(tool_module_path: str) -> Dict[str, Any]:
+def get_tool_schema(tool_module_path: str) -> dict[str, Any]:
     """Extract input schema from a tool module."""
     try:
-        import importlib
 
         module = importlib.import_module(tool_module_path)
 
@@ -425,16 +423,14 @@ def get_tool_schema(tool_module_path: str) -> Dict[str, Any]:
                 if inspect.isclass(obj):
                     tool_class = obj
                     break
-                elif inspect.isfunction(obj):
+                if inspect.isfunction(obj):
                     tool_func = obj
                     break
 
         # If not found, look for any Tool/Toolkit class
         if not tool_class and not tool_func:
             for name, obj in inspect.getmembers(module):
-                if inspect.isclass(obj) and (
-                    name.endswith("Tool") or name.endswith("Toolkit")
-                ):
+                if inspect.isclass(obj) and (name.endswith(("Tool", "Toolkit"))):
                     tool_class = obj
                     break
 
@@ -472,7 +468,7 @@ def get_tool_schema(tool_module_path: str) -> Dict[str, Any]:
             # LangChain tool with args_schema
             schema = tool_class.args_schema.schema()
             return schema
-        elif hasattr(tool_class, "__init__"):
+        if hasattr(tool_class, "__init__"):
             # Extract from __init__ parameters
             sig = inspect.signature(tool_class.__init__)
             params = {}
@@ -497,14 +493,13 @@ def get_tool_schema(tool_module_path: str) -> Dict[str, Any]:
         return {"type": "unknown", "message": "Could not extract schema"}
 
     except Exception as e:
-        logger.error(f"Failed to get schema for {tool_module_path}: {e}")
+        logger.exception(f"Failed to get schema for {tool_module_path}: {e}")
         return {"error": str(e)}
 
 
-async def invoke_tool(tool_module_path: str, arguments: Dict[str, Any]) -> Any:
+async def invoke_tool(tool_module_path: str, arguments: dict[str, Any]) -> Any:
     """Invoke a tool with given arguments."""
     try:
-        import importlib
 
         module = importlib.import_module(tool_module_path)
 
@@ -513,9 +508,7 @@ async def invoke_tool(tool_module_path: str, arguments: Dict[str, Any]) -> Any:
 
         # First, try to find a tool class
         for name, obj in inspect.getmembers(module):
-            if inspect.isclass(obj) and (
-                name.endswith("Tool") or name.endswith("Toolkit")
-            ):
+            if inspect.isclass(obj) and (name.endswith(("Tool", "Toolkit"))):
                 # Instantiate the tool
                 try:
                     tool_instance = obj(**arguments.get("init_args", {}))
@@ -524,8 +517,8 @@ async def invoke_tool(tool_module_path: str, arguments: Dict[str, Any]) -> Any:
                     if hasattr(tool_instance, "invoke") or hasattr(
                         tool_instance, "run"
                     ):
-                        method = getattr(tool_instance, "invoke", None) or getattr(
-                            tool_instance, "run"
+                        method = (
+                            getattr(tool_instance, "invoke", None) or tool_instance.run
                         )
                         result = (
                             await method(**arguments.get("run_args", arguments))
@@ -533,10 +526,9 @@ async def invoke_tool(tool_module_path: str, arguments: Dict[str, Any]) -> Any:
                             else method(**arguments.get("run_args", arguments))
                         )
                         return result
-                    else:
-                        return {"error": "Tool does not have invoke or run method"}
+                    return {"error": "Tool does not have invoke or run method"}
                 except Exception as e:
-                    logger.error(f"Failed to instantiate tool: {e}")
+                    logger.exception(f"Failed to instantiate tool: {e}")
                     # Try next tool class
                     continue
 
@@ -555,7 +547,7 @@ async def invoke_tool(tool_module_path: str, arguments: Dict[str, Any]) -> Any:
         return {"error": "No callable tool found in module"}
 
     except Exception as e:
-        logger.error(f"Failed to invoke tool {tool_module_path}: {e}")
+        logger.exception(f"Failed to invoke tool {tool_module_path}: {e}")
         raise
 
 
@@ -589,21 +581,16 @@ async def get_tool_schema_endpoint(tool_name: str) -> ToolSchema:
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get tool schema: {e}")
+        logger.exception(f"Failed to get tool schema: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 def get_tool_schema_for_name(
     tool_module_path: str, target_tool_name: str
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Extract input schema for a specific tool by name."""
     try:
         # Try using the enhanced analyzer from haive discovery
-        import importlib
-
-        from haive.core.utils.haive_discovery.enhanced_tool_discovery import (
-            EnhancedToolAnalyzer,
-        )
 
         module = importlib.import_module(tool_module_path)
 
@@ -612,10 +599,10 @@ def get_tool_schema_for_name(
 
         # Check for exact name match (function or class)
         for name, obj in inspect.getmembers(module):
-            if name.lower() == target_tool_name.lower():
-                tool_obj = obj
-                break
-            elif name.lower() == f"{target_tool_name.lower()}tool":
+            if (
+                name.lower() == target_tool_name.lower()
+                or name.lower() == f"{target_tool_name.lower()}tool"
+            ):
                 tool_obj = obj
                 break
 
@@ -646,8 +633,7 @@ def get_tool_schema_for_name(
                         "required": required,
                         "description": schema_info.get("description", ""),
                     }
-                else:
-                    return schema_info
+                return schema_info
 
             except ImportError:
                 # Fall back to manual extraction
@@ -678,43 +664,41 @@ def get_tool_schema_for_name(
                     "parameters": params,
                     "description": tool_obj.__doc__ or "No description",
                 }
-            elif inspect.isclass(tool_obj):
+            if inspect.isclass(tool_obj):
                 # Class-based tool
                 if hasattr(tool_obj, "args_schema"):
                     schema = tool_obj.args_schema.schema()
                     return schema
-                else:
-                    # Extract from __init__ or run method
-                    method = getattr(tool_obj, "run", None) or getattr(
-                        tool_obj, "__init__", None
-                    )
-                    if method:
-                        sig = inspect.signature(method)
-                        params = {}
-                        for param_name, param in sig.parameters.items():
-                            if param_name not in ["self", "args", "kwargs"]:
-                                param_type = (
-                                    str(param.annotation)
-                                    if param.annotation != inspect.Parameter.empty
-                                    else "Any"
-                                )
-                                params[param_name] = {
-                                    "type": param_type,
-                                    "required": param.default
-                                    == inspect.Parameter.empty,
-                                    "default": (
-                                        param.default
-                                        if param.default != inspect.Parameter.empty
-                                        else None
-                                    ),
-                                }
-                        return {"type": "class", "parameters": params}
+                # Extract from __init__ or run method
+                method = getattr(tool_obj, "run", None) or getattr(
+                    tool_obj, "__init__", None
+                )
+                if method:
+                    sig = inspect.signature(method)
+                    params = {}
+                    for param_name, param in sig.parameters.items():
+                        if param_name not in ["self", "args", "kwargs"]:
+                            param_type = (
+                                str(param.annotation)
+                                if param.annotation != inspect.Parameter.empty
+                                else "Any"
+                            )
+                            params[param_name] = {
+                                "type": param_type,
+                                "required": param.default == inspect.Parameter.empty,
+                                "default": (
+                                    param.default
+                                    if param.default != inspect.Parameter.empty
+                                    else None
+                                ),
+                            }
+                    return {"type": "class", "parameters": params}
 
         # Fallback to original logic
         return get_tool_schema(tool_module_path)
 
     except Exception as e:
-        logger.error(f"Failed to get schema for {target_tool_name}: {e}")
+        logger.exception(f"Failed to get schema for {target_tool_name}: {e}")
         return {"error": str(e)}
 
 
@@ -743,12 +727,12 @@ async def invoke_tool_endpoint(request: ToolInvokeRequest) -> ToolInvokeResponse
         return ToolInvokeResponse(success=True, result=result)
 
     except Exception as e:
-        logger.error(f"Failed to invoke tool: {e}")
+        logger.exception(f"Failed to invoke tool: {e}")
         return ToolInvokeResponse(success=False, error=str(e))
 
 
 @router.get("/{tool_name}")
-async def get_tool_details(tool_name: str) -> Dict[str, Any]:
+async def get_tool_details(tool_name: str) -> dict[str, Any]:
     """Get detailed information about a specific tool.
 
     Args:
@@ -768,7 +752,6 @@ async def get_tool_details(tool_name: str) -> Dict[str, Any]:
         details = tool.dict()
 
         try:
-            import importlib
 
             module = importlib.import_module(tool.module)
 
@@ -791,5 +774,5 @@ async def get_tool_details(tool_name: str) -> Dict[str, Any]:
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get tool details: {e}")
+        logger.exception(f"Failed to get tool details: {e}")
         raise HTTPException(status_code=500, detail=str(e))
