@@ -6,12 +6,12 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+from haive.core.engine.aug_llm import AugLLMConfig
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.tools import Tool
 from pydantic import BaseModel, ConfigDict, Field
 
-from .engine.aug_llm import AugLLMConfig
 from .models.llm.base import (
     AnthropicLLMConfig,
     AzureLLMConfig,
