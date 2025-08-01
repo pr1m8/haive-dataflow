@@ -1,4 +1,4 @@
-from .db.supabase import (
+from haive.dataflow.db.db.supabase import (
     fetch_all_schemas_and_tables,
     fetch_foreign_key_relations,
     fetch_primary_keys,
