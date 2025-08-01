@@ -30,7 +30,7 @@ Typical usage example:
     >>>     print(f"Tool: {tool.name} - {tool.description}")
 """
 
-from haive.dataflow.registry.core import registry_system
+from haive.dataflow.registry.core import get_registry_system, registry_system
 from haive.dataflow.registry.discovery import (
     discover_agents,
     discover_all,
@@ -39,7 +39,7 @@ from haive.dataflow.registry.discovery import (
     discover_toolkits,
     discover_tools,
 )
-from haive.dataflow.registry.models import (
+from haive.dataflow.registry.models import (  # MCP models
     ConfigType,
     Configuration,
     Dependency,
@@ -49,6 +49,12 @@ from haive.dataflow.registry.models import (
     GraphDefinition,
     ImportLogItem,
     ImportStatus,
+    MCPPromptDefinition,
+    MCPResourceDefinition,
+    MCPServerConfig,
+    MCPServerHealth,
+    MCPToolDefinition,
+    MCPTransport,
     RegistryItem,
 )
 from haive.dataflow.registry.serialization import (
@@ -74,6 +80,13 @@ __all__ = [
     "GraphDefinition",
     "ImportLogItem",
     "ImportStatus",
+    # MCP models
+    "MCPPromptDefinition",
+    "MCPResourceDefinition",
+    "MCPServerConfig",
+    "MCPServerHealth",
+    "MCPToolDefinition",
+    "MCPTransport",
     "RegistryItem",
     "SerializationRegistry",
     "deserialize_object",
@@ -85,6 +98,7 @@ __all__ = [
     "discover_toolkits",
     "discover_tools",
     # Core registry system
+    "get_registry_system",
     "registry_system",
     # Serialization
     "serialize_object",

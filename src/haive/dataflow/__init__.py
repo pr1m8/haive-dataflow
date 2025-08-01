@@ -42,91 +42,83 @@ This package consists of several modules:
     providers: Provider implementations for various services
 """
 
-# Use lazy loading for the registry system
-# Lazy import to prevent heavy initialization
+import lazy_loader as lazy
 
-from haive.dataflow.registry.core import get_registry_system
-from haive.dataflow.registry.discovery import (
-    discover_agents,
-    discover_all,
-    discover_engines,
-    discover_games,
-    discover_toolkits,
-    discover_tools,
-)
-from haive.dataflow.registry.models import (  # MCP Models
-    ConfigType,
-    Configuration,
-    Dependency,
-    DependencyType,
-    EntityType,
-    EnvironmentVar,
-    GraphDefinition,
-    ImportLogItem,
-    ImportStatus,
-    MCPPromptDefinition,
-    MCPResourceDefinition,
-    MCPServerConfig,
-    MCPServerHealth,
-    MCPToolDefinition,
-    MCPTransport,
-    RegistryItem,
-)
-from haive.dataflow.registry.serialization import (
-    SerializationRegistry,
-    deserialize_object,
-    serialize_object,
+# Define submodules to lazy load
+submodules = [
+    "registry",  # Core registry system
+    "mcp",  # MCP integration
+    "models",  # Data models
+    "api",  # API endpoints
+    "auth",  # Authentication
+    "db",  # Database layer
+    "persistence",  # Persistence layer
+    "providers",  # Provider implementations
+    "core",  # Core functionality
+    "utils",  # Utilities
+]
+
+# Define specific attributes from submodules to expose
+submod_attrs = {
+    "registry": [
+        "get_registry_system",
+        "discover_agents",
+        "discover_all",
+        "discover_engines",
+        "discover_games",
+        "discover_toolkits",
+        "discover_tools",
+        "EntityType",
+        "RegistryItem",
+        "serialize_object",
+        "deserialize_object",
+        # MCP models are defined in registry.models
+        "MCPServerConfig",
+        "MCPToolDefinition",
+        "MCPPromptDefinition",
+        "MCPResourceDefinition",
+        "MCPTransport",
+        "MCPServerHealth",
+    ],
+    "mcp": [],  # MCP client functionality loaded on demand
+    "models": [
+        "ConfigType",
+        "Configuration",
+        "Dependency",
+        "DependencyType",
+        "EnvironmentVar",
+        "GraphDefinition",
+        "ImportLogItem",
+        "ImportStatus",
+    ],
+    # Heavy modules are fully lazy loaded
+    "api": [],  # API endpoints loaded on demand
+    "db": [],  # Database connections loaded on demand
+    "auth": [],  # Auth system loaded on demand
+    "persistence": [],  # Persistence layer loaded on demand
+    "providers": [],  # Provider implementations loaded on demand
+    "core": [],  # Core functionality loaded on demand
+    "utils": [],  # Utility functions loaded on demand
+}
+
+# Attach lazy loading - this creates __getattr__, __dir__, and __all__
+__getattr__, __dir__, __all__ = lazy.attach(
+    __name__, submodules=submodules, submod_attrs=submod_attrs
 )
 
 
-# For backwards compatibility
+# Backwards compatibility - lazy registry access
 class LazyRegistryAccess:
     def __getattr__(self, name):
+        from .registry import get_registry_system
+
         registry = get_registry_system()
         return getattr(registry, name)
-
-    def __call__(self, *args, **kwargs):
-        registry = get_registry_system()
-        return registry(*args, **kwargs)
 
 
 registry_system = LazyRegistryAccess()
 
-# Import discovery functions (these should also be lazy)
+# Add eager imports to __all__
+__all__ += ["registry_system"]
 
-# Import serialization utilities
-
-# Export for convenient imports
-__all__ = [
-    "ConfigType",
-    "Configuration",
-    "Dependency",
-    "DependencyType",
-    # Models
-    "EntityType",
-    "EnvironmentVar",
-    "GraphDefinition",
-    "ImportLogItem",
-    "ImportStatus",
-    "MCPPromptDefinition",
-    "MCPResourceDefinition",
-    "MCPServerConfig",
-    "MCPServerHealth",
-    "MCPToolDefinition",
-    # MCP Models
-    "MCPTransport",
-    "RegistryItem",
-    "SerializationRegistry",
-    "deserialize_object",
-    "discover_agents",
-    # Discovery
-    "discover_all",
-    "discover_engines",
-    "discover_games",
-    "discover_toolkits",
-    "discover_tools",
-    # Core registry system
-    "registry_system",
-    # Serialization
-    "serialize_object",
-]
+# Note: Heavy database, API, and persistence modules are lazy loaded for performance

@@ -22,7 +22,7 @@ import json
 import logging
 from pathlib import Path
 
-from haive.dataflow.mcp.registry.models import (
+from haive.dataflow.registry.models import (
     EntityType,
     MCPPromptDefinition,
     MCPResourceDefinition,

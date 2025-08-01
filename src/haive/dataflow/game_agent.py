@@ -11,8 +11,12 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from .engine.agent.persistence.memory_config import MemoryCheckpointerConfig
-from .engine.agent.persistence.postgres_config import PostgresCheckpointerConfig
+from haive.dataflow.engine.agent.persistence.memory_config import (
+    MemoryCheckpointerConfig,
+)
+from haive.dataflow.engine.agent.persistence.postgres_config import (
+    PostgresCheckpointerConfig,
+)
 
 # Import persistence components
 

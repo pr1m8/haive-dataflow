@@ -15,7 +15,7 @@ from haive_games.connect4.config import Connect4AgentConfig
 from haive_games.connect4.state import Connect4State
 from pydantic import BaseModel, Field
 
-from .api.game_agent import AgentResponseBase, GenericAgentAPI
+from haive.dataflow.api.game_agent import AgentResponseBase, GenericAgentAPI
 
 # Import Connect4 components
 

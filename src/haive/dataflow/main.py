@@ -10,8 +10,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from .api.app import app
-from .config.settings import get_settings
+from haive.dataflow.api.app import app
+from haive.dataflow.config.settings import get_settings
 
 # Load environment variables from .env file
 load_dotenv()

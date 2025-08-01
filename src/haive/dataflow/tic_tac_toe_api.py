@@ -13,7 +13,7 @@ from haive_games.tic_tac_toe.state import TicTacToeState
 from haive_games.tic_tac_toe.state_manager import TicTacToeStateManager
 from pydantic import BaseModel, Field
 
-from .api.game_agent import AgentResponseBase, GenericAgentAPI
+from haive.dataflow.api.game_agent import AgentResponseBase, GenericAgentAPI
 
 # Logging
 logging.basicConfig(level=logging.INFO)

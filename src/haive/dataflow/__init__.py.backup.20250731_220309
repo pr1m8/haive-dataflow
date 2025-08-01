@@ -42,8 +42,10 @@ This package consists of several modules:
     providers: Provider implementations for various services
 """
 
-# Import discovery functions (these should also be lazy)
+# Use lazy loading for the registry system
+# Lazy import to prevent heavy initialization
 
+from haive.dataflow.registry.core import get_registry_system
 from haive.dataflow.registry.discovery import (
     discover_agents,
     discover_all,
@@ -52,7 +54,6 @@ from haive.dataflow.registry.discovery import (
     discover_toolkits,
     discover_tools,
 )
-from haive.dataflow.registry.lazy_core import registry_system
 from haive.dataflow.registry.models import (  # MCP Models
     ConfigType,
     Configuration,
@@ -77,10 +78,23 @@ from haive.dataflow.registry.serialization import (
     serialize_object,
 )
 
-# Use lazy loading for the registry system
+
+# For backwards compatibility
+class LazyRegistryAccess:
+    def __getattr__(self, name):
+        registry = get_registry_system()
+        return getattr(registry, name)
+
+    def __call__(self, *args, **kwargs):
+        registry = get_registry_system()
+        return registry(*args, **kwargs)
+
+
+registry_system = LazyRegistryAccess()
+
+# Import discovery functions (these should also be lazy)
 
 # Import serialization utilities
-
 
 # Export for convenient imports
 __all__ = [

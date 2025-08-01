@@ -13,7 +13,7 @@ import contextlib
 import logging
 from datetime import datetime
 
-from haive.dataflow.mcp.registry.models import MCPServerConfig, MCPServerHealth
+from haive.dataflow.registry.models import MCPServerConfig, MCPServerHealth
 
 logger = logging.getLogger(__name__)
 

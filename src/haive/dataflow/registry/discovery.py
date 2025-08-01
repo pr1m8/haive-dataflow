@@ -50,10 +50,10 @@ from typing import Any
 from pydantic import BaseModel
 
 from haive.dataflow.mcp.discovery import discover_mcp_servers as mcp_discover
-from haive.dataflow.registry.registry.core import (
+from haive.dataflow.registry.core import (
     registry_system,  # Import the singleton instance
 )
-from haive.dataflow.registry.registry.models import ConfigType, EntityType, ImportStatus
+from haive.dataflow.registry.models import ConfigType, EntityType, ImportStatus
 
 # Import registry models and utilities
 
