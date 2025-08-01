@@ -55,8 +55,7 @@ from typing import Any
 from haive.core.persistence.postgres_config import PostgresCheckpointerConfig
 
 from haive.dataflow.config.environment import get_supabase_server_config
-
-from .persistence.factory import (
+from haive.dataflow.persistence.persistence.factory import (
     acreate_postgres_checkpointer,
     aget_postgres_checkpoint,
     aput_postgres_checkpoint,

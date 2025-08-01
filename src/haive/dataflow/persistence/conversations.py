@@ -48,8 +48,8 @@ from typing import Any
 from pydantic import BaseModel
 from supabase import create_client
 
-from .config.environment import get_supabase_server_config
-from .persistence.supabase_adapter import SupabasePersistence
+from haive.dataflow.persistence.config.environment import get_supabase_server_config
+from haive.dataflow.persistence.persistence.supabase_adapter import SupabasePersistence
 
 logger = logging.getLogger(__name__)
 
