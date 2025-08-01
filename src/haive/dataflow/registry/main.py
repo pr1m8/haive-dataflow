@@ -2,9 +2,9 @@
 
 import uuid
 
-from .registry.core import registry_system
-from .registry.models import EntityType
-from .registry.providers.agent_provider import agent_provider
+from haive.dataflow.registry.registry.core import registry_system
+from haive.dataflow.registry.registry.models import EntityType
+from haive.dataflow.registry.registry.providers.agent_provider import agent_provider
 
 # Generate a session ID for tracking imports
 session_id = str(uuid.uuid4())

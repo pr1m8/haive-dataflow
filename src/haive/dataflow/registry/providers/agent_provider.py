@@ -11,9 +11,8 @@ from datetime import datetime
 
 from haive.dataflow.core import registry_system
 from haive.dataflow.models import ConfigType, DependencyType, EntityType, ImportStatus
-
-from .providers.base import EntityProvider
-from .utils.logging import setup_discovery_logger
+from haive.dataflow.registry.providers.providers.base import EntityProvider
+from haive.dataflow.registry.providers.utils.logging import setup_discovery_logger
 
 # Import models
 

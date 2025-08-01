@@ -12,8 +12,7 @@ import logging
 from typing import Any
 
 from haive.dataflow.db.supabase import get_supabase_client
-
-from .registry.models import EntityType
+from haive.dataflow.registry.registry.models import EntityType
 
 logger = logging.getLogger(__name__)
 

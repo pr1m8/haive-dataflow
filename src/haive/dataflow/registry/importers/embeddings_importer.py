@@ -11,9 +11,13 @@ import uuid
 from datetime import datetime
 
 from haive.dataflow.registry.db.supabase import table
-
-from .registry.core import DependencyType, EntityType, ImportStatus, registry_system
-from .registry.serialization import serialize_object
+from haive.dataflow.registry.importers.registry.core import (
+    DependencyType,
+    EntityType,
+    ImportStatus,
+    registry_system,
+)
+from haive.dataflow.registry.importers.registry.serialization import serialize_object
 
 # Import registry models and utilities
 

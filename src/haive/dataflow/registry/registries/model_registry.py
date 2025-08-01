@@ -13,7 +13,7 @@ import re
 import traceback
 from typing import Any
 
-from .db.supabase import get_supabase_client, table
+from haive.dataflow.registry.registries.db.supabase import get_supabase_client, table
 
 # Import LLM core models for environment variable inspection
 try:
