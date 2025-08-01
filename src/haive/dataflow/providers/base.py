@@ -15,8 +15,7 @@ from pydantic import BaseModel
 
 from haive.dataflow.core import registry_system
 from haive.dataflow.models import ConfigType, DependencyType, EntityType, ImportStatus
-
-from .utils.logging import setup_discovery_logger
+from haive.dataflow.providers.utils.logging import setup_discovery_logger
 
 # Import models
 
