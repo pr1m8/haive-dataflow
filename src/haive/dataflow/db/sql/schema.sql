@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS components.llm_models (
   provider TEXT NOT NULL, -- 'azure', 'anthropic', 'openai', etc.
   model_name TEXT NOT NULL,
   description TEXT,
-  config_data JSONB NOT NULL, 
+  config_data JSONB NOT NULL,
   is_default BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
