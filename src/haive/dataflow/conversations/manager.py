@@ -9,14 +9,15 @@ from pydantic import BaseModel
 from supabase import create_client
 
 from haive.dataflow.config import SupabaseServerConfig
-
-from .persistence.factory import (
+from haive.dataflow.conversations.persistence.factory import (
     acreate_postgres_checkpointer,
     aget_postgres_checkpoint,
     aput_postgres_checkpoint,
     aregister_postgres_thread,
 )
-from .persistence.postgres_config import PostgresCheckpointerConfig
+from haive.dataflow.conversations.persistence.postgres_config import (
+    PostgresCheckpointerConfig,
+)
 
 logger = logging.getLogger(__name__)
 
