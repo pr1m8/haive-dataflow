@@ -22,7 +22,7 @@ from typing import Any
 
 from langchain_mcp_adapters.client import MultiServerMCPClient, load_mcp_tools
 
-from .registry.models import (
+from haive.dataflow.mcp.registry.models import (
     EntityType,
     MCPServerConfig,
     MCPServerHealth,
