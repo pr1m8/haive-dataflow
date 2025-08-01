@@ -9,13 +9,16 @@ from typing import Any
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from langchain_core.messages import HumanMessage
 
+from haive.dataflow.internal_websockets.auth.credits import CreditsManager, UsageRecord
+from haive.dataflow.internal_websockets.config.settings import get_settings
+from haive.dataflow.internal_websockets.internal_websockets.manager import (
+    ConnectionManager,
+)
+from haive.dataflow.internal_websockets.persistence.conversations import (
+    ConversationManager,
+)
 from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
 from haive.dataflow.registry import AgentRegistry
-
-from .auth.credits import CreditsManager, UsageRecord
-from .config.settings import get_settings
-from .internal_websockets.manager import ConnectionManager
-from .persistence.conversations import ConversationManager
 
 # Try importing from your registry
 try:

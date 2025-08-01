@@ -5,8 +5,10 @@ from uuid import uuid4
 
 from fastapi import WebSocket
 
-from .auth.supabase import SupabaseAuth
-from .config.environment import get_supabase_server_config
+from haive.dataflow.internal_websockets.auth.supabase import SupabaseAuth
+from haive.dataflow.internal_websockets.config.environment import (
+    get_supabase_server_config,
+)
 
 logger = logging.getLogger(__name__)
 
