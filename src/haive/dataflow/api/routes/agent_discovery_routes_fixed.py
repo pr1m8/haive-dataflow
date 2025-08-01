@@ -12,7 +12,10 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from .utils.haive_discovery import ComponentInfo, HaiveComponentDiscovery
+from haive.dataflow.api.routes.utils.haive_discovery import (
+    ComponentInfo,
+    HaiveComponentDiscovery,
+)
 
 # Import discovery system
 

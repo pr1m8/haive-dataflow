@@ -5,8 +5,8 @@ import logging
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
-from .auth.supabase import SupabaseAuth
-from .config.environment import get_supabase_server_config
+from haive.dataflow.api.middleware.auth.supabase import SupabaseAuth
+from haive.dataflow.api.middleware.config.environment import get_supabase_server_config
 
 logger = logging.getLogger(__name__)
 

@@ -49,7 +49,10 @@ from fastapi import APIRouter, FastAPI, HTTPException, WebSocket, WebSocketDisco
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
-from .utils.haive_discovery import ComponentInfo, HaiveComponentDiscovery
+from haive.dataflow.api.utils.haive_discovery import (
+    ComponentInfo,
+    HaiveComponentDiscovery,
+)
 
 # Import discovery system
 

@@ -40,7 +40,10 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from .utils.haive_discovery import ComponentInfo, discover_tools_with_schemas
+from haive.dataflow.api.routes.utils.haive_discovery import (
+    ComponentInfo,
+    discover_tools_with_schemas,
+)
 
 # Import discovery system
 

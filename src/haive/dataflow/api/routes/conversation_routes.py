@@ -55,16 +55,15 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from haive.core.registry import AgentRegistry
 from langchain_core.messages import HumanMessage
 
+from haive.dataflow.api.routes.auth.credits import CreditsManager, UsageRecord
+from haive.dataflow.api.routes.auth.dependencies import require_auth
+from haive.dataflow.api.routes.config.settings import get_settings
+from haive.dataflow.api.routes.persistence.conversations import ConversationManager
 from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
-
-from .auth.credits import CreditsManager, UsageRecord
-from .auth.dependencies import require_auth
-from .config.settings import get_settings
-from .persistence.conversations import ConversationManager
 
 # Try importing from your registry
 try:
-    from ...registry import AgentRegistry
+    from haive.dataflow.registry import AgentRegistry
 except ImportError:
     # Mock registry for testing
     class AgentRegistry:

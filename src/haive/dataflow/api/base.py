@@ -12,7 +12,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.tools import Tool
 from pydantic import BaseModel, ConfigDict, Field
 
-from .models.llm.base import (
+from haive.dataflow.api.models.llm.base import (
     AnthropicLLMConfig,
     AzureLLMConfig,
     DeepSeekLLMConfig,
@@ -20,7 +20,7 @@ from .models.llm.base import (
     MistralLLMConfig,
     OpenAILLMConfig,
 )
-from .models.llm.provider_types import LLMProvider
+from haive.dataflow.api.models.llm.provider_types import LLMProvider
 
 # Load environment variables
 load_dotenv(".env")

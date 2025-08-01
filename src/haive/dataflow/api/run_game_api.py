@@ -18,7 +18,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from .api.game_router import discover_game_agents, game_agents, get_router
+from haive.dataflow.api.api.game_router import (
+    discover_game_agents,
+    game_agents,
+    get_router,
+)
 
 # Configure logging
 logging.basicConfig(

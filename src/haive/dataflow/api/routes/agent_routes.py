@@ -78,13 +78,11 @@ from fastapi.websockets import WebSocketState
 from haive.core.engine.agent.agent import AGENT_REGISTRY
 from pydantic import BaseModel, Field
 
-from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
-
-from .auth.dependencies import require_auth
-from .auth.supabase import SupabaseAuth
-from .engine.agent.config import AgentConfig
-from .engine.aug_llm import AugLLMConfig
-from .models.llm.base import (
+from haive.dataflow.api.routes.auth.dependencies import require_auth
+from haive.dataflow.api.routes.auth.supabase import SupabaseAuth
+from haive.dataflow.api.routes.engine.agent.config import AgentConfig
+from haive.dataflow.api.routes.engine.aug_llm import AugLLMConfig
+from haive.dataflow.api.routes.models.llm.base import (
     AnthropicLLMConfig,
     AzureLLMConfig,
     DeepSeekLLMConfig,
@@ -92,7 +90,8 @@ from .models.llm.base import (
     MistralLLMConfig,
     OpenAILLMConfig,
 )
-from .models.llm.provider_types import LLMProvider
+from haive.dataflow.api.routes.models.llm.provider_types import LLMProvider
+from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
 
 # Authentication imports
 

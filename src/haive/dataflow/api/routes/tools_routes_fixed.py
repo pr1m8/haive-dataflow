@@ -13,7 +13,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from .utils.haive_discovery import (
+from haive.dataflow.api.routes.utils.haive_discovery import (
     ComponentInfo,
     HaiveComponentDiscovery,
     create_tool_from_component,

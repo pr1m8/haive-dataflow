@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from .api.connect4_api import connect4_api
-from .api.tic_tac_toe_api import tictactoe_api
+from haive.dataflow.api.api.connect4_api import connect4_api
+from haive.dataflow.api.api.tic_tac_toe_api import tictactoe_api
 
 # from db.api.chess_api import chess_api  # Add more as needed
 

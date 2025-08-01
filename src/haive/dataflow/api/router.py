@@ -10,7 +10,7 @@ from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from langchain_core.messages import HumanMessage
 
-from .api.registry import agent_registry
+from haive.dataflow.api.api.registry import agent_registry
 
 logger = logging.getLogger(__name__)
 

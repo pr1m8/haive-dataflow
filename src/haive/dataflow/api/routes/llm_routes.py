@@ -53,9 +53,9 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.tools import Tool
 from pydantic import BaseModel, ConfigDict, Field
 
-from .auth.middleware import require_auth
-from .engine.aug_llm import AugLLMConfig
-from .models.llm.base import (
+from haive.dataflow.api.routes.auth.middleware import require_auth
+from haive.dataflow.api.routes.engine.aug_llm import AugLLMConfig
+from haive.dataflow.api.routes.models.llm.base import (
     AnthropicLLMConfig,
     AzureLLMConfig,
     DeepSeekLLMConfig,
@@ -63,7 +63,7 @@ from .models.llm.base import (
     MistralLLMConfig,
     OpenAILLMConfig,
 )
-from .models.llm.provider_types import LLMProvider
+from haive.dataflow.api.routes.models.llm.provider_types import LLMProvider
 
 logger = logging.getLogger(__name__)
 

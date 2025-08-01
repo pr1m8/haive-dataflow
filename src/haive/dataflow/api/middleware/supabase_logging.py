@@ -13,7 +13,7 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from supabase import create_client
 
-from .config.environment import get_supabase_server_config
+from haive.dataflow.api.middleware.config.environment import get_supabase_server_config
 
 # Import Supabase client
 
