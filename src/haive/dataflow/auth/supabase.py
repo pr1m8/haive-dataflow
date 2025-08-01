@@ -10,7 +10,7 @@ import jwt
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from .config.environment import SupabaseServerConfig
+from haive.dataflow.auth.config.environment import SupabaseServerConfig
 
 logger = logging.getLogger(__name__)
 security = HTTPBearer(auto_error=False)

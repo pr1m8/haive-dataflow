@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException, Request, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
-from .auth.supabase import SupabaseAuth
+from haive.dataflow.auth.auth.supabase import SupabaseAuth
 
 logger = logging.getLogger(__name__)
 security = HTTPBearer(auto_error=False)

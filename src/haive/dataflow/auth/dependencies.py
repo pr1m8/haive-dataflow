@@ -32,8 +32,8 @@ Typical usage example:
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from .auth.supabase import SupabaseAuth
-from .config.environment import get_supabase_server_config
+from haive.dataflow.auth.auth.supabase import SupabaseAuth
+from haive.dataflow.auth.config.environment import get_supabase_server_config
 
 # Security scheme for auth header
 security = HTTPBearer(auto_error=False)
