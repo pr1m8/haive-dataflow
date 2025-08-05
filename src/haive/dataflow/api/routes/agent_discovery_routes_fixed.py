@@ -178,9 +178,7 @@ def discover_all_agents(force_refresh: bool = False) -> list[ComponentInfo]:
             ) and component.name not in ["BaseConfig", "AgentConfig"]:
                 agent_components.append(component)
                 logger.info(
-                    f"✅ Found agent config: {
-                        component.name} in {
-                        component.module_path}"
+                    f"✅ Found agent config: {component.name} in {component.module_path}"
                 )
 
         logger.info(f"📊 Total agents discovered: {len(agent_components)}")

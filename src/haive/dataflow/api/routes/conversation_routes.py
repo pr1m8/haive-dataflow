@@ -159,7 +159,6 @@ async def add_message(
 
     # Add user message to state
     if isinstance(state, dict):
-
         if "messages" not in state:
             state["messages"] = []
 

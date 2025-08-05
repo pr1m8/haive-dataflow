@@ -118,7 +118,7 @@ def ensure_vault_reference_column(table_name: str) -> bool:
         SELECT column_name FROM information_schema.columns
         WHERE table_schema = '{schema}' AND table_name = '{table_base}'
         AND column_name = 'vault_secret_id'
-        """
+        """  # nosec B608 - sanitized by sanitize_sql
         check_result = supabase.rpc(
             "execute_sql", {"sql": sanitize_sql(check_sql)}
         ).execute()
@@ -156,8 +156,7 @@ def ensure_vault_reference_column(table_name: str) -> bool:
 
             if hasattr(refs_result, "error") and refs_result.error:
                 logger.error(
-                    f"Failed to add config_vault_refs to engines.engines: {
-                        refs_result.error}"
+                    f"Failed to add config_vault_refs to engines.engines: {refs_result.error}"
                 )
             else:
                 logger.info("Added config_vault_refs column to engines.engines")
@@ -307,12 +306,12 @@ def add_columns(args):
     # Add the helper functions
     try:
         # Create get_vault_secret function
-        secret_func_sql = """
+        secret_func_sql = """  # nosec B105
         CREATE OR REPLACE FUNCTION get_vault_secret(secret_id UUID)
         RETURNS TEXT
         LANGUAGE plpgsql
         SECURITY DEFINER
-        AS $$
+        AS $$  -- nosec B105 - SQL function definition, not a password
         DECLARE
             secret_value TEXT;
         BEGIN

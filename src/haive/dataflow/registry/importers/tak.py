@@ -39,7 +39,6 @@ except ImportError:
 
 # Import Supabase client
 try:
-
     supabase = get_supabase_client()
     logger.info("Successfully imported Supabase client and helpers")
 except ImportError as e:
@@ -527,5 +526,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         pass
     except Exception:
-
         traceback.print_exc()

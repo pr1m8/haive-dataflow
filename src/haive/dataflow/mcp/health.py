@@ -196,9 +196,7 @@ class MCPHealthMonitor:
                     logger.exception(f"Failed to recover server {server_name}: {e}")
 
         logger.info(
-            f"Recovered {
-                len(recovered_servers)} out of {
-                len(failed_servers)} failed servers"
+            f"Recovered {len(recovered_servers)} out of {len(failed_servers)} failed servers"
         )
         return recovered_servers
 

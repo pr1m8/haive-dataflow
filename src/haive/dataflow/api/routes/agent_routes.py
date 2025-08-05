@@ -341,8 +341,9 @@ def get_user_from_token(token: str) -> str | None:
     # Development mode bypass
 
     haive_env = os.getenv("HAIVE_ENV")
+    dev_token = os.getenv("HAIVE_DEV_TOKEN", "")  # nosec B105
     logger.info(f"HAIVE_ENV: {haive_env}, token: {token[:20]}...")
-    if haive_env == "development" and token == "test":
+    if haive_env == "development" and dev_token and token == dev_token:
         logger.warning("Using development bypass for authentication")
         return "test-user"
 
@@ -452,8 +453,7 @@ async def load_agent_config(
                     logger.warning(f"Failed to load agent module: {e}")
 
             logger.info(
-                f"Loaded agent config: {
-                    config_instance.__class__.__name__} for thread {thread_id}"
+                f"Loaded agent config: {config_instance.__class__.__name__} for thread {thread_id}"
             )
             return config_instance
 

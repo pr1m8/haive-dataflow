@@ -467,8 +467,8 @@ async def discover_mcp_servers(registry_system=None) -> list[RegistryItem]:
             name=server.name,
             type=EntityType.MCP_SERVER,
             description=f"MCP server providing {
-                ', '.join(
-                    server.capabilities) if server.capabilities else 'various capabilities'}",
+                ', '.join(server.capabilities) if server.capabilities else 'various capabilities'
+            }",
             module_path="haive.dataflow.mcp.client",
             class_name="MCPServerAdapter",
             config=server.dict(),

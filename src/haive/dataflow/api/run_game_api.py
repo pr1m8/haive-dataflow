@@ -84,10 +84,7 @@ def create_app():
     app.include_router(game_router)
 
     logger.info(
-        f"Discovered and registered routes for {
-            len(game_agents)} games: {
-            list(
-                game_agents.keys())}"
+        f"Discovered and registered routes for {len(game_agents)} games: {list(game_agents.keys())}"
     )
 
     return app
@@ -98,10 +95,12 @@ def main():
     app = create_app()
 
     # Run server
+    host = os.getenv("HAIVE_API_HOST", "127.0.0.1")  # Default to localhost
+    port = int(os.getenv("HAIVE_API_PORT", "8005"))
     uvicorn.run(
         app,
-        host="0.0.0.0",
-        port=8005,
+        host=host,  # nosec B104
+        port=port,
         log_level="info",
     )
 

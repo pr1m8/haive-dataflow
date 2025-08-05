@@ -212,8 +212,7 @@ class ModelRegistry:
                                     "var_name": env_var_name,
                                     "provider_name": provider_name,
                                     "is_required": True,
-                                    "description": f"API key for {
-                                        provider_name.title()} provider",
+                                    "description": f"API key for {provider_name.title()} provider",
                                 }
                             )
                             logger.debug(
@@ -244,8 +243,7 @@ class ModelRegistry:
                                 "var_name": env_var_name,
                                 "provider_name": provider_lower,
                                 "is_required": True,
-                                "description": f"API key for {
-                                    provider.title()} provider",
+                                "description": f"API key for {provider.title()} provider",
                             }
                         )
                         logger.debug(
@@ -278,8 +276,7 @@ class ModelRegistry:
                             "var_name": env_var_name,
                             "provider_name": provider_name,
                             "is_required": True,
-                            "description": f"API key for {
-                                provider_name.title()} provider",
+                            "description": f"API key for {provider_name.title()} provider",
                         }
                     )
                     logger.debug(
@@ -715,7 +712,6 @@ class ModelRegistry:
 
                 # Try the table method as a fallback
                 try:
-
                     response = (
                         table(self._supabase, "models.providers")
                         .select("*")
@@ -769,7 +765,6 @@ class ModelRegistry:
 
                 # Try the table method as a fallback
                 try:
-
                     # Get providers that have embedding models
                     embedding_providers = []
 
@@ -1255,9 +1250,7 @@ class ModelRegistry:
                             "name": cls.__name__.replace("LLMConfig", ""),
                             "display_name": cls.__name__.replace("LLMConfig", ""),
                             "description": cls.__doc__
-                            or f"Configuration for {
-                                cls.__name__.replace(
-                                    'LLMConfig', '')} models",
+                            or f"Configuration for {cls.__name__.replace('LLMConfig', '')} models",
                         }
 
                         return model_data

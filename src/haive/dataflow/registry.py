@@ -36,7 +36,6 @@ class AgentRegistryService:
 
         # Try to load persistence types
         try:
-
             self.default_persistence_type = CheckpointerType.postgres
         except ImportError:
             logger.warning(
@@ -53,7 +52,6 @@ class AgentRegistryService:
         """Set up the database connection and schema."""
         # Get database parameters from environment or config
         try:
-
             db_params = {
                 "dbname": os.getenv("DB_NAME", "postgres"),
                 "user": os.getenv("DB_USER", "postgres"),
@@ -103,8 +101,7 @@ class AgentRegistryService:
             search_paths = ["src.haive.agents", "src.haive.games", "src.haive.tak"]
         start_time = datetime.now()
         logger.info(
-            f"=== Starting agent discovery at {
-                start_time.strftime('%Y-%m-%d %H:%M:%S')} ==="
+            f"=== Starting agent discovery at {start_time.strftime('%Y-%m-%d %H:%M:%S')} ==="
         )
         logger.info(f"Search paths: {search_paths}")
         logger.info(f"Python path: {sys.path}")
@@ -128,7 +125,8 @@ class AgentRegistryService:
                     logger.debug(f"Package directory: {pkg_path}")
                     logger.debug(
                         f"Directory contents: {
-                            os.listdir(pkg_path) if os.path.exists(pkg_path) else 'Not available'}"
+                            os.listdir(pkg_path) if os.path.exists(pkg_path) else 'Not available'
+                        }"
                     )
 
                 for _, name, is_pkg in pkgutil.iter_modules(
@@ -230,8 +228,7 @@ class AgentRegistryService:
                 logger.warning(f"  ✗ {package_name}: {error}")
 
         logger.info(
-            f"=== Agent discovery completed at {
-                end_time.strftime('%Y-%m-%d %H:%M:%S')} ==="
+            f"=== Agent discovery completed at {end_time.strftime('%Y-%m-%d %H:%M:%S')} ==="
         )
 
     def register_agent_config(

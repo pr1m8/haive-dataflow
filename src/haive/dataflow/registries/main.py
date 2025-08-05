@@ -152,8 +152,7 @@ def main():
         # Try to import embedding models data
         try:
             logger.info(
-                f"  ✅ Found {
-                    len(EMBEDDING_MODELS)} embedding models in embeddings_importer"
+                f"  ✅ Found {len(EMBEDDING_MODELS)} embedding models in embeddings_importer"
             )
 
             # Show a sample of embedding models
@@ -236,11 +235,8 @@ def main():
             )
             logger.info(
                 f"  Pricing: {
-                    sample_embed.get(
-                        'pricing',
-                        {}).get(
-                        'input_cost_per_token',
-                        'Unknown')} per token"
+                    sample_embed.get('pricing', {}).get('input_cost_per_token', 'Unknown')
+                } per token"
             )
 
         # Print sample model info for first available LLM model

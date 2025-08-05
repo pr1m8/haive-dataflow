@@ -212,9 +212,9 @@ class SerializationRegistry:
                     return getattr(module, type_data["name"])
                 except Exception as e:
                     logger.warning(
-                        f"Error deserializing function {
-                            type_data['module']}.{
-                            type_data['name']}: {e}"
+                        f"Error deserializing function {type_data['module']}.{type_data['name']}: {
+                            e
+                        }"
                     )
                     return None
 
@@ -227,9 +227,7 @@ class SerializationRegistry:
                     return getattr(module, type_data["name"])
                 except Exception as e:
                     logger.warning(
-                        f"Error deserializing class {
-                            type_data['module']}.{
-                            type_data['name']}: {e}"
+                        f"Error deserializing class {type_data['module']}.{type_data['name']}: {e}"
                     )
                     return None
 

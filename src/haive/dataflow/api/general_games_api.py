@@ -15,11 +15,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
-from haive.core.engine.agent.agent import Agent
-from haive.games.core.config import BaseGameConfig
 from pydantic import BaseModel, Field
-
-from haive.dataflow.api.game_api import GameAPI
 
 logger = logging.getLogger(__name__)
 
@@ -37,10 +33,15 @@ except ImportError:
     GameAPI = None
 
 try:
-    from haive.games.common.config import BaseGameConfig
+    from haive.games.core.config import BaseGameConfig
 except ImportError:
-    logger.warning("Could not import BaseGameConfig - games discovery may be limited")
-    BaseGameConfig = None
+    try:
+        from haive.games.common.config import BaseGameConfig
+    except ImportError:
+        logger.warning(
+            "Could not import BaseGameConfig - games discovery may be limited"
+        )
+        BaseGameConfig = None
 
 
 class GameInfo(BaseModel):
@@ -544,7 +545,6 @@ def create_general_game_api(
 
 # Example usage
 if __name__ == "__main__":
-
     # Create the general API
     app, game_api = create_general_game_api()
 

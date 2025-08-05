@@ -49,7 +49,6 @@ if str(project_root) not in sys.path:
 
 # Try to import rich for better formatting
 try:
-
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False

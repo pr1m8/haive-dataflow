@@ -467,8 +467,7 @@ class MCPServerAdapter:
 
         # Implementation would execute the actual tool
         # For now, return a placeholder
-        return f"Tool {tool_name} executed on server {
-            self.config.name} with parameters: {parameters}"
+        return f"Tool {tool_name} executed on server {self.config.name} with parameters: {parameters}"
 
     async def get_available_tools(self) -> list[str]:
         """Get list of available tools on this server.

@@ -294,8 +294,7 @@ def import_embedding_models() -> bool:
                         var_name=env_var,
                         provider_name=provider,
                         is_required=True,
-                        description=f"API key for {
-                            provider.title()} embedding provider",
+                        description=f"API key for {provider.title()} embedding provider",
                     )
 
                 # Register the provider
@@ -587,8 +586,7 @@ def import_embedding_models() -> bool:
                     )
 
         logger.info(
-            f"Imported {
-                len(provider_ids)} embedding providers and {model_count} embedding models"
+            f"Imported {len(provider_ids)} embedding providers and {model_count} embedding models"
         )
         return True
 

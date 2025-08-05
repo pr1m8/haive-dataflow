@@ -56,9 +56,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 content=json.dumps(
                     {
                         "error": "Rate limit exceeded",
-                        "detail": f"Maximum {
-                            self.rate_limit} requests per {
-                            self.window} seconds",
+                        "detail": f"Maximum {self.rate_limit} requests per {self.window} seconds",
                     }
                 ),
                 status_code=429,

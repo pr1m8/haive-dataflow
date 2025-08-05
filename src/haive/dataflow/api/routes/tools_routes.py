@@ -320,7 +320,6 @@ def simple_discover_tools() -> list[ToolInfo]:
 
     # Try to add real tools
     try:
-
         for _importer, modname, ispkg in pkgutil.iter_modules(
             haive.tools.tools.__path__
         ):
@@ -404,7 +403,6 @@ async def search_tools(
 def get_tool_schema(tool_module_path: str) -> dict[str, Any]:
     """Extract input schema from a tool module."""
     try:
-
         module = importlib.import_module(tool_module_path)
 
         # Get the tool name from the module path
@@ -500,7 +498,6 @@ def get_tool_schema(tool_module_path: str) -> dict[str, Any]:
 async def invoke_tool(tool_module_path: str, arguments: dict[str, Any]) -> Any:
     """Invoke a tool with given arguments."""
     try:
-
         module = importlib.import_module(tool_module_path)
 
         # Try to find and instantiate the tool
@@ -752,7 +749,6 @@ async def get_tool_details(tool_name: str) -> dict[str, Any]:
         details = tool.dict()
 
         try:
-
             module = importlib.import_module(tool.module)
 
             # Add additional details if available

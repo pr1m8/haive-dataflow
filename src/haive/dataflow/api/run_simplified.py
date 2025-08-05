@@ -233,8 +233,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
         active_connections.discard(websocket)
         connection_game_map.pop(websocket, None)
         logger.info(
-            f"Connection terminated due to error, remaining connections: {
-                len(active_connections)}"
+            f"Connection terminated due to error, remaining connections: {len(active_connections)}"
         )
 
 

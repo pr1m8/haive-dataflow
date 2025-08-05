@@ -29,9 +29,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         # Log start of request
         start_time = time.time()
         logger.info(
-            f"Request {request_id} started: {
-                request.method} {
-                request.url.path} (User: {user_id})"
+            f"Request {request_id} started: {request.method} {request.url.path} (User: {user_id})"
         )
 
         # Process request
@@ -106,9 +104,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 content=json.dumps(
                     {
                         "error": "Rate limit exceeded",
-                        "detail": f"Maximum {
-                            self.rate_limit} requests per {
-                            self.window} seconds",
+                        "detail": f"Maximum {self.rate_limit} requests per {self.window} seconds",
                     }
                 ),
                 status_code=429,

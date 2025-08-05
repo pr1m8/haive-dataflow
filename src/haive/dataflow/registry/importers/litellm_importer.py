@@ -512,8 +512,7 @@ def import_from_env() -> list[dict[str, Any]]:
                     "supports_batch": True,
                     "supports_query_mapping": provider == "cohere",
                     "input_cost_per_token": 0.0000001 if provider == "openai" else 0.0,
-                    "description": f"{
-                        provider.capitalize()} embedding model: {model_name}",
+                    "description": f"{provider.capitalize()} embedding model: {model_name}",
                 }
             )
 
@@ -680,8 +679,7 @@ def import_embedding_models() -> int:
 
             except Exception as e:
                 logger.exception(
-                    f"Error processing embedding model {
-                        model_info.get('model_id')}: {e}"
+                    f"Error processing embedding model {model_info.get('model_id')}: {e}"
                 )
 
         logger.info(

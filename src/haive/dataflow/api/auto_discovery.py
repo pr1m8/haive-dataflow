@@ -636,9 +636,7 @@ All endpoints follow consistent error response format:
             ws_count = sum(1 for p in patterns if p.websocket)
 
             table_rows.append(
-                f"| {
-                    pattern_type.title()} | {
-                    len(patterns)} | {rest_count} | {ws_count} |"
+                f"| {pattern_type.title()} | {len(patterns)} | {rest_count} | {ws_count} |"
             )
 
         table_header = """| Pattern Type | Total | REST | WebSocket |

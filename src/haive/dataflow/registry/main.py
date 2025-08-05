@@ -17,7 +17,6 @@ agents = registry_system.list_entities(EntityType.AGENT)
 
 # For each agent, print its dependencies and configurations
 for agent in agents:
-
     # Get dependencies
     deps = registry_system.get_dependencies(agent.id)
     for dep in deps:

@@ -364,7 +364,9 @@ def discover_tools(module_paths: list[str] | None = None) -> list[str]:
                                 except Exception:
                                     # If that fails, skip - we'll register the class at
                                     # least
-                                    pass
+                                    logger.debug(
+                                        f"Could not instantiate {obj.__name__} with no args"
+                                    )
 
                                 # Get tool info
                                 tool_name = (
@@ -390,9 +392,7 @@ def discover_tools(module_paths: list[str] | None = None) -> list[str]:
                                         "key",
                                     ]:
                                         if hasattr(instance, attr_name):
-                                            env_var = f"{
-                                                tool_name.upper()}_{
-                                                attr_name.upper()}"
+                                            env_var = f"{tool_name.upper()}_{attr_name.upper()}"
                                             required_env_vars.append(env_var)
 
                             # For functions, extract info
@@ -523,7 +523,9 @@ def discover_toolkits(module_paths: list[str] | None = None) -> list[str]:
                             except Exception:
                                 # If that fails, skip - we'll register the class at
                                 # least
-                                pass
+                                logger.debug(
+                                    f"Could not instantiate {obj.__name__} with no args"
+                                )
 
                             # Get toolkit info
                             toolkit_name = (
@@ -555,7 +557,9 @@ def discover_toolkits(module_paths: list[str] | None = None) -> list[str]:
                                             for tool in tools
                                         ]
                                     except Exception:
-                                        pass
+                                        logger.debug(
+                                            f"Could not get tools from {instance}"
+                                        )
 
                             # Register the toolkit
                             toolkit_id = registry_system.register_entity(
@@ -580,9 +584,7 @@ def discover_toolkits(module_paths: list[str] | None = None) -> list[str]:
                                     "key",
                                 ]:
                                     if hasattr(instance, attr_name):
-                                        env_var = f"{
-                                            toolkit_name.upper()}_{
-                                            attr_name.upper()}"
+                                        env_var = f"{toolkit_name.upper()}_{attr_name.upper()}"
                                         registry_system.add_environment_var(
                                             registry_id=toolkit_id,
                                             env_name=env_var,
@@ -695,7 +697,9 @@ def discover_engines(module_paths: list[str] | None = None) -> list[str]:
                             except Exception:
                                 # If that fails, skip - we'll register the class at
                                 # least
-                                pass
+                                logger.debug(
+                                    f"Could not instantiate {obj.__name__} with no args"
+                                )
 
                             # Get engine info
                             engine_name = (
