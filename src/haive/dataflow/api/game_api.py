@@ -24,6 +24,9 @@ from typing import Any, Optional
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from haive.core.engine.agent.agent import Agent
+from haive.core.persistence.supabase_config import SupabaseCheckpointerConfig
+from haive.core.schema.state_schema import StateSchema
 from haive.games.chess.agent import ChessAgent
 from haive.games.chess.state import ChessState
 from haive.games.connect4.agent import Connect4Agent
@@ -32,10 +35,7 @@ from haive.games.tic_tac_toe.agent import TicTacToeAgent
 from haive.games.tic_tac_toe.state import TicTacToeState
 from pydantic import BaseModel, Field, create_model
 
-from haive.dataflow.api.engine.agent.agent import Agent
 from haive.dataflow.api.game_socket import GameSocketServer
-from haive.dataflow.api.persistence.supabase_config import SupabaseCheckpointerConfig
-from haive.dataflow.api.schema.state_schema import StateSchema
 
 # Fix imports for local development
 

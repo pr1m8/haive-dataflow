@@ -17,13 +17,16 @@ from typing import Any
 from haive.dataflow.db.supabase import get_supabase_client, sanitize_sql, table
 
 # Set up logging
+# Ensure logs directory exists
+os.makedirs("logs", exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout),
         logging.FileHandler(
-            f"vault_cli_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+            f"logs/vault_cli_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
         ),
     ],
 )
