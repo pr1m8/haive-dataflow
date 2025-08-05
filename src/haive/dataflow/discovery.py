@@ -347,9 +347,7 @@ def discover_tools(module_paths: list[str] | None = None) -> list[str]:
                                         "key",
                                     ]:
                                         if hasattr(instance, attr_name):
-                                            env_var = f"{
-                                                tool_name.upper()}_{
-                                                attr_name.upper()}"
+                                            env_var = f"{tool_name.upper()}_{attr_name.upper()}"
                                             required_env_vars.append(env_var)
 
                             # For functions, extract info
@@ -537,9 +535,7 @@ def discover_toolkits(module_paths: list[str] | None = None) -> list[str]:
                                     "key",
                                 ]:
                                     if hasattr(instance, attr_name):
-                                        env_var = f"{
-                                            toolkit_name.upper()}_{
-                                            attr_name.upper()}"
+                                        env_var = f"{toolkit_name.upper()}_{attr_name.upper()}"
                                         registry_system.add_environment_var(
                                             registry_id=toolkit_id,
                                             env_name=env_var,

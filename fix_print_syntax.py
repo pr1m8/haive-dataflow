@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Fix malformed print statements with extra characters at the end."""
+
 import glob
 import re
 

@@ -383,7 +383,6 @@ def run():
     """Run the Connect4 API server."""
     # Fix for Windows asyncio issues
     if __name__ == "__main__":
-
         if platform.system() == "Windows":
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 

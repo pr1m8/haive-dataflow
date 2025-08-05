@@ -34,7 +34,6 @@ from haive.dataflow.registry.utils.vault_migration_script import (
 
 # Try to import tqdm for progress bars
 try:
-
     TQDM_AVAILABLE = True
 except ImportError:
     TQDM_AVAILABLE = False
@@ -56,7 +55,6 @@ logger = logging.getLogger(__name__)
 def run_migrate():
     """Run the migration script."""
     try:
-
         logger.info("Starting vault reference migration...")
 
         # 1. First, migrate environment variables
@@ -98,7 +96,6 @@ def run_import(
 ):
     """Run the model importer."""
     try:
-
         # Override TQDM_AVAILABLE if progress bars are explicitly disabled
         if no_progress and "TQDM_AVAILABLE" in globals():
             global TQDM_AVAILABLE
@@ -148,7 +145,6 @@ def run_import(
 def run_verify():
     """Run the verification script."""
     try:
-
         logger.info("Starting vault secret verification...")
         generate_report()
         logger.info("Verification complete")

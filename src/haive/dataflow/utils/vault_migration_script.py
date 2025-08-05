@@ -107,8 +107,7 @@ def ensure_vault_reference_column(table_name: str) -> bool:
 
             if hasattr(refs_result, "error") and refs_result.error:
                 logger.error(
-                    f"Failed to add config_vault_refs to engines.engines: {
-                        refs_result.error}"
+                    f"Failed to add config_vault_refs to engines.engines: {refs_result.error}"
                 )
             else:
                 logger.info("Added config_vault_refs column to engines.engines")

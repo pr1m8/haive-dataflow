@@ -300,7 +300,6 @@ class RegistrySystem:
         # Store in Supabase if available
         if self._supabase is not None:
             try:
-
                 # Convert metadata to JSON string for storage if needed
                 db_entity = dict(entity_data)
                 if isinstance(db_entity.get("metadata"), dict):
@@ -422,8 +421,7 @@ class RegistrySystem:
                                     var_name=env_var_name,
                                     provider_name=name,
                                     is_required=True,
-                                    description=f"API key for {
-                                        name.title()} embedding provider",
+                                    description=f"API key for {name.title()} embedding provider",
                                 )
                     except Exception as e:
                         logger.warning(f"Error storing {name} in models.providers: {e}")
@@ -502,7 +500,6 @@ class RegistrySystem:
     def _get_or_create_provider_type(self, type_name, display_name):
         """Helper method to get or create a provider type."""
         try:
-
             # Check if the provider type exists
             response = (
                 table(self._supabase, "models.provider_types")
@@ -563,7 +560,6 @@ class RegistrySystem:
     def _get_or_create_component_type(self, type_name, display_name):
         """Helper method to get or create a component type."""
         try:
-
             # Check if the component type exists
             response = (
                 table(self._supabase, "config.component_types")
@@ -663,7 +659,6 @@ class RegistrySystem:
         # Store in Supabase if available
         if self._supabase is not None:
             try:
-
                 # Try to serialize the data
                 try:
                     from haive.dataflow.serialization import serialize_object
@@ -733,7 +728,6 @@ class RegistrySystem:
         # Store in Supabase if available
         if self._supabase is not None:
             try:
-
                 # Insert into registry.dependencies table
                 table(self._supabase, "registry.dependencies").insert(
                     dependency_record
@@ -804,7 +798,6 @@ class RegistrySystem:
         # Store in Supabase if available
         if self._supabase is not None:
             try:
-
                 # Try to add to config.environment_variables (new schema)
                 try:
                     # Format the display name
@@ -1119,7 +1112,6 @@ class RegistrySystem:
         # Store in Supabase if available
         if self._supabase is not None:
             try:
-
                 # Try to add to audit.import_logs (new schema)
                 try:
                     (
@@ -1253,7 +1245,6 @@ class RegistrySystem:
         # Try Supabase if available
         if self._supabase is not None:
             try:
-
                 response = (
                     table(self._supabase, "registry.items")
                     .select("*")
@@ -1285,7 +1276,6 @@ class RegistrySystem:
         # Try Supabase if available
         if self._supabase is not None:
             try:
-
                 response = (
                     table(self._supabase, "registry.items")
                     .select("*")
@@ -1354,7 +1344,6 @@ class RegistrySystem:
         # Try Supabase if available
         if self._supabase is not None:
             try:
-
                 # Try to use config.environment_variables first (new schema)
                 try:
                     query = table(
@@ -1451,7 +1440,6 @@ class RegistrySystem:
         # First try to get providers from the models schema (new schema)
         if self._supabase is not None:
             try:
-
                 # Try to query from models.providers
                 provider_type = None
                 if entity_type_value == EntityType.LLM_PROVIDER:
@@ -1574,7 +1562,6 @@ class RegistrySystem:
         # Try Supabase if available and has search capabilities
         if self._supabase is not None:
             try:
-
                 # Build query
                 base_query = table(self._supabase, "registry.items").select("*")
 

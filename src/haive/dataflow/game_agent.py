@@ -196,9 +196,12 @@ class CheckpointDB:
     async def get_checkpoints(thread_id: str) -> list[CheckpointInfo]:
         """Get checkpoints for a thread."""
         try:
-            with psycopg.connect(
-                "dbname=postgres user=postgres password=postgres"
-            ) as conn, conn.cursor() as cur:
+            with (
+                psycopg.connect(
+                    "dbname=postgres user=postgres password=postgres"
+                ) as conn,
+                conn.cursor() as cur,
+            ):
                 cur.execute(
                     """
                         SELECT thread_id, id as checkpoint_id, checkpoint_ns,
@@ -234,9 +237,12 @@ class CheckpointDB:
     async def get_threads() -> list[dict[str, Any]]:
         """Get all threads in the database."""
         try:
-            with psycopg.connect(
-                "dbname=postgres user=postgres password=postgres"
-            ) as conn, conn.cursor() as cur:
+            with (
+                psycopg.connect(
+                    "dbname=postgres user=postgres password=postgres"
+                ) as conn,
+                conn.cursor() as cur,
+            ):
                 cur.execute(
                     """
                         SELECT thread_id, name, metadata, created_at
