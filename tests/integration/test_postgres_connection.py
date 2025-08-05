@@ -43,7 +43,6 @@ async def test_postgres_connection():
         )
 
         if connection_string:
-
             # Check if the connection string has placeholders
             if (
                 "[NEED_PASSWORD]" in connection_string
@@ -94,7 +93,6 @@ async def test_postgres_connection():
                 schema_exists = await cursor.fetchone()
 
                 if schema_exists:
-
                     # Check tables in agent_state schema
                     await cursor.execute(
                         """

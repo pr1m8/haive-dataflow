@@ -17,7 +17,6 @@ async def test_supabase_persistence():
         uri = "ws://localhost:8000/api/ws/chat/CheckersAgent?token=test"
 
         async with websockets.connect(uri) as websocket:
-
             # Send test message
             message = {"messages": [{"role": "user", "content": test_message}]}
 

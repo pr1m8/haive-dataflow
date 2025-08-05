@@ -24,7 +24,6 @@ async def test_simple_agent():
     try:
         # Connect to WebSocket
         async with websockets.connect(ws_url) as websocket:
-
             # Send a simple message
             message = {
                 "agent_name": "SimpleAgent",

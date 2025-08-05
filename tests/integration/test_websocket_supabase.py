@@ -26,7 +26,6 @@ async def test_websocket_and_database():
     try:
         # Connect to WebSocket
         async with websockets.connect("ws://localhost:8192/agents/ws") as websocket:
-
             # Send message
             await websocket.send(json.dumps(test_message))
 

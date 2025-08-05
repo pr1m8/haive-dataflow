@@ -51,7 +51,6 @@ async def test_simple_websocket():
     uri = f"{base_url}/api/ws/chat/{agent_name}?token={encoded_token}"
 
     try:
-
         websocket = await websockets.connect(uri)
 
         # Just wait for any initial message

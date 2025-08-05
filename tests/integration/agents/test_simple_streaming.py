@@ -18,7 +18,6 @@ async def test_simple_agent():
     agent_names = ["simple", "chat", "base", "test", "agent"]
 
     for agent_name in agent_names:
-
         try:
             # Simple config
             config = {

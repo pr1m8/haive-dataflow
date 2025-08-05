@@ -228,5 +228,4 @@ if __name__ == "__main__":
 
     # Test imports
     with contextlib.suppress(Exception):
-
         pass

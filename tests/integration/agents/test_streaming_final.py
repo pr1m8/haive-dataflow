@@ -57,7 +57,6 @@ async def test_enhanced_streaming():
     ]
 
     for test_case in test_configs:
-
         try:
             config = test_case["config"]
             agent_name = config["agent_name"]
@@ -77,7 +76,6 @@ async def test_enhanced_streaming():
                     welcome.get("type") == "status"
                     and welcome.get("content", {}).get("status") == "connected"
                 ):
-
                     # Send test message
                     test_message = {
                         "type": "message",

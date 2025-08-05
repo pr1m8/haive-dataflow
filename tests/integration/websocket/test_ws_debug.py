@@ -33,7 +33,6 @@ async def debug_websocket():
         return True
 
     except Exception:
-
         # Try without config
         simple_uri = f"{base_url}/api/ws/chat/{agent_name}?token={token}"
 

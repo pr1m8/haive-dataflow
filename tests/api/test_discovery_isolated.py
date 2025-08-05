@@ -109,7 +109,6 @@ def test_path_resolution():
 
 
 if __name__ == "__main__":
-
     try:
         test_discovery_directly()
         test_fixed_api_logic()

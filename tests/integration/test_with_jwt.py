@@ -54,7 +54,6 @@ async def test_agent_with_jwt():
     base_url = "ws://localhost:8000"
 
     for agent_name in agents_to_try:
-
         # Create config
         config = {
             "agent_name": agent_name,

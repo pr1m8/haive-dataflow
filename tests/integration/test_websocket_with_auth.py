@@ -54,7 +54,6 @@ async def test_websocket_with_auth():
         async with websockets.connect(
             "ws://localhost:8192/agents/ws", extra_headers=headers
         ) as websocket:
-
             # Send message
             await websocket.send(json.dumps(test_message))
 

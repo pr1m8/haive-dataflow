@@ -59,6 +59,5 @@ def test_websocket_with_python():
 
 
 if __name__ == "__main__":
-
     test_websocket_with_curl()
     test_websocket_with_python()

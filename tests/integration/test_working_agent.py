@@ -63,7 +63,6 @@ async def test_available_agents():
     base_url = "ws://localhost:8000"
 
     for agent_name in available_agents[:3]:  # Test first 3
-
         # Simple URL without config
         uri = f"{base_url}/api/ws/chat/{agent_name}?token={urllib.parse.quote(token)}"
 

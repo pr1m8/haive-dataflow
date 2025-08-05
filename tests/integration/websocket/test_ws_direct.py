@@ -12,13 +12,11 @@ async def test_websocket():
     agent_names = ["simple", "simple_agent", "SimpleAgent", "test"]
 
     for agent_name in agent_names:
-
         # Try with test token
         uri = f"ws://localhost:8000/api/ws/chat/{agent_name}?token=test-token"
 
         try:
             async with websockets.connect(uri) as ws:
-
                 # Send test message
                 message = {"messages": [{"role": "user", "content": "Hello"}]}
                 await ws.send(json.dumps(message))
