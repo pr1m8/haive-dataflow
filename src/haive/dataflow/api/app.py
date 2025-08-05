@@ -30,20 +30,18 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from haive.dataflow.api.api.middleware.logging import RequestLoggingMiddleware
-from haive.dataflow.api.api.middleware.rate_limit import RateLimitMiddleware
-from haive.dataflow.api.api.routes.agent_discovery_routes import (
+from haive.dataflow.api.game_router import discover_game_agents, game_agents, get_router
+from haive.dataflow.api.middleware.logging import RequestLoggingMiddleware
+from haive.dataflow.api.middleware.rate_limit import RateLimitMiddleware
+from haive.dataflow.api.routes.agent_discovery_routes import (
     router as agent_discovery_router,
 )
-from haive.dataflow.api.api.routes.agent_routes import router as agent_router
-from haive.dataflow.api.api.routes.conversation_routes import (
-    router as conversation_router,
-)
-from haive.dataflow.api.api.routes.llm_routes import router as llm_router
-from haive.dataflow.api.api.routes.tools_routes import router as tools_router
-from haive.dataflow.api.auth.middleware import SupabaseAuthMiddleware
-from haive.dataflow.api.config.settings import get_settings
-from haive.dataflow.api.game_router import discover_game_agents, game_agents, get_router
+from haive.dataflow.api.routes.agent_routes import router as agent_router
+from haive.dataflow.api.routes.conversation_routes import router as conversation_router
+from haive.dataflow.api.routes.llm_routes import router as llm_router
+from haive.dataflow.api.routes.tools_routes import router as tools_router
+from haive.dataflow.auth.middleware import SupabaseAuthMiddleware
+from haive.dataflow.config.settings import get_settings
 
 logger = logging.getLogger(__name__)
 settings = get_settings()

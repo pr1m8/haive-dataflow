@@ -32,8 +32,8 @@ from haive.games.tic_tac_toe.agent import TicTacToeAgent
 from haive.games.tic_tac_toe.state import TicTacToeState
 from pydantic import BaseModel, Field, create_model
 
-from haive.dataflow.api.api.game_socket import GameSocketServer
 from haive.dataflow.api.engine.agent.agent import Agent
+from haive.dataflow.api.game_socket import GameSocketServer
 from haive.dataflow.api.persistence.supabase_config import SupabaseCheckpointerConfig
 from haive.dataflow.api.schema.state_schema import StateSchema
 
