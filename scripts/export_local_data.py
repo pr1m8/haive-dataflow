@@ -169,13 +169,13 @@ async def export_local_data():
                     f"""
 INSERT INTO public.threads (id, user_id, agent_name, name, metadata, created_at, updated_at)
 VALUES (
-    '{thread['id']}'::uuid,
+    '{thread["id"]}'::uuid,
     NULL,
-    '{thread['agent_name']}',
-    '{thread['name']}',
-    '{json.dumps(thread['metadata'])}'::jsonb,
-    '{thread['created_at']}'::timestamptz,
-    '{thread['updated_at']}'::timestamptz
+    '{thread["agent_name"]}',
+    '{thread["name"]}',
+    '{json.dumps(thread["metadata"])}'::jsonb,
+    '{thread["created_at"]}'::timestamptz,
+    '{thread["updated_at"]}'::timestamptz
 );
 """
                 )

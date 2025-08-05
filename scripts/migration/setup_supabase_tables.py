@@ -128,7 +128,6 @@ def setup_tables():
         return True
 
     except Exception:
-
         # Try a simpler approach - just test if we can query
         try:
             supabase.table("threads").select("*").limit(1).execute()
@@ -154,7 +153,6 @@ def test_tables():
         result = supabase.table("agent_state.threads").insert(test_data).execute()
 
         if result.data:
-
             # Try to read it back
             read_result = (
                 supabase.table("agent_state.threads")
@@ -164,7 +162,6 @@ def test_tables():
             )
 
             if read_result.data:
-
                 # Clean up
                 supabase.table("agent_state.threads").delete().eq(
                     "thread_id", "test-thread-123"
