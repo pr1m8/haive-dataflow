@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+
+<html class="no-js" data-content_root="../../../" lang="en">
+<head><meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="light dark" name="color-scheme"/><meta content="width=device-width, initial-scale=1" name="viewport">
+<meta content="dataflow.fetchers" property="og:title"/>
+<meta content="website" property="og:type"/>
+<meta content="https://docs.haive.ai/packages/haive-dataflow/autoapi/dataflow/fetchers/index.html" property="og:url"/>
+<meta content="Dataflow" property="og:site_name"/>
+<meta content="Fetchers - TODO: Add brief description. TODO: Add detailed description of module functionality Example Basic usage: Submodules: dataflow.fetchers.lite_llm_import." property="og:description"/>
+<meta content="https://docs.haive.ai/packages/haive-dataflow/_static/social-preview.png" property="og:image"/>
+<meta content="Dataflow Documentation" property="og:image:alt"/>
+<meta content="Fetchers - TODO: Add brief description. TODO: Add detailed description of module functionality Example Basic usage: Submodules: dataflow.fetchers.lite_llm_import." name="description"/>
+<link href="../../../_static/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="../../../_static/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="../../../_static/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180" type="image/png"/>
+<link href="../../../_static/favicon.ico" rel="shortcut icon" type="image/x-icon"/><link href="../../../genindex.html" rel="index" title="Index"><link href="../../../search.html" rel="search" title="Search"><link href="lite_llm_import/index.html" rel="next" title="dataflow.fetchers.lite_llm_import"><link href="../discovery/index.html" rel="prev" title="dataflow.discovery">
+<link href="https://docs.haive.ai/packages/haive-dataflow/autoapi/dataflow/fetchers/index.html" rel="canonical"/>
+<!-- Generated with Sphinx 8.2.3 and Furo 2024.08.06 -->
+<title>dataflow.fetchers - Haive Dataflow 0.1.0 documentation</title>
+<link href="../../../_static/pygments.css?v=8f2a1f02" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/styles/furo.css?v=354aac6f" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/graphviz.css?v=4ae1632d" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/autodoc_pydantic.css" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/togglebutton.css?v=13237357" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/sphinx-codeautolink.css?v=b2176991" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/sphinx_contributors.css?v=f079e67e" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/tabs.css?v=a5c4661c" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/sphinx-design.min.css?v=95c83b7e" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/treeview.css?v=f8e9195c" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/sphinx-data-viewer/jsonview.bundle.css?v=f6ef2277" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/sphinx-needs/libs/html/datatables.min.css?v=4b4fd840" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/sphinx-needs/common_css/needstable.css?v=5e1b6797" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/sphinx-needs/common_css/need_style.css?v=92936fa5" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/sphinx-needs/common_css/need_toggle.css?v=5c6620df" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/sphinx-needs/common_css/need_core.css?v=f5b60a78" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/sphinx-needs/common_css/need_links.css?v=2150a916" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/sphinx-needs/modern.css?v=803738c0" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/styles/furo-extensions.css?v=302659d7" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/furo-intense.css?v=5f6b010a" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/api-docs.css?v=09b89479" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/mermaid-custom.css?v=7f44d164" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/toc-enhancements.css?v=97d88526" rel="stylesheet" type="text/css"/>
+<link href="../../../_static/tippy-enhancements.css?v=8547876c" rel="stylesheet" type="text/css"/>
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #2563eb;
+  --color-brand-content: #1d4ed8;
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f8fafc;
+  --color-background-hover: #e2e8f0;
+  --color-background-border: #cbd5e1;
+  --color-code-background: #1e293b;
+  --color-code-foreground: #e2e8f0;
+  --color-sidebar-background: #0f172a;
+  --color-sidebar-foreground: #cbd5e1;
+  --color-api-background: #f1f5f9;
+  --color-api-background-hover: #e2e8f0;
+  --color-admonition-background: #dbeafe;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #60a5fa;
+  --color-brand-content: #3b82f6;
+  --color-background-primary: #0f172a;
+  --color-background-secondary: #1e293b;
+  --color-background-hover: #334155;
+  --color-background-border: #475569;
+  --color-code-background: #0f172a;
+  --color-code-foreground: #cbd5e1;
+  --color-sidebar-background: #020617;
+  --color-sidebar-foreground: #94a3b8;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #60a5fa;
+  --color-brand-content: #3b82f6;
+  --color-background-primary: #0f172a;
+  --color-background-secondary: #1e293b;
+  --color-background-hover: #334155;
+  --color-background-border: #475569;
+  --color-code-background: #0f172a;
+  --color-code-foreground: #cbd5e1;
+  --color-sidebar-background: #020617;
+  --color-sidebar-foreground: #94a3b8;
+  
+      }
+    }
+  }
+</style></link></link></link></link></meta></head>
+<body>
+<script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<symbol id="svg-toc" viewbox="0 0 24 24">
+<title>Contents</title>
+<svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 1024 1024">
+<path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"></path>
+</svg>
+</symbol>
+<symbol id="svg-menu" viewbox="0 0 24 24">
+<title>Menu</title>
+<svg class="feather-menu" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<line x1="3" x2="21" y1="12" y2="12"></line>
+<line x1="3" x2="21" y1="6" y2="6"></line>
+<line x1="3" x2="21" y1="18" y2="18"></line>
+</svg>
+</symbol>
+<symbol id="svg-arrow-right" viewbox="0 0 24 24">
+<title>Expand</title>
+<svg class="feather-chevron-right" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="9 18 15 12 9 6"></polyline>
+</svg>
+</symbol>
+<symbol id="svg-sun" viewbox="0 0 24 24">
+<title>Light mode</title>
+<svg class="feather-sun" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<circle cx="12" cy="12" r="5"></circle>
+<line x1="12" x2="12" y1="1" y2="3"></line>
+<line x1="12" x2="12" y1="21" y2="23"></line>
+<line x1="4.22" x2="5.64" y1="4.22" y2="5.64"></line>
+<line x1="18.36" x2="19.78" y1="18.36" y2="19.78"></line>
+<line x1="1" x2="3" y1="12" y2="12"></line>
+<line x1="21" x2="23" y1="12" y2="12"></line>
+<line x1="4.22" x2="5.64" y1="19.78" y2="18.36"></line>
+<line x1="18.36" x2="19.78" y1="5.64" y2="4.22"></line>
+</svg>
+</symbol>
+<symbol id="svg-moon" viewbox="0 0 24 24">
+<title>Dark mode</title>
+<svg class="icon-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path>
+</svg>
+</symbol>
+<symbol id="svg-sun-with-moon" viewbox="0 0 24 24">
+<title>Auto light/dark, in light mode</title>
+<svg class="icon-custom-derived-from-feather-sun-and-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z" style="opacity: 50%"></path>
+<line x1="14.5" x2="14.5" y1="3.25" y2="1.25"></line>
+<line x1="14.5" x2="14.5" y1="15.85" y2="17.85"></line>
+<line x1="10.044" x2="8.63" y1="5.094" y2="3.68"></line>
+<line x1="19" x2="20.414" y1="14.05" y2="15.464"></line>
+<line x1="8.2" x2="6.2" y1="9.55" y2="9.55"></line>
+<line x1="20.8" x2="22.8" y1="9.55" y2="9.55"></line>
+<line x1="10.044" x2="8.63" y1="14.006" y2="15.42"></line>
+<line x1="19" x2="20.414" y1="5.05" y2="3.636"></line>
+<circle cx="14.5" cy="9.55" r="3.6"></circle>
+</svg>
+</symbol>
+<symbol id="svg-moon-with-sun" viewbox="0 0 24 24">
+<title>Auto light/dark, in dark mode</title>
+<svg class="icon-custom-derived-from-feather-sun-and-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"></path>
+<line style="opacity: 50%" x1="18" x2="18" y1="3.705" y2="2.5"></line>
+<line style="opacity: 50%" x1="18" x2="18" y1="11.295" y2="12.5"></line>
+<line style="opacity: 50%" x1="15.316" x2="14.464" y1="4.816" y2="3.964"></line>
+<line style="opacity: 50%" x1="20.711" x2="21.563" y1="10.212" y2="11.063"></line>
+<line style="opacity: 50%" x1="14.205" x2="13.001" y1="7.5" y2="7.5"></line>
+<line style="opacity: 50%" x1="21.795" x2="23" y1="7.5" y2="7.5"></line>
+<line style="opacity: 50%" x1="15.316" x2="14.464" y1="10.184" y2="11.036"></line>
+<line style="opacity: 50%" x1="20.711" x2="21.563" y1="4.789" y2="3.937"></line>
+<circle cx="18" cy="7.5" r="2.169" style="opacity: 50%"></circle>
+</svg>
+</symbol>
+<symbol id="svg-pencil" viewbox="0 0 24 24">
+<svg class="icon-tabler-pencil-code" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"></path>
+<path d="M13.5 6.5l4 4"></path>
+<path d="M20 21l2 -2l-2 -2"></path>
+<path d="M17 17l-2 2l2 2"></path>
+</svg>
+</symbol>
+<symbol id="svg-eye" viewbox="0 0 24 24">
+<svg class="icon-tabler-eye-code" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+<path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path>
+<path d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008"></path>
+<path d="M20 21l2 -2l-2 -2"></path>
+<path d="M17 17l-2 2l2 2"></path>
+</svg>
+</symbol>
+</svg>
+<input class="sidebar-toggle" id="__navigation" name="__navigation" type="checkbox"/>
+<input class="sidebar-toggle" id="__toc" name="__toc" type="checkbox"/>
+<label class="overlay sidebar-overlay" for="__navigation">
+<div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+<div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+<div class="announcement">
+<aside class="announcement-content">
+     🎯 <a href="../../index.html">← Back to Haive Docs</a> | haive-dataflow - Part of the Haive AI Agent Framework 
+  </aside>
+</div>
+<div class="page">
+<header class="mobile-header">
+<div class="header-left">
+<label class="nav-overlay-icon" for="__navigation">
+<div class="visually-hidden">Toggle site navigation sidebar</div>
+<i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+</label>
+</div>
+<div class="header-center">
+<a href="../../../index.html"><div class="brand">Haive Dataflow 0.1.0 documentation</div></a>
+</div>
+<div class="header-right">
+<div class="theme-toggle-container theme-toggle-header">
+<button class="theme-toggle">
+<div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+<svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+<svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+<svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+<svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+</button>
+</div>
+<label class="toc-overlay-icon toc-header-icon" for="__toc">
+<div class="visually-hidden">Toggle table of contents sidebar</div>
+<i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+</label>
+</div>
+</header>
+<aside class="sidebar-drawer">
+<div class="sidebar-container">
+<div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+<span class="sidebar-brand-text">Haive Dataflow 0.1.0 documentation</span>
+</a><form action="../../../search.html" class="sidebar-search-container" method="get" role="search">
+<input aria-label="Search" class="sidebar-search" name="q" placeholder="Search"/>
+<input name="check_keywords" type="hidden" value="yes"/>
+<input name="area" type="hidden" value="default"/>
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+<p class="caption" role="heading"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../../index.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of API Reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">dataflow</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of dataflow</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../__init___lazy/index.html">dataflow.__init___lazy</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../api/index.html">dataflow.api</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of dataflow.api</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../api/app/index.html">dataflow.api.app</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/app_dep/index.html">dataflow.api.app_dep</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/auto_discovery/index.html">dataflow.api.auto_discovery</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/base/index.html">dataflow.api.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/connect4_api/index.html">dataflow.api.connect4_api</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/db/index.html">dataflow.api.db</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/game_agent/index.html">dataflow.api.game_agent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/game_api/index.html">dataflow.api.game_api</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/game_router/index.html">dataflow.api.game_router</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/game_router_enhanced/index.html">dataflow.api.game_router_enhanced</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/game_router_fixed/index.html">dataflow.api.game_router_fixed</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/game_socket/index.html">dataflow.api.game_socket</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/general_games_api/index.html">dataflow.api.general_games_api</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/integrate_games/index.html">dataflow.api.integrate_games</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../api/llms/index.html">dataflow.api.llms</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of dataflow.api.llms</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../api/llms/api/index.html">dataflow.api.llms.api</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../api/llms/models/index.html">dataflow.api.llms.models</a></li>
+</ul>
+</input></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/main/index.html">dataflow.api.main</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../api/middleware/index.html">dataflow.api.middleware</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle navigation of dataflow.api.middleware</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../api/middleware/auth/index.html">dataflow.api.middleware.auth</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../api/middleware/logging/index.html">dataflow.api.middleware.logging</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../api/middleware/rate_limit/index.html">dataflow.api.middleware.rate_limit</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../api/middleware/supabase_logging/index.html">dataflow.api.middleware.supabase_logging</a></li>
+</ul>
+</input></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/registry/index.html">dataflow.api.registry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/router/index.html">dataflow.api.router</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../api/routers/index.html">dataflow.api.routers</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle navigation of dataflow.api.routers</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../api/routers/games/index.html">dataflow.api.routers.games</a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../api/routes/index.html">dataflow.api.routes</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of dataflow.api.routes</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../api/routes/agent_discovery_routes/index.html">dataflow.api.routes.agent_discovery_routes</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../api/routes/agent_discovery_routes_enhanced/index.html">dataflow.api.routes.agent_discovery_routes_enhanced</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../api/routes/agent_discovery_routes_fixed/index.html">dataflow.api.routes.agent_discovery_routes_fixed</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../api/routes/agent_routes/index.html">dataflow.api.routes.agent_routes</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../api/routes/conversation_routes/index.html">dataflow.api.routes.conversation_routes</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../api/routes/example_tool/index.html">dataflow.api.routes.example_tool</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../api/routes/games/index.html">dataflow.api.routes.games</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../api/routes/llm_routes/index.html">dataflow.api.routes.llm_routes</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../api/routes/tools_routes/index.html">dataflow.api.routes.tools_routes</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../api/routes/tools_routes_enhanced/index.html">dataflow.api.routes.tools_routes_enhanced</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../api/routes/tools_routes_fixed/index.html">dataflow.api.routes.tools_routes_fixed</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../api/run_chess_api/index.html">dataflow.api.run_chess_api</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/run_game_api/index.html">dataflow.api.run_game_api</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/run_games_api/index.html">dataflow.api.run_games_api</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/run_integrated_api/index.html">dataflow.api.run_integrated_api</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/run_simple/index.html">dataflow.api.run_simple</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/run_simplified/index.html">dataflow.api.run_simplified</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/serve_chess_client/index.html">dataflow.api.serve_chess_client</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/simple_chess_ws/index.html">dataflow.api.simple_chess_ws</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../api/tic_tac_toe_api/index.html">dataflow.api.tic_tac_toe_api</a></li>
+</ul>
+</input></li>
+<li class="toctree-l3"><a class="reference internal" href="../app_dep/index.html">dataflow.app_dep</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../auth/index.html">dataflow.auth</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of dataflow.auth</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../auth/credits/index.html">dataflow.auth.credits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../auth/dependencies/index.html">dataflow.auth.dependencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../auth/middleware/index.html">dataflow.auth.middleware</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../auth/supabase/index.html">dataflow.auth.supabase</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../base/index.html">dataflow.base</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../bin/index.html">dataflow.bin</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of dataflow.bin</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../bin/litellm_cli/index.html">dataflow.bin.litellm_cli</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bin/registry_cli/index.html">dataflow.bin.registry_cli</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../bin/vault_cli/index.html">dataflow.bin.vault_cli</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../config/index.html">dataflow.config</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of dataflow.config</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../config/environment/index.html">dataflow.config.environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../config/settings/index.html">dataflow.config.settings</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../connect4_api/index.html">dataflow.connect4_api</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../conversations/index.html">dataflow.conversations</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of dataflow.conversations</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../conversations/manager/index.html">dataflow.conversations.manager</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../core/index.html">dataflow.core</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../db/index.html">dataflow.db</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle navigation of dataflow.db</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../db/inspect_supabase/index.html">dataflow.db.inspect_supabase</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../db/schema/index.html">dataflow.db.schema</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../db/supabase/index.html">dataflow.db.supabase</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../discovery/index.html">dataflow.discovery</a></li>
+<li class="toctree-l3 current has-children current-page"><a class="current reference internal" href="#">dataflow.fetchers</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle navigation of dataflow.fetchers</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="lite_llm_import/index.html">dataflow.fetchers.lite_llm_import</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../game_agent/index.html">dataflow.game_agent</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../importers/index.html">dataflow.importers</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle navigation of dataflow.importers</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../importers/embeddings_importer/index.html">dataflow.importers.embeddings_importer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../importers/litellm_importer/index.html">dataflow.importers.litellm_importer</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../importers/tak/index.html">dataflow.importers.tak</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../internal_websockets/index.html">dataflow.internal_websockets</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle navigation of dataflow.internal_websockets</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../internal_websockets/handlers/index.html">dataflow.internal_websockets.handlers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internal_websockets/manager/index.html">dataflow.internal_websockets.manager</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../llms/index.html">dataflow.llms</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle navigation of dataflow.llms</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../llms/api/index.html">dataflow.llms.api</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../llms/models/index.html">dataflow.llms.models</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../main/index.html">dataflow.main</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../mcp/index.html">dataflow.mcp</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle navigation of dataflow.mcp</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../mcp/client/index.html">dataflow.mcp.client</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../mcp/discovery/index.html">dataflow.mcp.discovery</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../mcp/health/index.html">dataflow.mcp.health</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../models/index.html">dataflow.models</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../persistence/index.html">dataflow.persistence</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle navigation of dataflow.persistence</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../persistence/conversations/index.html">dataflow.persistence.conversations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../persistence/supabase_adapter/index.html">dataflow.persistence.supabase_adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../providers/index.html">dataflow.providers</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle navigation of dataflow.providers</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../providers/agent_provider/index.html">dataflow.providers.agent_provider</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../providers/base/index.html">dataflow.providers.base</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../registries/index.html">dataflow.registries</a><input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><div class="visually-hidden">Toggle navigation of dataflow.registries</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../registries/main/index.html">dataflow.registries.main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../registries/model_registry/index.html">dataflow.registries.model_registry</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../registry/index.html">dataflow.registry</a><input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><div class="visually-hidden">Toggle navigation of dataflow.registry</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../registry/base/index.html">dataflow.registry.base</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../registry/bin/index.html">dataflow.registry.bin</a><input class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><div class="visually-hidden">Toggle navigation of dataflow.registry.bin</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../registry/bin/litellm_cli/index.html">dataflow.registry.bin.litellm_cli</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../registry/bin/registry_cli/index.html">dataflow.registry.bin.registry_cli</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../registry/bin/vault_cli/index.html">dataflow.registry.bin.vault_cli</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../registry/core/index.html">dataflow.registry.core</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../registry/db/index.html">dataflow.registry.db</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../registry/discovery/index.html">dataflow.registry.discovery</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../registry/importers/index.html">dataflow.registry.importers</a><input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><div class="visually-hidden">Toggle navigation of dataflow.registry.importers</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../registry/importers/embeddings_importer/index.html">dataflow.registry.importers.embeddings_importer</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../registry/importers/litellm_importer/index.html">dataflow.registry.importers.litellm_importer</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../registry/importers/tak/index.html">dataflow.registry.importers.tak</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../registry/lazy_core/index.html">dataflow.registry.lazy_core</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../registry/main/index.html">dataflow.registry.main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../registry/models/index.html">dataflow.registry.models</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../registry/providers/index.html">dataflow.registry.providers</a><input class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><div class="visually-hidden">Toggle navigation of dataflow.registry.providers</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../registry/providers/agent_provider/index.html">dataflow.registry.providers.agent_provider</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../registry/providers/base/index.html">dataflow.registry.providers.base</a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../registry/registries/index.html">dataflow.registry.registries</a><input class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><div class="visually-hidden">Toggle navigation of dataflow.registry.registries</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../registry/registries/main/index.html">dataflow.registry.registries.main</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../registry/registries/model_registry/index.html">dataflow.registry.registries.model_registry</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../registry/serialization/index.html">dataflow.registry.serialization</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../registry/utils/index.html">dataflow.registry.utils</a><input class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><div class="visually-hidden">Toggle navigation of dataflow.registry.utils</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../registry/utils/logging/index.html">dataflow.registry.utils.logging</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../registry/utils/vault_migration_script/index.html">dataflow.registry.utils.vault_migration_script</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../router/index.html">dataflow.router</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../serialization/index.html">dataflow.serialization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tic_tac_toe_api/index.html">dataflow.tic_tac_toe_api</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../utils/index.html">dataflow.utils</a><input class="toctree-checkbox" id="toctree-checkbox-27" name="toctree-checkbox-27" role="switch" type="checkbox"/><label for="toctree-checkbox-27"><div class="visually-hidden">Toggle navigation of dataflow.utils</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../utils/logging/index.html">dataflow.utils.logging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../utils/vault_migration_script/index.html">dataflow.utils.vault_migration_script</a></li>
+</ul>
+</li>
+</ul>
+</input></li>
+</ul>
+</input></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/prim8/haive">GitHub Repository</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/prim8/haive/blob/main/CONTRIBUTING.md">Contributing Guide</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/prim8/haive/issues">Issue Tracker</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Changelog</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<div class="main">
+<div class="content">
+<div class="article-container">
+<a class="back-to-top muted-link" href="#">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+</svg>
+<span>Back to top</span>
+</a>
+<div class="content-icon-container">
+<div class="theme-toggle-container theme-toggle-content">
+<button class="theme-toggle">
+<div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+<svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+<svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+<svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+<svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+</button>
+</div>
+<label class="toc-overlay-icon toc-content-icon" for="__toc">
+<div class="visually-hidden">Toggle table of contents sidebar</div>
+<i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+</label>
+</div>
+<article id="furo-main-content" role="main">
+<section id="module-dataflow.fetchers">
+<span id="dataflow-fetchers"></span><h1>dataflow.fetchers<a class="headerlink" href="#module-dataflow.fetchers" title="Link to this heading">¶</a></h1>
+<p>Fetchers - TODO: Add brief description.</p>
+<p>TODO: Add detailed description of module functionality</p>
+<p class="rubric">Example</p>
+<p>Basic usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">haive.fetchers</span><span class="w"> </span><span class="kn">import</span> <span class="n">module_function</span>
+
+<span class="c1"># TODO: Add example</span>
+</pre></div>
+</div>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="lite_llm_import/index.html">dataflow.fetchers.lite_llm_import</a></li>
+</ul>
+</div>
+</section>
+</section>
+</article>
+</div>
+<footer>
+<div class="related-pages">
+<a class="next-page" href="lite_llm_import/index.html">
+<div class="page-info">
+<div class="context">
+<span>Next</span>
+</div>
+<div class="title">dataflow.fetchers.lite_llm_import</div>
+</div>
+<svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+</a>
+<a class="prev-page" href="../discovery/index.html">
+<svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+<div class="page-info">
+<div class="context">
+<span>Previous</span>
+</div>
+<div class="title">dataflow.discovery</div>
+</div>
+</a>
+</div>
+<div class="bottom-of-page">
+<div class="left-details">
+<div class="copyright">
+                Copyright © 2025, Haive Team
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+</div>
+<div class="right-details">
+<div class="icons">
+<a aria-label="GitHub" class="muted-link" href="https://github.com/haive-ai/haive/"><svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 16 16">
+<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" fill-rule="evenodd"></path>
+</svg></a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<aside class="toc-drawer">
+<div class="toc-sticky toc-scroll">
+<div class="toc-title-container">
+<span class="toc-title">
+            On this page
+          </span>
+</div>
+<div class="toc-tree-container">
+<div class="toc-tree">
+<ul>
+<li><a class="reference internal" href="#">dataflow.fetchers</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div><script src="../../../_static/jquery.js?v=5d32c60e"></script>
+<script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+<script src="../../../_static/documentation_options.js?v=01f34227"></script>
+<script src="../../../_static/doctools.js?v=9bcbadda"></script>
+<script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+<script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
+<script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+<script src="../../../_static/copybutton.js?v=30646c52"></script>
+<script src="../../../_static/toggleprompt.js?v=62b33c42"></script>
+<script>let toggleHintShow = 'Click to expand';</script>
+<script>let toggleHintHide = 'Click to collapse';</script>
+<script>let toggleOpenOnPrint = 'true';</script>
+<script src="../../../_static/togglebutton.js?v=4a39c7ea"></script>
+<script async="async" kind="hypothesis" src="https://hypothes.is/embed.js"></script>
+<script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+<script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+<script src="../../../_static/treeview.js?v=265ad9b8"></script>
+<script src="../../../_static/sphinx-data-viewer/jsonview.bundle.js?v=18cd53c5"></script>
+<script src="../../../_static/sphinx-data-viewer/jsonview_loader.js?v=f7ff7e7d"></script>
+<script src="../../../_static/sphinx-needs/libs/html/datatables.min.js?v=8a4aee21"></script>
+<script src="../../../_static/sphinx-needs/libs/html/datatables_loader.js?v=a2cae175"></script>
+<script src="../../../_static/sphinx-needs/libs/html/sphinx_needs_collapse.js?v=dca66431"></script>
+<script defer="defer" src="https://unpkg.com/@popperjs/core@2"></script>
+<script defer="defer" src="https://unpkg.com/tippy.js@6"></script>
+<script defer="defer" src="../../../_static/tippy/autoapi/dataflow/fetchers/index.6415b66a-3e1e-46dc-98a3-2f4e1eb2b441.js"></script>
+<script src="../../../_static/furo-enhancements.js?v=de17fdd7"></script>
+<script src="../../../_static/mermaid-config.js?v=6a473628"></script>
+<script src="../../../_static/js/api-enhancements.js?v=eac7d5a3"></script>
+</body>
+</html>

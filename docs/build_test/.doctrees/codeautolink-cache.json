@@ -1,0 +1,1531 @@
+{
+  "_tags/tagsindex": [],
+  "autoapi/dataflow/__init___lazy/index": [],
+  "autoapi/dataflow/api/app/index": [
+    {
+      "source": ">>> app = create_app()\n>>> # Run the app with Uvicorn\n>>> import uvicorn\n>>> uvicorn.run(app, host=\"0.0.0.0\", port=8000)",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/api/app/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.api.app",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 75
+    }
+  ],
+  "autoapi/dataflow/api/app_dep/index": [],
+  "autoapi/dataflow/api/auto_discovery/index": [],
+  "autoapi/dataflow/api/base/index": [],
+  "autoapi/dataflow/api/connect4_api/index": [],
+  "autoapi/dataflow/api/db/index": [],
+  "autoapi/dataflow/api/game_agent/index": [],
+  "autoapi/dataflow/api/game_api/index": [],
+  "autoapi/dataflow/api/game_router/index": [],
+  "autoapi/dataflow/api/game_router_enhanced/index": [],
+  "autoapi/dataflow/api/game_router_fixed/index": [],
+  "autoapi/dataflow/api/game_socket/index": [],
+  "autoapi/dataflow/api/general_games_api/index": [
+    {
+      "source": ">>> app, game_api = create_general_game_api()\n>>> # Now you have endpoints for all games!",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/api/general_games_api/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.api.general_games_api",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 281
+    }
+  ],
+  "autoapi/dataflow/api/index": [],
+  "autoapi/dataflow/api/integrate_games/index": [],
+  "autoapi/dataflow/api/llms/api/index": [],
+  "autoapi/dataflow/api/llms/index": [
+    {
+      "source": "from haive.llms import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/api/llms/index",
+        "ref_id": "module-dataflow.api.llms",
+        "headings": [
+          "dataflow.api.llms"
+        ]
+      },
+      "doc_lineno": 18
+    }
+  ],
+  "autoapi/dataflow/api/llms/models/index": [],
+  "autoapi/dataflow/api/main/index": [],
+  "autoapi/dataflow/api/middleware/auth/index": [],
+  "autoapi/dataflow/api/middleware/index": [
+    {
+      "source": "from haive.middleware import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/api/middleware/index",
+        "ref_id": "module-dataflow.api.middleware",
+        "headings": [
+          "dataflow.api.middleware"
+        ]
+      },
+      "doc_lineno": 18
+    }
+  ],
+  "autoapi/dataflow/api/middleware/logging/index": [],
+  "autoapi/dataflow/api/middleware/rate_limit/index": [],
+  "autoapi/dataflow/api/middleware/supabase_logging/index": [],
+  "autoapi/dataflow/api/registry/index": [],
+  "autoapi/dataflow/api/router/index": [],
+  "autoapi/dataflow/api/routers/games/index": [],
+  "autoapi/dataflow/api/routers/index": [],
+  "autoapi/dataflow/api/routes/agent_discovery_routes/index": [],
+  "autoapi/dataflow/api/routes/agent_discovery_routes_enhanced/index": [],
+  "autoapi/dataflow/api/routes/agent_discovery_routes_fixed/index": [],
+  "autoapi/dataflow/api/routes/agent_routes/index": [
+    {
+      "source": ">>> config = AgentChatConfig(\n...     agent_name=\"TextAnalyzer\",\n...     provider=LLMProvider.OPENAI,\n...     model=\"gpt-4\",\n...     temperature=0.5,\n...     system_prompt=\"You are an expert text analyst.\",\n...     stream=True\n... )",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/api/routes/agent_routes/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.api.routes.agent_routes",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 151
+    },
+    {
+      "source": ">>> manager = ConnectionManager()\n>>> success = await manager.connect(websocket, \"thread-123\", \"user-456\")\n>>> if success:\n...     print(\"Connection established\")",
+      "names": [
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 4,
+          "end_lineno": 4,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/api/routes/agent_routes/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.api.routes.agent_routes",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 324
+    },
+    {
+      "source": ">>> message = WSMessage(\n...     type=WSMessageType.MESSAGE,\n...     content=\"Analyze this text\",\n...     thread_id=\"thread-123\"\n... )\n>>> json_str = message.json()",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/api/routes/agent_routes/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.api.routes.agent_routes",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 400
+    }
+  ],
+  "autoapi/dataflow/api/routes/conversation_routes/index": [
+    {
+      "source": ")\n```",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/api/routes/conversation_routes/index",
+        "ref_id": "module-dataflow.api.routes.conversation_routes",
+        "headings": [
+          "dataflow.api.routes.conversation_routes"
+        ]
+      },
+      "doc_lineno": null
+    }
+  ],
+  "autoapi/dataflow/api/routes/example_tool/index": [],
+  "autoapi/dataflow/api/routes/games/index": [],
+  "autoapi/dataflow/api/routes/index": [
+    {
+      "source": "from haive.routes import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/api/routes/index",
+        "ref_id": "module-dataflow.api.routes",
+        "headings": [
+          "dataflow.api.routes"
+        ]
+      },
+      "doc_lineno": 18
+    }
+  ],
+  "autoapi/dataflow/api/routes/llm_routes/index": [],
+  "autoapi/dataflow/api/routes/tools_routes/index": [],
+  "autoapi/dataflow/api/routes/tools_routes_enhanced/index": [],
+  "autoapi/dataflow/api/routes/tools_routes_fixed/index": [],
+  "autoapi/dataflow/api/run_chess_api/index": [],
+  "autoapi/dataflow/api/run_game_api/index": [],
+  "autoapi/dataflow/api/run_games_api/index": [],
+  "autoapi/dataflow/api/run_integrated_api/index": [],
+  "autoapi/dataflow/api/run_simple/index": [],
+  "autoapi/dataflow/api/run_simplified/index": [],
+  "autoapi/dataflow/api/serve_chess_client/index": [],
+  "autoapi/dataflow/api/simple_chess_ws/index": [
+    {
+      "source": "\"\"\"\n<!DOCTYPE html>\n<html>\n    <head>\n        <title>Chess WebSocket Client</title>\n        <style>\n            body {\n                font-family: Arial, sans-serif;\n                max-width: 800px;\n                margin: 0 auto;\n                padding: 20px;\n            }\n            .chessboard {\n                width: 400px;\n                height: 400px;\n                border: 1px solid #000;\n                display: grid;\n                grid-template-columns: repeat(8, 1fr);\n                grid-template-rows: repeat(8, 1fr);\n            }\n            .square {\n                display: flex;\n                justify-content: center;\n                align-items: center;\n                font-size: 30px;\n            }\n            .white {\n                background-color: #f0d9b5;\n            }\n            .black {\n                background-color: #b58863;\n            }\n            .log {\n                height: 200px;\n                overflow-y: auto;\n                border: 1px solid #ccc;\n                padding: 10px;\n                margin-top: 20px;\n            }\n        </style>\n    </head>\n    <body>\n        <h1>Chess WebSocket Client</h1>\n\n        <div>\n            <label for=\"gameId\">Game ID:</label>\n            <input type=\"text\" id=\"gameId\" value=\"test123\">\n            <button onclick=\"connect()\">Connect</button>\n            <button onclick=\"disconnect()\">Disconnect</button>\n        </div>\n\n        <div style=\"display: flex; margin-top: 20px;\">\n            <div>\n                <div class=\"chessboard\" id=\"board\"></div>\n                <div style=\"margin-top: 10px;\">\n                    <button onclick=\"getState()\">Get State</button>\n                    <button onclick=\"aiMove()\">AI Move</button>\n                </div>\n            </div>\n\n            <div style=\"margin-left: 20px; flex: 1;\">\n                <h3>Game Info</h3>\n                <div id=\"gameInfo\">\n                    <p>Status: <span id=\"status\">Disconnected</span></p>\n                    <p>Turn: <span id=\"turn\">-</span></p>\n                    <p>Game Status: <span id=\"gameStatus\">-</span></p>\n                </div>\n\n                <h3>Log</h3>\n                <div class=\"log\" id=\"log\"></div>\n            </div>\n        </div>\n\n        <script>\n            // Game data\n            let ws = null;\n            let gameState = null;\n            let boardElement = document.getElementById('board');\n            let statusElement = document.getElementById('status');\n            let turnElement = document.getElementById('turn');\n            let gameStatusElement = document.getElementById('gameStatus');\n            let logElement = document.getElementById('log');\n\n            // Chess pieces mapping\n            const pieceMap = {\n                'K': '\u2654', 'Q': '\u2655', 'R': '\u2656', 'B': '\u2657', 'N': '\u2658', 'P': '\u2659',  // White pieces\n                'k': '\u265a', 'q': '\u265b', 'r': '\u265c', 'b': '\u265d', 'n': '\u265e', 'p': '\u265f'   // Black pieces\n            };\n\n            // Initialize the board\n            function initBoard() {\n                boardElement.innerHTML = '';\n                for (let row = 0; row < 8; row++) {\n                    for (let col = 0; col < 8; col++) {\n                        const square = document.createElement('div');\n                        square.className = `square ${(row + col) % 2 === 0 ? 'white' : 'black'}`;\n                        square.dataset.row = 7 - row;  // Flip for chess notation\n                        square.dataset.col = col;\n                        boardElement.appendChild(square);\n                    }\n                }\n            }\n\n            // Update board from FEN\n            function updateBoard(fen) {\n                if (!fen) return;\n\n                const boardFen = fen.split(' ')[0];\n                const rows = boardFen.split('/');\n\n                for (let rowIndex = 0; rowIndex < 8; rowIndex++) {\n                    let colIndex = 0;\n                    const row = rows[rowIndex];\n\n                    for (let i = 0; i < row.length; i++) {\n                        const char = row[i];\n\n                        if (isNaN(char)) {\n                            // It's a piece\n                            const square = document.querySelector(`.square[data-row=\"${rowIndex}\"][data-col=\"${colIndex}\"]`);\n                            if (square) {\n                                square.textContent = pieceMap[char] || char;\n                            }\n                            colIndex++;\n                        } else {\n                            // It's a number of empty squares\n                            colIndex += parseInt(char);\n                        }\n                    }\n                }\n            }\n\n            // Add to log\n            function log(message) {\n                const entry = document.createElement('div');\n                entry.textContent = message;\n                logElement.appendChild(entry);\n                logElement.scrollTop = logElement.scrollHeight;\n            }\n\n            // Connect WebSocket\n            function connect() {\n                const gameId = document.getElementById('gameId').value || 'test123';\n                const wsUrl = `ws://${window.location.host}/ws/chess/${gameId}`;\n\n                if (ws) {\n                    ws.close();\n                }\n\n                log(`Connecting to ${wsUrl}...`);\n                ws = new WebSocket(wsUrl);\n\n                ws.onopen = function(event) {\n                    statusElement.textContent = 'Connected';\n                    log('Connection established');\n                    getState();\n                };\n\n                ws.onmessage = function(event) {\n                    log(`Received: ${event.data}`);\n\n                    try {\n                        const data = JSON.parse(event.data);\n\n                        if (data.type === 'state_update') {\n                            gameState = data.state;\n                            updateBoard(gameState.board_fen);\n                            turnElement.textContent = gameState.current_player || '-';\n                            gameStatusElement.textContent = gameState.game_status || '-';\n                        } else if (data.type === 'error') {\n                            log(`Error: ${data.message}`);\n                        }\n                    } catch (e) {\n                        log(`Error parsing message: ${e.message}`);\n                    }\n                };\n\n                ws.onclose = function(event) {\n                    statusElement.textContent = 'Disconnected';\n                    log('Connection closed');\n                };\n\n                ws.onerror = function(event) {\n                    statusElement.textContent = 'Error';\n                    log('WebSocket error');\n                };\n            }\n\n            // Disconnect WebSocket\n            function disconnect() {\n                if (ws) {\n                    ws.close();\n                    ws = null;\n                }\n            }\n\n            // Get game state\n            function getState() {\n                if (ws && ws.readyState === WebSocket.OPEN) {\n                    const message = {\n                        type: 'get_state'\n                    };\n                    ws.send(JSON.stringify(message));\n                    log(`Sent: ${JSON.stringify(message)}`);\n                } else {\n                    log('WebSocket not connected');\n                }\n            }\n\n            // Request AI move\n            function aiMove() {\n                if (ws && ws.readyState === WebSocket.OPEN) {\n                    const message = {\n                        type: 'ai_move'\n                    };\n                    ws.send(JSON.stringify(message));\n                    log(`Sent: ${JSON.stringify(message)}`);\n                } else {\n                    log('WebSocket not connected');\n                }\n            }\n\n            // Initialize\n            initBoard();\n        </script>\n    </body>\n</html>\n\"\"\"",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/api/simple_chess_ws/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.api.simple_chess_ws",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 110
+    }
+  ],
+  "autoapi/dataflow/api/tic_tac_toe_api/index": [],
+  "autoapi/dataflow/app_dep/index": [],
+  "autoapi/dataflow/auth/credits/index": [],
+  "autoapi/dataflow/auth/dependencies/index": [
+    {
+      "source": ">>> from fastapi import Depends\n>>> from haive.dataflow.auth.dependencies import get_auth_instance\n>>>\n>>> async def custom_auth(auth = Depends(get_auth_instance)):\n...     # Use auth instance for custom authentication logic\n...     return auth.validate_token(token)",
+      "names": [
+        {
+          "import_components": [
+            "fastapi",
+            "Depends"
+          ],
+          "code_str": "Depends",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "fastapi.Depends"
+        },
+        {
+          "import_components": [
+            "fastapi",
+            "Depends"
+          ],
+          "code_str": "Depends",
+          "lineno": 4,
+          "end_lineno": 4,
+          "context": "none",
+          "resolved_location": "fastapi.Depends"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/auth/dependencies/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.auth.dependencies",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 78
+    },
+    {
+      "source": ">>> @router.get(\"/profile\")\n>>> async def get_profile(user_id: Optional[str] = Depends(get_current_user)):\n...     if user_id:\n...         return {\"user_id\": user_id, \"premium\": True}\n...     else:\n...         return {\"premium\": False}",
+      "names": [
+        {
+          "import_components": [
+            "fastapi",
+            "Depends"
+          ],
+          "code_str": "Depends",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "none",
+          "resolved_location": "fastapi.Depends"
+        },
+        {
+          "import_components": [
+            "str"
+          ],
+          "code_str": "str",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "none",
+          "resolved_location": "str"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/auth/dependencies/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.auth.dependencies",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 110
+    },
+    {
+      "source": ">>> @router.post(\"/secure-endpoint\")\n>>> async def secure_endpoint(user_id: str = Depends(require_auth)):\n...     return {\"message\": f\"Hello, {user_id}!\", \"status\": \"authenticated\"}",
+      "names": [
+        {
+          "import_components": [
+            "fastapi",
+            "Depends"
+          ],
+          "code_str": "Depends",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "none",
+          "resolved_location": "fastapi.Depends"
+        },
+        {
+          "import_components": [
+            "str"
+          ],
+          "code_str": "str",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "none",
+          "resolved_location": "str"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/auth/dependencies/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.auth.dependencies",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 141
+    }
+  ],
+  "autoapi/dataflow/auth/index": [
+    {
+      "source": "from haive.auth import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/auth/index",
+        "ref_id": "module-dataflow.auth",
+        "headings": [
+          "dataflow.auth"
+        ]
+      },
+      "doc_lineno": 18
+    }
+  ],
+  "autoapi/dataflow/auth/middleware/index": [],
+  "autoapi/dataflow/auth/supabase/index": [],
+  "autoapi/dataflow/base/index": [],
+  "autoapi/dataflow/bin/index": [],
+  "autoapi/dataflow/bin/litellm_cli/index": [],
+  "autoapi/dataflow/bin/registry_cli/index": [],
+  "autoapi/dataflow/bin/vault_cli/index": [],
+  "autoapi/dataflow/config/environment/index": [],
+  "autoapi/dataflow/config/index": [
+    {
+      "source": "from haive.config import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/config/index",
+        "ref_id": "module-dataflow.config",
+        "headings": [
+          "dataflow.config"
+        ]
+      },
+      "doc_lineno": 18
+    }
+  ],
+  "autoapi/dataflow/config/settings/index": [],
+  "autoapi/dataflow/connect4_api/index": [],
+  "autoapi/dataflow/conversations/index": [
+    {
+      "source": "from haive.conversations import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/conversations/index",
+        "ref_id": "module-dataflow.conversations",
+        "headings": [
+          "dataflow.conversations"
+        ]
+      },
+      "doc_lineno": 18
+    }
+  ],
+  "autoapi/dataflow/conversations/manager/index": [],
+  "autoapi/dataflow/core/index": [],
+  "autoapi/dataflow/db/index": [
+    {
+      "source": "from haive.db import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/db/index",
+        "ref_id": "module-dataflow.db",
+        "headings": [
+          "dataflow.db"
+        ]
+      },
+      "doc_lineno": 18
+    }
+  ],
+  "autoapi/dataflow/db/inspect_supabase/index": [],
+  "autoapi/dataflow/db/schema/index": [],
+  "autoapi/dataflow/db/supabase/index": [
+    {
+      "source": ">>> from haive.dataflow.db.supabase import get_supabase_client\n>>>\n>>> # Get a Supabase client\n>>> supabase = get_supabase_client()\n>>>\n>>> # Query a table\n>>> result = supabase.table('registry_items').select('*').execute()\n>>> items = result.data\n>>> print(f\"Found {len(items)} registry items\")",
+      "names": [
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 9,
+          "end_lineno": 9,
+          "context": "none",
+          "resolved_location": "print"
+        },
+        {
+          "import_components": [
+            "len"
+          ],
+          "code_str": "len",
+          "lineno": 9,
+          "end_lineno": 9,
+          "context": "none",
+          "resolved_location": "len"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/db/supabase/index",
+        "ref_id": "module-dataflow.db.supabase",
+        "headings": [
+          "dataflow.db.supabase"
+        ]
+      },
+      "doc_lineno": 22
+    },
+    {
+      "source": ">>> # Get client with default schema\n>>> client = get_supabase_client()\n>>>\n>>> # Get client with specific schema\n>>> registry_client = get_supabase_client(\"registry\")",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/db/supabase/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.db.supabase",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 115
+    },
+    {
+      "source": ">>> parse_table_reference(\"items\")\n('items', 'registry')  # Uses default schema mapping\n>>> parse_table_reference(\"registry.items\")\n('items', 'registry')  # Explicit schema\n>>> parse_table_reference(\"custom_table\")\n('custom_table', None)  # No mapping found",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/db/supabase/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.db.supabase",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 145
+    }
+  ],
+  "autoapi/dataflow/discovery/index": [],
+  "autoapi/dataflow/fetchers/index": [
+    {
+      "source": "from haive.fetchers import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/fetchers/index",
+        "ref_id": "module-dataflow.fetchers",
+        "headings": [
+          "dataflow.fetchers"
+        ]
+      },
+      "doc_lineno": 17
+    }
+  ],
+  "autoapi/dataflow/fetchers/lite_llm_import/index": [],
+  "autoapi/dataflow/game_agent/index": [],
+  "autoapi/dataflow/importers/embeddings_importer/index": [
+    {
+      "source": ">>> success = import_embedding_models()\n>>> if success:\n...     print(\"Embedding models imported successfully\")",
+      "names": [
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 3,
+          "end_lineno": 3,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/importers/embeddings_importer/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.importers.embeddings_importer",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 52
+    }
+  ],
+  "autoapi/dataflow/importers/index": [],
+  "autoapi/dataflow/importers/litellm_importer/index": [],
+  "autoapi/dataflow/importers/tak/index": [],
+  "autoapi/dataflow/index": [],
+  "autoapi/dataflow/internal_websockets/handlers/index": [],
+  "autoapi/dataflow/internal_websockets/index": [
+    {
+      "source": "from haive.internal_websockets import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/internal_websockets/index",
+        "ref_id": "module-dataflow.internal_websockets",
+        "headings": [
+          "dataflow.internal_websockets"
+        ]
+      },
+      "doc_lineno": 18
+    }
+  ],
+  "autoapi/dataflow/internal_websockets/manager/index": [],
+  "autoapi/dataflow/llms/api/index": [],
+  "autoapi/dataflow/llms/index": [
+    {
+      "source": "from haive.llms import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/llms/index",
+        "ref_id": "module-dataflow.llms",
+        "headings": [
+          "dataflow.llms"
+        ]
+      },
+      "doc_lineno": 18
+    }
+  ],
+  "autoapi/dataflow/llms/models/index": [
+    {
+      "source": "from haive.dataflow.llms.models import Provider, Model, ModelCapabilities\n\n# Create a provider\nprovider = Provider(\n    name=\"OpenAI\",\n    is_available=True,\n    created_at=\"2024-01-01T00:00:00Z\",\n    updated_at=\"2024-01-01T00:00:00Z\"\n)\n\n# Define model capabilities\ncapabilities = ModelCapabilities(\n    supports_function_calling=True,\n    supports_vision=True,\n    supports_response_schema=True\n)\n\n# Create a model entry\nmodel = Model(\n    model_id=\"gpt-4-vision-preview\",\n    provider=\"OpenAI\",\n    mode=\"chat\",\n    litellm_provider=\"openai\",\n    max_tokens=128000,\n    max_input_tokens=120000,\n    max_output_tokens=8000,\n    capabilities=capabilities\n)",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/llms/models/index",
+        "ref_id": "module-dataflow.llms.models",
+        "headings": [
+          "dataflow.llms.models"
+        ]
+      },
+      "doc_lineno": 25
+    },
+    {
+      "source": "from haive.dataflow.llms.models import Pricing\n\npricing = Pricing(\n    input_cost_per_token=0.00001,\n    output_cost_per_token=0.00003,\n    cache_read_input_token_cost=0.000005\n)\n\nmodel = Model(\n    model_id=\"claude-3-opus\",\n    provider=\"Anthropic\",\n    mode=\"chat\",\n    litellm_provider=\"anthropic\",\n    max_tokens=200000,\n    max_input_tokens=180000,\n    max_output_tokens=20000,\n    pricing=pricing\n)",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/llms/models/index",
+        "ref_id": "module-dataflow.llms.models",
+        "headings": [
+          "dataflow.llms.models"
+        ]
+      },
+      "doc_lineno": 57
+    }
+  ],
+  "autoapi/dataflow/main/index": [],
+  "autoapi/dataflow/mcp/client/index": [],
+  "autoapi/dataflow/mcp/discovery/index": [],
+  "autoapi/dataflow/mcp/health/index": [],
+  "autoapi/dataflow/mcp/index": [],
+  "autoapi/dataflow/models/index": [],
+  "autoapi/dataflow/persistence/conversations/index": [
+    {
+      "source": ">>> metadata = ConversationMetadata(\n...     agent_id=\"agent-123\",\n...     title=\"Customer Support\",\n...     tags=[\"support\", \"billing\"],\n...     custom_data={\"priority\": \"high\"}\n... )",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/persistence/conversations/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.persistence.conversations",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 228
+    }
+  ],
+  "autoapi/dataflow/persistence/index": [
+    {
+      "source": "from haive.persistence import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/persistence/index",
+        "ref_id": "module-dataflow.persistence",
+        "headings": [
+          "dataflow.persistence"
+        ]
+      },
+      "doc_lineno": 18
+    }
+  ],
+  "autoapi/dataflow/persistence/supabase_adapter/index": [
+    {
+      "source": ")\n```",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/persistence/supabase_adapter/index",
+        "ref_id": "module-dataflow.persistence.supabase_adapter",
+        "headings": [
+          "dataflow.persistence.supabase_adapter"
+        ]
+      },
+      "doc_lineno": null
+    }
+  ],
+  "autoapi/dataflow/providers/agent_provider/index": [],
+  "autoapi/dataflow/providers/base/index": [],
+  "autoapi/dataflow/providers/index": [
+    {
+      "source": "from haive.providers import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/providers/index",
+        "ref_id": "module-dataflow.providers",
+        "headings": [
+          "dataflow.providers"
+        ]
+      },
+      "doc_lineno": 18
+    }
+  ],
+  "autoapi/dataflow/registries/index": [
+    {
+      "source": "from haive.registries import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/registries/index",
+        "ref_id": "module-dataflow.registries",
+        "headings": [
+          "dataflow.registries"
+        ]
+      },
+      "doc_lineno": 18
+    }
+  ],
+  "autoapi/dataflow/registries/main/index": [],
+  "autoapi/dataflow/registries/model_registry/index": [],
+  "autoapi/dataflow/registry/base/index": [],
+  "autoapi/dataflow/registry/bin/index": [],
+  "autoapi/dataflow/registry/bin/litellm_cli/index": [],
+  "autoapi/dataflow/registry/bin/registry_cli/index": [],
+  "autoapi/dataflow/registry/bin/vault_cli/index": [],
+  "autoapi/dataflow/registry/core/index": [
+    {
+      "source": ">>> from haive.dataflow.registry.core import registry_system\n>>> from haive.dataflow.registry.models import EntityType\n>>>\n>>> # Register a new component\n>>> entity_id = registry_system.register_entity(\n...     name=\"TextSummarizer\",\n...     type=EntityType.TOOL,\n...     description=\"Summarizes text documents\",\n...     module_path=\"haive.tools.summarizers\",\n...     class_name=\"TextSummarizerTool\"\n... )\n>>>\n>>> # Query for components by type\n>>> tools = registry_system.get_entities_by_type(EntityType.TOOL)\n>>> print(f\"Found {len(tools)} registered tools\")\n>>>\n>>> # Get a specific component by ID\n>>> entity = registry_system.get_entity(entity_id)\n>>> print(f\"Retrieved entity: {entity.name}\")",
+      "names": [
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 15,
+          "end_lineno": 15,
+          "context": "none",
+          "resolved_location": "print"
+        },
+        {
+          "import_components": [
+            "len"
+          ],
+          "code_str": "len",
+          "lineno": 15,
+          "end_lineno": 15,
+          "context": "none",
+          "resolved_location": "len"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 19,
+          "end_lineno": 19,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/core/index",
+        "ref_id": "module-dataflow.registry.core",
+        "headings": [
+          "dataflow.registry.core"
+        ]
+      },
+      "doc_lineno": 23
+    },
+    {
+      "source": ">>> from haive.dataflow.registry.core import registry_system\n>>> from haive.dataflow.registry.models import EntityType\n>>>\n>>> # Register a new component\n>>> entity_id = registry_system.register_entity(\n...     name=\"TextAnalyzer\",\n...     type=EntityType.TOOL,\n...     description=\"Analyzes text content\",\n...     module_path=\"haive.tools.analyzers\",\n...     class_name=\"TextAnalyzerTool\"\n... )\n>>>\n>>> # Add configuration\n>>> registry_system.add_configuration(\n...     registry_id=entity_id,\n...     config_type=\"input_schema\",\n...     config_data={\"type\": \"object\", \"properties\": {\"text\": {\"type\": \"string\"}}}\n... )",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/registry/core/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.core",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 317
+    }
+  ],
+  "autoapi/dataflow/registry/db/index": [],
+  "autoapi/dataflow/registry/discovery/index": [
+    {
+      "source": ">>> from haive.dataflow.registry.discovery import discover_agents, discover_tools\n>>>\n>>> # Discover all agents in the system\n>>> discovered_agents = discover_agents()\n>>> print(f\"Discovered {len(discovered_agents)} agents\")\n>>>\n>>> # Discover tools and toolkits\n>>> discovered_tools = discover_tools()\n>>> discovered_toolkits = discover_toolkits()\n>>> print(f\"Discovered {len(discovered_tools)} tools and {len(discovered_toolkits)} toolkits\")",
+      "names": [
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 5,
+          "end_lineno": 5,
+          "context": "none",
+          "resolved_location": "print"
+        },
+        {
+          "import_components": [
+            "len"
+          ],
+          "code_str": "len",
+          "lineno": 5,
+          "end_lineno": 5,
+          "context": "none",
+          "resolved_location": "len"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 10,
+          "end_lineno": 10,
+          "context": "none",
+          "resolved_location": "print"
+        },
+        {
+          "import_components": [
+            "len"
+          ],
+          "code_str": "len",
+          "lineno": 10,
+          "end_lineno": 10,
+          "context": "none",
+          "resolved_location": "len"
+        },
+        {
+          "import_components": [
+            "len"
+          ],
+          "code_str": "len",
+          "lineno": 10,
+          "end_lineno": 10,
+          "context": "none",
+          "resolved_location": "len"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/discovery/index",
+        "ref_id": "module-dataflow.registry.discovery",
+        "headings": [
+          "dataflow.registry.discovery"
+        ]
+      },
+      "doc_lineno": 35
+    },
+    {
+      "source": ">>> mcp_servers = discover_mcp_servers()\n>>> print(f\"Discovered {len(mcp_servers)} MCP servers\")",
+      "names": [
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "none",
+          "resolved_location": "print"
+        },
+        {
+          "import_components": [
+            "len"
+          ],
+          "code_str": "len",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "none",
+          "resolved_location": "len"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/discovery/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.discovery",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 141
+    },
+    {
+      "source": ">>> modules = discover_modules(\"haive.tools\")\n>>> print(f\"Discovered modules: {modules}\")\nDiscovered modules: ['haive.tools.text', 'haive.tools.image', ...]",
+      "names": [
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/discovery/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.discovery",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 163
+    }
+  ],
+  "autoapi/dataflow/registry/importers/embeddings_importer/index": [],
+  "autoapi/dataflow/registry/importers/index": [],
+  "autoapi/dataflow/registry/importers/litellm_importer/index": [
+    {
+      "source": ">>> provider_id = get_or_create_provider_type(\"openai\", \"OpenAI\")\n>>> if provider_id:\n...     print(f\"Provider type ID: {provider_id}\")",
+      "names": [
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 3,
+          "end_lineno": 3,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/importers/litellm_importer/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.importers.litellm_importer",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 105
+    }
+  ],
+  "autoapi/dataflow/registry/importers/tak/index": [],
+  "autoapi/dataflow/registry/index": [
+    {
+      "source": ">>> from haive.dataflow.registry import registry_system, EntityType, discover_agents\n>>>\n>>> # Discover and register all agents\n>>> discovered_agents = discover_agents()\n>>> print(f\"Discovered {len(discovered_agents)} agents\")\n>>>\n>>> # Get all registered tools\n>>> tools = registry_system.get_entities_by_type(EntityType.TOOL)\n>>> for tool in tools:\n>>>     print(f\"Tool: {tool.name} - {tool.description}\")",
+      "names": [
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 5,
+          "end_lineno": 5,
+          "context": "none",
+          "resolved_location": "print"
+        },
+        {
+          "import_components": [
+            "len"
+          ],
+          "code_str": "len",
+          "lineno": 5,
+          "end_lineno": 5,
+          "context": "none",
+          "resolved_location": "len"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 10,
+          "end_lineno": 10,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/index",
+        "ref_id": "module-dataflow.registry",
+        "headings": [
+          "dataflow.registry"
+        ]
+      },
+      "doc_lineno": 29
+    }
+  ],
+  "autoapi/dataflow/registry/lazy_core/index": [],
+  "autoapi/dataflow/registry/main/index": [],
+  "autoapi/dataflow/registry/models/index": [
+    {
+      "source": ">>> from haive.dataflow.registry.models import RegistryItem, EntityType\n>>> from datetime import datetime\n>>>\n>>> # Create a new registry item\n>>> item = RegistryItem(\n...     name=\"TextClassifier\",\n...     type=EntityType.AGENT,\n...     description=\"Classifies text into categories\",\n...     module_path=\"haive.agents.classifiers\",\n...     class_name=\"TextClassifierAgent\",\n...     created_at=datetime.now()\n... )\n>>>\n>>> # Access properties\n>>> print(f\"Registry item: {item.name} ({item.type})\")\n>>> print(f\"Created at: {item.created_at}\")",
+      "names": [
+        {
+          "import_components": [
+            "datetime"
+          ],
+          "code_str": "datetime",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_from",
+          "resolved_location": "datetime"
+        },
+        {
+          "import_components": [
+            "datetime",
+            "datetime"
+          ],
+          "code_str": "datetime",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_target",
+          "resolved_location": "datetime.datetime"
+        },
+        {
+          "import_components": [
+            "datetime",
+            "datetime",
+            "now"
+          ],
+          "code_str": "datetime.now",
+          "lineno": 11,
+          "end_lineno": 11,
+          "context": "none",
+          "resolved_location": "datetime.datetime.now"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 15,
+          "end_lineno": 15,
+          "context": "none",
+          "resolved_location": "print"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 16,
+          "end_lineno": 16,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/models/index",
+        "ref_id": "module-dataflow.registry.models",
+        "headings": [
+          "dataflow.registry.models"
+        ]
+      },
+      "doc_lineno": 35
+    },
+    {
+      "source": ">>> from haive.dataflow.registry.models import Configuration, ConfigType\n>>> from datetime import datetime\n>>>\n>>> config = Configuration(\n...     registry_id=\"tool-123\",\n...     config_type=ConfigType.INPUT_SCHEMA,\n...     config_data={\n...         \"type\": \"object\",\n...         \"properties\": {\n...             \"text\": {\"type\": \"string\", \"description\": \"Text to process\"},\n...             \"max_length\": {\"type\": \"integer\", \"default\": 100}\n...         },\n...         \"required\": [\"text\"]\n...     },\n...     created_at=datetime.now()\n... )",
+      "names": [
+        {
+          "import_components": [
+            "datetime"
+          ],
+          "code_str": "datetime",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_from",
+          "resolved_location": "datetime"
+        },
+        {
+          "import_components": [
+            "datetime",
+            "datetime"
+          ],
+          "code_str": "datetime",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_target",
+          "resolved_location": "datetime.datetime"
+        },
+        {
+          "import_components": [
+            "datetime",
+            "datetime",
+            "now"
+          ],
+          "code_str": "datetime.now",
+          "lineno": 15,
+          "end_lineno": 15,
+          "context": "none",
+          "resolved_location": "datetime.datetime.now"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/models/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.models",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 184
+    },
+    {
+      "source": ">>> from haive.dataflow.registry.models import Dependency, DependencyType\n>>> from datetime import datetime\n>>>\n>>> dependency = Dependency(\n...     registry_id=\"tool-123\",\n...     dependent_id=\"engine-456\",\n...     dependency_type=DependencyType.REQUIRES,\n...     created_at=datetime.now()\n... )",
+      "names": [
+        {
+          "import_components": [
+            "datetime"
+          ],
+          "code_str": "datetime",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_from",
+          "resolved_location": "datetime"
+        },
+        {
+          "import_components": [
+            "datetime",
+            "datetime"
+          ],
+          "code_str": "datetime",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_target",
+          "resolved_location": "datetime.datetime"
+        },
+        {
+          "import_components": [
+            "datetime",
+            "datetime",
+            "now"
+          ],
+          "code_str": "datetime.now",
+          "lineno": 8,
+          "end_lineno": 8,
+          "context": "none",
+          "resolved_location": "datetime.datetime.now"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/models/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.models",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 289
+    },
+    {
+      "source": ">>> from haive.dataflow.registry.models import EnvironmentVar\n>>> from datetime import datetime\n>>>\n>>> env_var = EnvironmentVar(\n...     registry_id=\"agent-123\",\n...     env_name=\"OPENAI_API_KEY\",\n...     is_required=True,\n...     created_at=datetime.now()\n... )\n>>>\n>>> optional_var = EnvironmentVar(\n...     registry_id=\"tool-456\",\n...     env_name=\"DEBUG_LEVEL\",\n...     is_required=False,\n...     default_value=\"INFO\",\n...     created_at=datetime.now()\n... )",
+      "names": [
+        {
+          "import_components": [
+            "datetime"
+          ],
+          "code_str": "datetime",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_from",
+          "resolved_location": "datetime"
+        },
+        {
+          "import_components": [
+            "datetime",
+            "datetime"
+          ],
+          "code_str": "datetime",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_target",
+          "resolved_location": "datetime.datetime"
+        },
+        {
+          "import_components": [
+            "datetime",
+            "datetime",
+            "now"
+          ],
+          "code_str": "datetime.now",
+          "lineno": 8,
+          "end_lineno": 8,
+          "context": "none",
+          "resolved_location": "datetime.datetime.now"
+        },
+        {
+          "import_components": [
+            "datetime",
+            "datetime",
+            "now"
+          ],
+          "code_str": "datetime.now",
+          "lineno": 16,
+          "end_lineno": 16,
+          "context": "none",
+          "resolved_location": "datetime.datetime.now"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/models/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.models",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 496
+    },
+    {
+      "source": ">>> from haive.dataflow.registry.models import GraphDefinition\n>>> from datetime import datetime\n>>>\n>>> graph = GraphDefinition(\n...     registry_id=\"agent-123\",\n...     nodes=[\n...         {\"id\": \"node1\", \"type\": \"input\", \"config\": {...}},\n...         {\"id\": \"node2\", \"type\": \"processing\", \"config\": {...}},\n...         {\"id\": \"node3\", \"type\": \"output\", \"config\": {...}}\n...     ],\n...     edges=[\n...         {\"source\": \"node1\", \"target\": \"node2\"},\n...         {\"source\": \"node2\", \"target\": \"node3\"}\n...     ],\n...     created_at=datetime.now()\n... )",
+      "names": [
+        {
+          "import_components": [
+            "datetime"
+          ],
+          "code_str": "datetime",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_from",
+          "resolved_location": "datetime"
+        },
+        {
+          "import_components": [
+            "datetime",
+            "datetime"
+          ],
+          "code_str": "datetime",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_target",
+          "resolved_location": "datetime.datetime"
+        },
+        {
+          "import_components": [
+            "datetime",
+            "datetime",
+            "now"
+          ],
+          "code_str": "datetime.now",
+          "lineno": 15,
+          "end_lineno": 15,
+          "context": "none",
+          "resolved_location": "datetime.datetime.now"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/models/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.models",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 610
+    },
+    {
+      "source": ">>> from haive.dataflow.registry.models import ImportLogItem, ImportStatus\n>>> from datetime import datetime\n>>>\n>>> log_entry = ImportLogItem(\n...     import_session=\"session-123\",\n...     entity_name=\"gpt-4\",\n...     entity_type=\"llm_model\",\n...     status=ImportStatus.SUCCESS,\n...     message=\"Successfully imported model\"\n... )\n>>>\n>>> error_log = ImportLogItem(\n...     import_session=\"session-123\",\n...     entity_name=\"invalid-model\",\n...     entity_type=\"llm_model\",\n...     status=ImportStatus.FAILURE,\n...     message=\"Failed to import model\",\n...     traceback=\"ImportError: Model not found\"\n... )",
+      "names": [
+        {
+          "import_components": [
+            "datetime"
+          ],
+          "code_str": "datetime",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_from",
+          "resolved_location": "datetime"
+        },
+        {
+          "import_components": [
+            "datetime",
+            "datetime"
+          ],
+          "code_str": "datetime",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_target",
+          "resolved_location": "datetime.datetime"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/models/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.models",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 731
+    },
+    {
+      "source": ">>> prompt = MCPPromptDefinition(\n...     name=\"code_review\",\n...     description=\"Review code for best practices\",\n...     server_name=\"github\",\n...     template=\"Review this code: {code}\",\n...     variables=[{\"name\": \"code\", \"type\": \"string\", \"required\": True}],\n...     tags=[\"code\", \"review\"]\n... )",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/registry/models/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.models",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 893
+    },
+    {
+      "source": ">>> resource = MCPResourceDefinition(\n...     name=\"project_docs\",\n...     uri=\"file:///project/docs/\",\n...     server_name=\"filesystem\",\n...     mime_type=\"text/markdown\",\n...     description=\"Project documentation files\"\n... )",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/registry/models/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.models",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 1017
+    },
+    {
+      "source": ">>> config = MCPServerConfig(\n...     name=\"filesystem\",\n...     transport=MCPTransport.STDIO,\n...     command=\"npx\",\n...     args=[\"-y\", \"@modelcontextprotocol/server-filesystem\"],\n...     capabilities=[\"file_read\", \"file_write\", \"directory_list\"]\n... )",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/registry/models/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.models",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 1161
+    },
+    {
+      "source": ">>> health = MCPServerHealth(\n...     server_name=\"filesystem\",\n...     is_healthy=True,\n...     last_check=datetime.now(),\n...     response_time_ms=50.0,\n...     error_count=0,\n...     capabilities_available=[\"file_read\", \"file_write\"]\n... )",
+      "names": [
+        {
+          "import_components": [
+            "datetime",
+            "datetime",
+            "now"
+          ],
+          "code_str": "datetime.now",
+          "lineno": 4,
+          "end_lineno": 4,
+          "context": "none",
+          "resolved_location": "datetime.datetime.now"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/models/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.models",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 1306
+    },
+    {
+      "source": ">>> tool = MCPToolDefinition(\n...     name=\"read_file\",\n...     description=\"Read contents of a file\",\n...     server_name=\"filesystem\",\n...     schema={\"type\": \"object\", \"properties\": {\"path\": {\"type\": \"string\"}}},\n...     tags=[\"filesystem\", \"read\"]\n... )",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/registry/models/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.models",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 1432
+    },
+    {
+      "source": ">>> from haive.dataflow.registry.models import RegistryItem, EntityType\n>>> from datetime import datetime\n>>>\n>>> item = RegistryItem(\n...     name=\"TextSummarizer\",\n...     type=EntityType.TOOL,\n...     description=\"Summarizes long text documents\",\n...     module_path=\"haive.tools.summarizers\",\n...     class_name=\"TextSummarizerTool\",\n...     created_at=datetime.now(),\n...     metadata={\"version\": \"1.0\", \"author\": \"Haive Team\"}\n... )",
+      "names": [
+        {
+          "import_components": [
+            "datetime"
+          ],
+          "code_str": "datetime",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_from",
+          "resolved_location": "datetime"
+        },
+        {
+          "import_components": [
+            "datetime",
+            "datetime"
+          ],
+          "code_str": "datetime",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_target",
+          "resolved_location": "datetime.datetime"
+        },
+        {
+          "import_components": [
+            "datetime",
+            "datetime",
+            "now"
+          ],
+          "code_str": "datetime.now",
+          "lineno": 10,
+          "end_lineno": 10,
+          "context": "none",
+          "resolved_location": "datetime.datetime.now"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/models/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.models",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 1596
+    }
+  ],
+  "autoapi/dataflow/registry/providers/agent_provider/index": [],
+  "autoapi/dataflow/registry/providers/base/index": [
+    {
+      "source": ">>> from haive.dataflow.registry.providers.base import EntityProvider\n>>> from haive.dataflow.registry.models import EntityType\n>>>\n>>> class CustomProvider(EntityProvider):\n...     def __init__(self):\n...         super().__init__(EntityType.CUSTOM)\n...\n...     def discover(self, module_paths=None):\n...         # Custom discovery logic\n...         paths = module_paths or self.get_default_search_paths()\n...         # ... discovery implementation ...\n...         return registered_ids\n...\n...     def get_default_search_paths(self):\n...         return [\"my_package.custom_components\"]",
+      "names": [
+        {
+          "import_components": [
+            "super"
+          ],
+          "code_str": "super",
+          "lineno": 6,
+          "end_lineno": 6,
+          "context": "none",
+          "resolved_location": "super"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/providers/base/index",
+        "ref_id": "module-dataflow.registry.providers.base",
+        "headings": [
+          "dataflow.registry.providers.base"
+        ]
+      },
+      "doc_lineno": 27
+    },
+    {
+      "source": ">>> provider = SomeEntityProvider()\n>>> modules = provider.discover_modules(\"haive.tools\")\n>>> print(f\"Discovered modules: {modules}\")\nDiscovered modules: ['haive.tools.text', 'haive.tools.image', ...]",
+      "names": [
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 3,
+          "end_lineno": 3,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/providers/base/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.providers.base",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 193
+    },
+    {
+      "source": ">>> def get_default_search_paths(self):\n...     return [\n...         \"haive.agents\",\n...         \"haive.core.agents\",\n...         \"my_package.custom_agents\"\n...     ]",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/registry/providers/base/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.providers.base",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 220
+    }
+  ],
+  "autoapi/dataflow/registry/providers/index": [
+    {
+      "source": "from haive.providers import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/registry/providers/index",
+        "ref_id": "module-dataflow.registry.providers",
+        "headings": [
+          "dataflow.registry.providers"
+        ]
+      },
+      "doc_lineno": 18
+    }
+  ],
+  "autoapi/dataflow/registry/registries/index": [
+    {
+      "source": "from haive.registries import module_function\n\n# TODO: Add example",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/registry/registries/index",
+        "ref_id": "module-dataflow.registry.registries",
+        "headings": [
+          "dataflow.registry.registries"
+        ]
+      },
+      "doc_lineno": 18
+    }
+  ],
+  "autoapi/dataflow/registry/registries/main/index": [],
+  "autoapi/dataflow/registry/registries/model_registry/index": [],
+  "autoapi/dataflow/registry/serialization/index": [
+    {
+      "source": ">>> from haive.dataflow.registry.serialization import serialize_object, deserialize_object\n>>>\n>>> # Create a complex object\n>>> class CustomObject:\n...     def __init__(self, name, value):\n...         self.name = name\n...         self.value = value\n>>>\n>>> obj = CustomObject(\"test\", 42)\n>>>\n>>> # Serialize it\n>>> serialized = serialize_object(obj)\n>>> print(f\"Serialized: {serialized}\")\n>>>\n>>> # Deserialize it\n>>> restored = deserialize_object(serialized)\n>>> print(f\"Restored: {restored.name}, {restored.value}\")",
+      "names": [
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 13,
+          "end_lineno": 13,
+          "context": "none",
+          "resolved_location": "print"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 17,
+          "end_lineno": 17,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/serialization/index",
+        "ref_id": "module-dataflow.registry.serialization",
+        "headings": [
+          "dataflow.registry.serialization"
+        ]
+      },
+      "doc_lineno": 31
+    },
+    {
+      "source": ">>> from haive.dataflow.registry.serialization import SerializationRegistry\n>>>\n>>> # Register serializer and deserializer for a custom type\n>>> SerializationRegistry.register(\n...     type_name=\"my_module.CustomType\",\n...     serializer=lambda obj: {\"data\": obj.to_dict()},\n...     deserializer=lambda data: CustomType.from_dict(data[\"data\"])\n... )",
+      "names": [],
+      "example": {
+        "document": "autoapi/dataflow/registry/serialization/index",
+        "ref_id": "module-dataflow.registry.serialization",
+        "headings": [
+          "dataflow.registry.serialization"
+        ]
+      },
+      "doc_lineno": 53
+    },
+    {
+      "source": ">>> from haive.dataflow.registry.serialization import SerializationRegistry\n>>>\n>>> # Define a custom type\n>>> class CustomType:\n...     def __init__(self, name, value):\n...         self.name = name\n...         self.value = value\n...\n...     def to_dict(self):\n...         return {\"name\": self.name, \"value\": self.value}\n...\n...     @classmethod\n...     def from_dict(cls, data):\n...         return cls(data[\"name\"], data[\"value\"])\n>>>\n>>> # Register serializer and deserializer\n>>> SerializationRegistry.register(\n...     type_name=\"__main__.CustomType\",\n...     serializer=lambda obj: {\"data\": obj.to_dict()},\n...     deserializer=lambda data: CustomType.from_dict(data[\"data\"])\n... )",
+      "names": [
+        {
+          "import_components": [
+            "classmethod"
+          ],
+          "code_str": "classmethod",
+          "lineno": 12,
+          "end_lineno": 12,
+          "context": "none",
+          "resolved_location": "classmethod"
+        }
+      ],
+      "example": {
+        "document": "autoapi/dataflow/registry/serialization/index",
+        "ref_id": "module-contents",
+        "headings": [
+          "dataflow.registry.serialization",
+          "Module Contents"
+        ]
+      },
+      "doc_lineno": 125
+    }
+  ],
+  "autoapi/dataflow/registry/utils/index": [],
+  "autoapi/dataflow/registry/utils/logging/index": [],
+  "autoapi/dataflow/registry/utils/vault_migration_script/index": [],
+  "autoapi/dataflow/router/index": [],
+  "autoapi/dataflow/serialization/index": [],
+  "autoapi/dataflow/tic_tac_toe_api/index": [],
+  "autoapi/dataflow/utils/index": [],
+  "autoapi/dataflow/utils/logging/index": [],
+  "autoapi/dataflow/utils/vault_migration_script/index": [],
+  "autoapi/index": [],
+  "changelog": [
+    {
+      "source": ".. changelog::\n   :towncrier: ../../\n   :towncrier-skip-if-empty:\n",
+      "names": [],
+      "example": {
+        "document": "changelog",
+        "ref_id": "release-notes",
+        "headings": [
+          "Changelog",
+          "Release Notes"
+        ]
+      },
+      "doc_lineno": null
+    },
+    {
+      "source": ".. git_changelog::\n   :revisions: 10\n   :rev-list-extra: --first-parent\n",
+      "names": [],
+      "example": {
+        "document": "changelog",
+        "ref_id": "recent-documentation-updates",
+        "headings": [
+          "Changelog",
+          "Recent Documentation Updates"
+        ]
+      },
+      "doc_lineno": null
+    }
+  ],
+  "index": [
+    {
+      "source": "Haive Dataflow Documentation\n===========================",
+      "names": [],
+      "example": {
+        "document": "index",
+        "ref_id": "haive-dataflow-documentation",
+        "headings": [
+          "Haive Dataflow Documentation"
+        ]
+      },
+      "doc_lineno": null
+    }
+  ]
+}
