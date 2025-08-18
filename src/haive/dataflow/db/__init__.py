@@ -1,17 +1,25 @@
-"""Db - TODO: Add brief description.
+"""Database module for Haive Dataflow.
 
-TODO: Add detailed description of module functionality
+This module provides database connectivity and operations for the Haive dataflow
+system, including Supabase integration and database schema management.
 
-
+Components:
+    supabase: Supabase database connection and operations
+    schema: Database schema definitions
+    inspect_supabase: Supabase inspection utilities
 
 Example:
     Basic usage::
 
-        from haive.db import module_function
-
-        # TODO: Add example
-
+        from haive.dataflow.db import supabase
+        from haive.dataflow.db.schema import DatabaseSchema
 
 """
 
-__all__ = []
+from . import supabase
+from . import schema
+
+__all__ = [
+    "supabase",
+    "schema",
+]
