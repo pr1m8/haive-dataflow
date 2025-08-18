@@ -22,11 +22,13 @@ release = "0.1.0"
 from pydevelop_docs.config import get_haive_config
 
 # Get the standardized configuration
-_config = get_haive_config(project, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_config = get_haive_config(
+    project, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
 
 # Apply all configuration settings
 for key, value in _config.items():
-    if key not in ['project', 'copyright', 'author', 'release']:
+    if key not in ["project", "copyright", "author", "release"]:
         globals()[key] = value
 
 # -- Project-specific overrides ----------------------------------------------
@@ -35,9 +37,23 @@ autoapi_dirs = ["../../src"]
 
 # -- Additional setup --------------------------------------------------------
 
+
 def setup(app):
     """Sphinx setup hook."""
+    # Modern CSS files (matches html_css_files)
+    css_files = [
+        "enhanced-design.css",
+        "breadcrumb-navigation.css",
+        "mermaid-custom.css",
+        "tippy-enhancements.css",
+    ]
+    for css_file in css_files:
+        if os.path.exists("_static/" + css_file):
+            app.add_css_file(css_file)
+
+    # Legacy fallback
     if os.path.exists("_static/css/custom.css"):
         app.add_css_file("css/custom.css")
+
     if os.path.exists("_static/js/api-enhancements.js"):
         app.add_js_file("js/api-enhancements.js")
