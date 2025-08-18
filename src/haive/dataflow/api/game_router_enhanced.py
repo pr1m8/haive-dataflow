@@ -19,18 +19,16 @@ Architecture:
     - Maintains active game sessions in memory
     - Provides WebSocket connections for real-time updates
 
-Example:
-    ```python
-    # Run as standalone server
-    python game_router_enhanced.py
+Examples:
+            # Run as standalone server
+            python game_router_enhanced.py
 
-    # Or integrate into existing FastAPI app
-    from haive.dataflow.api.game_router_enhanced import get_router
+            # Or integrate into existing FastAPI app
+            from haive.dataflow.api.game_router_enhanced import get_router
 
-    app = FastAPI()
-    games_router = get_router()
-    app.include_router(games_router, prefix="/games")
-    ```
+            app = FastAPI()
+            games_router = get_router()
+            app.include_router(games_router, prefix="/games")
 
 Note:
     This implementation fixes the circular import issue and uses the

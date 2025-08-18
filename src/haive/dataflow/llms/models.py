@@ -11,7 +11,7 @@ Key Components:
     - Pricing: Token-based pricing information
     - SearchPricing: Search-specific pricing tiers
 
-Example:
+Examples:
     Basic usage::
 
         from haive.dataflow.llms.models import Provider, Model, ModelCapabilities

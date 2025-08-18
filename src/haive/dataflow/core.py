@@ -97,7 +97,7 @@ class RegistrySystem:
             logger.info("Registry system running in in-memory mode only")
 
     def _ensure_registry_schema(self):
-        """Ensure the registry schema is properly set up for backward
+        """Ensure the registry schema is properly set up for backward.
         compatibility.
         """
         try:
@@ -962,7 +962,7 @@ class RegistrySystem:
         return env_var_id
 
     def _ensure_registry_schema(self):
-        """Ensure the registry schema is properly set up for backward
+        """Ensure the registry schema is properly set up for backward.
         compatibility.
         """
         try:

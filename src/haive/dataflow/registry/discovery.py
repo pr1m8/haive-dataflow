@@ -20,7 +20,7 @@ Functions:
     discover_engines: Discover and register engine components
     discover_games: Discover and register game components
 
-Example:
+Examples:
     Discovering components:
 
     >>> from haive.dataflow.registry.discovery import discover_agents, discover_tools
@@ -85,7 +85,7 @@ def discover_modules(base_path: str) -> list[str]:
     Returns:
         List[str]: List of fully qualified module paths discovered
 
-    Example:
+    Examples:
         >>> modules = discover_modules("haive.tools")
         >>> print(f"Discovered modules: {modules}")
         Discovered modules: ['haive.tools.text', 'haive.tools.image', ...]
@@ -953,7 +953,7 @@ def discover_mcp_servers() -> list[str]:
     Returns:
         List of registry IDs for registered MCP servers
 
-    Example:
+    Examples:
         >>> mcp_servers = discover_mcp_servers()
         >>> print(f"Discovered {len(mcp_servers)} MCP servers")
     """
@@ -964,6 +964,8 @@ def discover_mcp_servers() -> list[str]:
         # Discover MCP servers and register them
 
         async def async_discover():
+            """Async Discover.
+"""
             registry_items = await mcp_discover(registry_system)
             registered_ids = []
 

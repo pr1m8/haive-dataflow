@@ -273,7 +273,7 @@ def run_verify(args):
 
 
 def add_columns(args):
-    """Add the vault reference columns to the database tables using table()
+    """Add the vault reference columns to the database tables using table().
     helper.
     """
     logger.info("Adding vault reference columns to database tables...")

@@ -34,6 +34,16 @@ class APIPattern:
         websocket: bool = False,
         **metadata,
     ):
+        """  Init  .
+
+Args:
+    name: [TODO: Add description]
+    pattern_type: [TODO: Add description]
+    handler: [TODO: Add description]
+    route: [TODO: Add description]
+    method: [TODO: Add description]
+    websocket: [TODO: Add description]
+"""
         self.name = name
         self.pattern_type = pattern_type  # 'rest', 'websocket', 'stream', 'agent'
         self.handler = handler
@@ -100,6 +110,11 @@ class APIDiscovery:
     """Discovers API patterns across the Haive Dataflow ecosystem."""
 
     def __init__(self, api_dir: Path):
+        """  Init  .
+
+Args:
+    api_dir: [TODO: Add description]
+"""
         self.api_dir = Path(api_dir)
         self.discovered_patterns: list[APIPattern] = []
         self.failed_imports: list[str] = []
@@ -306,6 +321,8 @@ class APIDiscovery:
         """Create a mock handler for analysis purposes."""
 
         def mock_handler(*args, **kwargs):
+            """Mock Handler.
+"""
             return {"mock": True, "function": node.name}
 
         # Copy basic attributes
@@ -319,6 +336,11 @@ class APIRouterGenerator:
     """Generates router configurations from discovered patterns."""
 
     def __init__(self, patterns: list[APIPattern]):
+        """  Init  .
+
+Args:
+    patterns: [TODO: Add description]
+"""
         self.patterns = patterns
 
     def generate_unified_router(self, output_file: Path | None = None) -> str:
@@ -521,6 +543,11 @@ class APIDocumentationGenerator:
     """Generates documentation for discovered API patterns."""
 
     def __init__(self, patterns: list[APIPattern]):
+        """  Init  .
+
+Args:
+    patterns: [TODO: Add description]
+"""
         self.patterns = patterns
 
     def generate_api_docs(self, output_dir: Path) -> list[Path]:
@@ -639,7 +666,7 @@ All endpoints follow consistent error response format:
                 f"| {pattern_type.title()} | {len(patterns)} | {rest_count} | {ws_count} |"
             )
 
-        table_header = """| Pattern Type | Total | REST | WebSocket |
+        table_header = """| Pattern Type | Total | REST | WebSocket |.
 |--------------|-------|------|-----------|"""
 
         return table_header + "\\n" + "\\n".join(table_rows)

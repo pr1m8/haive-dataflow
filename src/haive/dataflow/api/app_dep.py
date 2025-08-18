@@ -41,10 +41,14 @@ def create_app() -> FastAPI:
 
     @app.on_event("startup")
     async def startup_event():
+        """Startup Event.
+"""
         logger.info("Starting Haive Agent API")
 
     @app.on_event("shutdown")
     async def shutdown_event():
+        """Shutdown Event.
+"""
         logger.info("Shutting down Haive Agent API")
 
     return app

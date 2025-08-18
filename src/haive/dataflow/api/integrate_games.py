@@ -6,13 +6,11 @@ to an existing FastAPI application. It integrates with the game_router module
 to discover and register game agents dynamically.
 
 Usage:
-    ```python
-    from haive.dataflow.api.app import app
-    from haive.dataflow.api.integrate_games import add_game_routes
+            from haive.dataflow.api.app import app
+            from haive.dataflow.api.integrate_games import add_game_routes
 
-    # Add game routes to the main app
-    add_game_routes(app)
-    ```
+            # Add game routes to the main app
+            add_game_routes(app)
 """
 
 import logging

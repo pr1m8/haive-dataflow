@@ -393,20 +393,17 @@ class GameSocketFactory:
     This class creates specialized socket servers for different game types,
     with appropriate message handling and state management for each game.
 
-    Example:
-        ```python
+    Examples:
+                # Create a chess socket server
+                chess_socket = GameSocketFactory.create_chess_socket(app)
 
-        # Create a chess socket server
-        chess_socket = GameSocketFactory.create_chess_socket(app)
-
-        # Or create a custom socket server
-        custom_socket = GameSocketFactory.create_socket(
-            app,
-            agent_class=ChessAgent,
-            state_schema=ChessState,
-            route_prefix="/ws/chess"
-        )
-        ```
+                # Or create a custom socket server
+                custom_socket = GameSocketFactory.create_socket(
+                    app,
+                    agent_class=ChessAgent,
+                    state_schema=ChessState,
+                    route_prefix="/ws/chess"
+                )
     """
 
     @staticmethod

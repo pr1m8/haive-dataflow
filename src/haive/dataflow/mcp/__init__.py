@@ -10,24 +10,22 @@ The module includes:
 - API endpoints for MCP operations
 - Registry integration for MCP entities
 
-Example:
+Examples:
     Basic MCP integration:
 
-    ```python
-    from haive.dataflow.mcp import MCPDiscovery, MCPClient
-    from haive.dataflow import registry_system
+            from haive.dataflow.mcp import MCPDiscovery, MCPClient
+            from haive.dataflow import registry_system
 
-    # Discover and register MCP servers
-    discovery = MCPDiscovery()
-    servers = await discovery.discover_all()
+            # Discover and register MCP servers
+            discovery = MCPDiscovery()
+            servers = await discovery.discover_all()
 
-    # Initialize MCP client with discovered servers
-    client = MCPClient(registry_system)
-    await client.initialize_from_registry()
+            # Initialize MCP client with discovered servers
+            client = MCPClient(registry_system)
+            await client.initialize_from_registry()
 
-    # Get available tools
-    tools = await client.get_available_tools()
-    ```
+            # Get available tools
+            tools = await client.get_available_tools()
 """
 
 from haive.dataflow.mcp.client import MCPClient, MCPToolProvider

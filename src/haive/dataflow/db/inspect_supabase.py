@@ -8,6 +8,8 @@ from haive.dataflow.db.db.supabase import (
 
 
 def main():
+    """Main.
+"""
     client = get_supabase_client()
 
     for _row in fetch_all_schemas_and_tables(client):

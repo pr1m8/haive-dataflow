@@ -18,17 +18,15 @@ Key functions:
 
 Typical usage example:
 
-    ```python
-    from haive.dataflow.registry.importers.litellm_importer import import_litellm_models
+            from haive.dataflow.registry.importers.litellm_importer import import_litellm_models
 
-    # Import all models from LiteLLM
-    session_id, import_count = import_litellm_models()
-    print(f"Imported {import_count} models in session {session_id}")
+            # Import all models from LiteLLM
+            session_id, import_count = import_litellm_models()
+            print(f"Imported {import_count} models in session {session_id}")
 
-    # Import models from a specific provider
-    session_id, import_count = import_litellm_models(provider_filter="openai")
-    print(f"Imported {import_count} OpenAI models")
-    ```
+            # Import models from a specific provider
+            session_id, import_count = import_litellm_models(provider_filter="openai")
+            print(f"Imported {import_count} OpenAI models")
 """
 
 import argparse
@@ -78,7 +76,7 @@ def get_or_create_provider_type(type_name: str, display_name: str) -> str | None
     Returns:
         Optional[str]: The ID of the provider type, or None if creation failed
 
-    Example:
+    Examples:
         >>> provider_id = get_or_create_provider_type("openai", "OpenAI")
         >>> if provider_id:
         ...     print(f"Provider type ID: {provider_id}")

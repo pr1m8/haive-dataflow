@@ -559,6 +559,12 @@ def migrate_engine_api_keys() -> int:
 
                 # Recursively find API keys in the config
                 def find_api_keys(obj, prefix=""):
+                    """Find Api Keys.
+
+Args:
+    obj: [TODO: Add description]
+    prefix: [TODO: Add description]
+"""
                     if isinstance(obj, dict):
                         for key, value in obj.items():
                             # Check if this is an API key
@@ -662,7 +668,7 @@ def add_vault_helper_functions() -> bool:
     """
     try:
         # Create the get_vault_secret function
-        secret_func_sql = """  # nosec B105
+        secret_func_sql = """  # nosec B105.
         CREATE OR REPLACE FUNCTION get_vault_secret(secret_id UUID)
         RETURNS TEXT
         LANGUAGE plpgsql

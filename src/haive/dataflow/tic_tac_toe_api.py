@@ -49,6 +49,8 @@ class TicTacToeResponse(AgentResponseBase):
 
 class TicTacToeAPI(GenericAgentAPI[TicTacToeAgent, TicTacToeConfig]):
     def __init__(self):
+        """  Init  .
+"""
         super().__init__(
             app_name="TicTacToe",
             agent_class=TicTacToeAgent,

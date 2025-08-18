@@ -14,20 +14,18 @@ a singleton instance of the AppSettings class.
 
 Typical usage example:
 
-    ```python
-    from haive.dataflow.config.settings import get_settings
+            from haive.dataflow.config.settings import get_settings
 
-    settings = get_settings()
+            settings = get_settings()
 
-    # Access settings properties
-    api_prefix = settings.api.prefix
-    is_production = settings.is_production
-    agent_timeout = settings.agent.default_timeout
+            # Access settings properties
+            api_prefix = settings.api.prefix
+            is_production = settings.is_production
+            agent_timeout = settings.agent.default_timeout
 
-    # Use in application logic
-    if settings.is_development:
-        print(f"Running in development mode with debug={settings.api.debug}")
-    ```
+            # Use in application logic
+            if settings.is_development:
+                print(f"Running in development mode with debug={settings.api.debug}")
 """
 
 import os

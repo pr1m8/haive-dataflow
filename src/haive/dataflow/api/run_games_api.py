@@ -100,6 +100,8 @@ def create_app():
             # Add fallback route
             @app.get("/", response_class=HTMLResponse)
             async def root():
+                """Root.
+"""
                 return """
                 <!DOCTYPE html>
                 <html>
@@ -120,6 +122,8 @@ def create_app():
         # Add fallback route
         @app.get("/", response_class=HTMLResponse)
         async def root():
+            """Root.
+"""
             return f"""
             <!DOCTYPE html>
             <html>

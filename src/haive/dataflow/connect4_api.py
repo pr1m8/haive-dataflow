@@ -72,6 +72,8 @@ class Connect4API(GenericAgentAPI[Connect4Agent, Connect4AgentConfig]):
     """API for Connect4 agent."""
 
     def __init__(self):
+        """  Init  .
+"""
         super().__init__(
             app_name="Connect4",
             agent_class=Connect4Agent,

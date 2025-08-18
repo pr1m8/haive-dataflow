@@ -49,6 +49,8 @@ def create_games_router(
 
         @router.get("/")
         async def games_not_available():
+            """Games Not Available.
+"""
             return JSONResponse(
                 status_code=501,
                 content={
@@ -144,6 +146,8 @@ def create_games_router(
 
         @router.get("/")
         async def games_error():
+            """Games Error.
+"""
             return JSONResponse(
                 status_code=500,
                 content={

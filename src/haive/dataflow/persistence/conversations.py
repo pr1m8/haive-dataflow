@@ -11,33 +11,31 @@ and deleting conversations.
 
 Typical usage example:
 
-    ```python
-    from haive.dataflow.persistence.conversations import ConversationManager, ConversationMetadata
+            from haive.dataflow.persistence.conversations import ConversationManager, ConversationMetadata
 
-    # Create a conversation manager
-    manager = ConversationManager()
+            # Create a conversation manager
+            manager = ConversationManager()
 
-    # Create a new conversation
-    conversation_id = await manager.create_conversation(
-        user_id="user-123",
-        metadata=ConversationMetadata(
-            agent_id="agent-456",
-            title="Technical Support",
-            tags=["support", "technical"]
-        )
-    )
+            # Create a new conversation
+            conversation_id = await manager.create_conversation(
+                user_id="user-123",
+                metadata=ConversationMetadata(
+                    agent_id="agent-456",
+                    title="Technical Support",
+                    tags=["support", "technical"]
+                )
+            )
 
-    # Add messages to the conversation
-    await manager.add_message(
-        conversation_id=conversation_id,
-        content="How do I reset my password?",
-        role="user",
-        user_id="user-123"
-    )
+            # Add messages to the conversation
+            await manager.add_message(
+                conversation_id=conversation_id,
+                content="How do I reset my password?",
+                role="user",
+                user_id="user-123"
+            )
 
-    # Get conversation messages
-    messages = await manager.get_messages(conversation_id)
-    ```
+            # Get conversation messages
+            messages = await manager.get_messages(conversation_id)
 """
 
 import datetime
@@ -68,7 +66,7 @@ class ConversationMetadata(BaseModel):
         tags: Optional list of tags for categorizing the conversation
         custom_data: Optional dictionary of additional custom data
 
-    Example:
+    Examples:
         >>> metadata = ConversationMetadata(
         ...     agent_id="agent-123",
         ...     title="Customer Support",

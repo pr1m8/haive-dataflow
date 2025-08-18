@@ -62,22 +62,20 @@ class MCPClient:
         connected_servers: Dictionary of connected server configurations
         available_tools: Cache of available tools from all servers
 
-    Example:
+    Examples:
         Basic usage:
 
-        ```python
-        from haive.dataflow.mcp import MCPClient
-        from haive.dataflow import registry_system
+                from haive.dataflow.mcp import MCPClient
+                from haive.dataflow import registry_system
 
-        client = MCPClient(registry_system)
-        await client.initialize_from_registry()
+                client = MCPClient(registry_system)
+                await client.initialize_from_registry()
 
-        # Get available tools
-        tools = await client.get_available_tools()
+                # Get available tools
+                tools = await client.get_available_tools()
 
-        # Execute a tool
-        result = await client.execute_tool("read_file", {"path": "/path/to/file"})
-        ```
+                # Execute a tool
+                result = await client.execute_tool("read_file", {"path": "/path/to/file"})
     """
 
     def __init__(self, registry_system=None):

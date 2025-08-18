@@ -27,6 +27,8 @@ class AgentRegistryService:
     # Update AgentRegistryService initialization to include database
 
     def __init__(self):
+        """  Init  .
+"""
         self.agent_configs: dict[str, dict[str, Any]] = {}
         self.instantiated_agents: dict[str, Agent] = {}
         self.agent_errors: dict[str, str] = (
@@ -92,7 +94,7 @@ class AgentRegistryService:
         self,
         search_paths: list[str] | None = None,
     ) -> None:
-        """Automatically discover and register all agent configurations from
+        """Automatically discover and register all agent configurations from.
         multiple paths.
 
         Args:
@@ -286,7 +288,7 @@ class AgentRegistryService:
     def get_or_create_agent(
         self, name: str, thread_id: str | None = None, **config_kwargs
     ) -> tuple[Agent | None, str | None]:
-        """Get a previously instantiated agent or create a new one. Returns the
+        """Get a previously instantiated agent or create a new one. Returns the.
         agent and an error message if there was a problem.
 
         Args:

@@ -174,7 +174,7 @@ class SupabaseLogger:
             return False
 
     def _sanitize_data(self, data: Any) -> Any:
-        """Sanitize data for logging (remove sensitive fields, truncate large
+        """Sanitize data for logging (remove sensitive fields, truncate large.
         values).
 
         Args:
@@ -260,6 +260,8 @@ class SupabaseLoggingMiddleware(BaseHTTPMiddleware):
 
                 # Store original body for later use
                 async def get_body():
+                    """Get Body.
+"""
                     return body_bytes
 
                 request._body = body_bytes

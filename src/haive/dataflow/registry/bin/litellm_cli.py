@@ -162,6 +162,8 @@ def run_verify():
 
 
 def main():
+    """Main.
+"""
     parser = argparse.ArgumentParser(description="Haive Vault CLI")
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 

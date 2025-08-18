@@ -68,7 +68,7 @@ def create_agent_router(prefix: str = "/agents") -> APIRouter:
             None, description="Optional initial state"
         ),
     ):
-        """Create a new thread with optional configuration and initial
+        """Create a new thread with optional configuration and initial.
         state.
         """
         agent = agent_registry.get_or_create_agent(agent_name, **config)
@@ -137,6 +137,8 @@ def create_agent_router(prefix: str = "/agents") -> APIRouter:
         if stream:
 
             async def stream_generator():
+                """Stream Generator.
+"""
                 try:
                     async for chunk in agent.astream(
                         input_data=input_data,

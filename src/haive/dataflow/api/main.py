@@ -17,4 +17,6 @@ app.include_router(tictactoe_api.app.router, prefix="/tictactoe", tags=["Tic Tac
 # Optionally add health check
 @app.get("/", tags=["Root"])
 def read_root():
+    """Read Root.
+"""
     return {"message": "Welcome to Agent Games API!"}

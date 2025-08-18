@@ -16,33 +16,31 @@ Key features:
 
 Typical usage example:
 
-    ```python
-    from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
+            from haive.dataflow.persistence.supabase_adapter import SupabasePersistence
 
-    # Create the persistence adapter
-    persistence = SupabasePersistence()
+            # Create the persistence adapter
+            persistence = SupabasePersistence()
 
-    # Register a thread
-    thread_id = await persistence.register_thread(
-        user_id="user-123",
-        metadata={"agent_id": "agent-456"}
-    )
+            # Register a thread
+            thread_id = await persistence.register_thread(
+                user_id="user-123",
+                metadata={"agent_id": "agent-456"}
+            )
 
-    # Store a checkpoint
-    await persistence.store_checkpoint(
-        thread_id=thread_id,
-        checkpoint_id="checkpoint-1",
-        state={"key": "value"},
-        user_id="user-123"
-    )
+            # Store a checkpoint
+            await persistence.store_checkpoint(
+                thread_id=thread_id,
+                checkpoint_id="checkpoint-1",
+                state={"key": "value"},
+                user_id="user-123"
+            )
 
-    # Retrieve a checkpoint
-    checkpoint = await persistence.get_checkpoint(
-        thread_id=thread_id,
-        checkpoint_id="checkpoint-1",
-        user_id="user-123"
-    )
-    ```
+            # Retrieve a checkpoint
+            checkpoint = await persistence.get_checkpoint(
+                thread_id=thread_id,
+                checkpoint_id="checkpoint-1",
+                user_id="user-123"
+            )
 """
 
 import json
@@ -94,7 +92,7 @@ class SupabasePersistence:
         self.postgres_config = self._create_supabase_postgres_config()
 
     def _create_supabase_postgres_config(self):
-        """Create PostgreSQL config that connects to Supabase instead of
+        """Create PostgreSQL config that connects to Supabase instead of.
         localhost.
         """
         # Use Supabase connection string from environment - check multiple possible env vars
@@ -159,13 +157,11 @@ class SupabasePersistence:
         Yields:
             None: Control is yielded back to the caller with the RLS context set
 
-        Example:
-            ```python
-            async with persistence.rls_context(connection, "user-123"):
-                # Operations here will be performed with the RLS context of user-123
-                await connection.execute("SELECT * FROM protected_table")
-            # RLS context is cleared after the block exits
-            ```
+        Examples:
+                    async with persistence.rls_context(connection, "user-123"):
+                        # Operations here will be performed with the RLS context of user-123
+                        await connection.execute("SELECT * FROM protected_table")
+                    # RLS context is cleared after the block exits
         """
         if not connection:
             yield
@@ -372,19 +368,17 @@ class SupabasePersistence:
         Returns:
             PostgresSaver: A configured PostgreSQL checkpointer
 
-        Example:
-            ```python
-            persistence = SupabasePersistence()
-            checkpointer = await persistence.get_checkpointer()
+        Examples:
+                    persistence = SupabasePersistence()
+                    checkpointer = await persistence.get_checkpointer()
 
-            # Pass to agent config
-            agent_config.runnable_config = {
-                "configurable": {
-                    "thread_id": thread_id,
-                    "checkpointer": checkpointer
-                }
-            }
-            ```
+                    # Pass to agent config
+                    agent_config.runnable_config = {
+                        "configurable": {
+                            "thread_id": thread_id,
+                            "checkpointer": checkpointer
+                        }
+                    }
         """
         return await acreate_postgres_checkpointer(self.postgres_config)
 

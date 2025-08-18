@@ -339,14 +339,12 @@ class GameAPIFactory:
     This class creates specialized API instances for different game types,
     with appropriate state schemas and agent classes for each game.
 
-    Example:
-        ```python
-        # Create a chess API
-        chess_api = GameAPIFactory.create_chess_api()
+    Examples:
+                # Create a chess API
+                chess_api = GameAPIFactory.create_chess_api()
 
-        # Run the server
-        chess_api.run(port=8000)
-        ```
+                # Run the server
+                chess_api.run(port=8000)
     """
 
     @staticmethod

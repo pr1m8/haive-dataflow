@@ -12,13 +12,11 @@ dynamic discovery of available games from the haive-games package.
 
 Typical usage example:
 
-    ```python
-    from haive.dataflow.api.app import app
-    import uvicorn
+            from haive.dataflow.api.app import app
+            import uvicorn
 
-    if __name__ == "__main__":
-        uvicorn.run(app, host="0.0.0.0", port=8000)
-    ```
+            if __name__ == "__main__":
+                uvicorn.run(app, host="0.0.0.0", port=8000)
 """
 
 import logging
@@ -60,7 +58,7 @@ def create_app() -> FastAPI:
     Returns:
         FastAPI: A configured FastAPI application instance ready to serve requests.
 
-    Example:
+    Examples:
         >>> app = create_app()
         >>> # Run the app with Uvicorn
         >>> import uvicorn
@@ -110,7 +108,7 @@ def create_app() -> FastAPI:
         Returns:
             dict: A dictionary containing the status ("ok") and the current environment.
 
-        Example:
+        Examples:
             >>> response = requests.get("http://localhost:8000/api/health")
             >>> print(response.json())
             {"status": "ok", "environment": "development"}
@@ -162,6 +160,12 @@ logger = logging.getLogger(__name__)
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
+    """Validation Exception Handler.
+
+Args:
+    request: [TODO: Add description]
+    exc: [TODO: Add description]
+"""
     # Log the full error details
     logger.error(f"Validation error in request: {request.url}")
     for error in exc.errors():

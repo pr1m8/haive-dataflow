@@ -28,6 +28,11 @@ except ImportError:
     class AgentRegistry:
         @staticmethod
         async def get_agent(agent_id: str):
+            """Get Agent.
+
+Args:
+    agent_id: [TODO: Add description]
+"""
             return None
 
 

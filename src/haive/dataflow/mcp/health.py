@@ -33,15 +33,13 @@ class MCPHealthMonitor:
         monitoring_interval: Seconds between health checks
         is_monitoring: Whether monitoring is currently active
 
-    Example:
-        ```python
-        monitor = MCPHealthMonitor(mcp_client)
-        await monitor.start_monitoring()
+    Examples:
+                monitor = MCPHealthMonitor(mcp_client)
+                await monitor.start_monitoring()
 
-        # Get health status
-        status = await monitor.get_health_summary()
-        print(f"Healthy servers: {status['healthy_count']}")
-        ```
+                # Get health status
+                status = await monitor.get_health_summary()
+                print(f"Healthy servers: {status['healthy_count']}")
     """
 
     def __init__(self, mcp_client=None, monitoring_interval: int = 30):

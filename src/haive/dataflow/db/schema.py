@@ -36,7 +36,7 @@ def create_schema_sql() -> str:
         SQL schema definition as a string
     """
     # The complete SQL schema definition
-    schema_sql = """-- Haive Registry System Schema Definitions
+    schema_sql = """-- Haive Registry System Schema Definitions.
 -- For Supabase PostgreSQL Database
 
 -- Create schemas
@@ -387,7 +387,7 @@ def setup_schema(client=None) -> bool:
 
 
 def setup_execute_sql_function(client=None) -> bool:
-    """Set up the execute_sql function in the database. This function is needed
+    """Set up the execute_sql function in the database. This function is needed.
     to execute arbitrary SQL statements.
 
     Args:

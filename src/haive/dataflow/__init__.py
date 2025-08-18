@@ -12,25 +12,23 @@ handling their registration, dependency management, configuration, and persisten
 
 Typical usage example:
 
-    ```python
-    from haive.dataflow import registry_system, EntityType, discover_agents
+            from haive.dataflow import registry_system, EntityType, discover_agents
 
-    # Discover and register agents (lazy initialization happens here)
-    discovered_agents = discover_agents()
-    print(f"Discovered {len(discovered_agents)} agents")
+            # Discover and register agents (lazy initialization happens here)
+            discovered_agents = discover_agents()
+            print(f"Discovered {len(discovered_agents)} agents")
 
-    # Register a custom component
-    registry_system.register_entity(
-        name="CustomAgent",
-        type=EntityType.AGENT,
-        description="A custom agent implementation",
-        module_path="my_module.agents",
-        class_name="CustomAgent"
-    )
+            # Register a custom component
+            registry_system.register_entity(
+                name="CustomAgent",
+                type=EntityType.AGENT,
+                description="A custom agent implementation",
+                module_path="my_module.agents",
+                class_name="CustomAgent"
+            )
 
-    # Query components
-    agents = registry_system.get_entities_by_type(EntityType.AGENT)
-    ```
+            # Query components
+            agents = registry_system.get_entities_by_type(EntityType.AGENT)
 
 This package consists of several modules:
 
@@ -110,6 +108,11 @@ __getattr__, __dir__, __all__ = lazy.attach(
 # Backwards compatibility - lazy registry access
 class LazyRegistryAccess:
     def __getattr__(self, name):
+        """  Getattr  .
+
+Args:
+    name: [TODO: Add description]
+"""
         from .registry import get_registry_system
 
         registry = get_registry_system()

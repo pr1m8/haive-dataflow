@@ -81,7 +81,7 @@ class ModelRegistry:
             logger.warning("Could not import LLM models data")
 
     def update_provider_availability(self):
-        """Scan environment variables and update provider availability
+        """Scan environment variables and update provider availability.
         status.
         """
         # Get all required environment variables by scanning the core LLM
@@ -135,7 +135,7 @@ class ModelRegistry:
                 logger.exception(f"Error updating provider availability: {e}")
 
     def get_required_environment_vars(self) -> list[dict[str, Any]]:
-        """Scan source code to detect environment variables used by LLM
+        """Scan source code to detect environment variables used by LLM.
         providers.
 
         Returns:
@@ -341,6 +341,8 @@ class ModelRegistry:
             return []
 
         def get_all_subclasses(cls):
+            """Get All Subclasses.
+"""
             all_subclasses = []
             for subclass in cls.__subclasses__():
                 all_subclasses.append(subclass)
@@ -1317,7 +1319,7 @@ class ModelRegistry:
         return None
 
     def detect_environment_variables(self):
-        """Detect available environment variables for LLM and embedding
+        """Detect available environment variables for LLM and embedding.
         providers.
 
         Returns:

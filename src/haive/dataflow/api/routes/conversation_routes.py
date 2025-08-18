@@ -17,33 +17,31 @@ Key features:
 
 Typical usage example:
 
-    ```python
-    # Client-side code to create and use a conversation
-    import requests
+            # Client-side code to create and use a conversation
+            import requests
 
-    # Create a new conversation
-    response = requests.post(
-        "http://localhost:8000/api/conversations",
-        json={
-            "title": "My Conversation",
-            "agent_id": "agent-123",
-            "metadata": {"topic": "AI Ethics"}
-        },
-        headers={"Authorization": "Bearer YOUR_TOKEN"}
-    )
+            # Create a new conversation
+            response = requests.post(
+                "http://localhost:8000/api/conversations",
+                json={
+                    "title": "My Conversation",
+                    "agent_id": "agent-123",
+                    "metadata": {"topic": "AI Ethics"}
+                },
+                headers={"Authorization": "Bearer YOUR_TOKEN"}
+            )
 
-    conversation_id = response.json()["id"]
+            conversation_id = response.json()["id"]
 
-    # Add a message to the conversation
-    response = requests.post(
-        f"http://localhost:8000/api/conversations/{conversation_id}/messages",
-        json={
-            "content": "Tell me about AI ethics",
-            "role": "user"
-        },
-        headers={"Authorization": "Bearer YOUR_TOKEN"}
-    )
-    ```
+            # Add a message to the conversation
+            response = requests.post(
+                f"http://localhost:8000/api/conversations/{conversation_id}/messages",
+                json={
+                    "content": "Tell me about AI ethics",
+                    "role": "user"
+                },
+                headers={"Authorization": "Bearer YOUR_TOKEN"}
+            )
 """
 
 import logging
@@ -69,6 +67,11 @@ except ImportError:
     class AgentRegistry:
         @staticmethod
         async def get_agent(agent_id: str):
+            """Get Agent.
+
+Args:
+    agent_id: [TODO: Add description]
+"""
             return None
 
 
@@ -102,10 +105,8 @@ async def list_conversations(
     Raises:
         HTTPException: If there's an error retrieving the conversations
 
-    Example:
-        ```
-        GET /api/conversations?offset=0&limit=20
-        ```
+    Examples:
+                GET /api/conversations?offset=0&limit=20
     """
     conversations = await conversation_manager.list_conversations(
         user_id, limit=limit, offset=offset

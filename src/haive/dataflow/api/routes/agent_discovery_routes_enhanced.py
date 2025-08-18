@@ -11,20 +11,18 @@ Key Features:
     - Rich metadata extraction including schemas and documentation
     - Categorization and filtering capabilities
 
-Example:
-    ```python
-    from fastapi import FastAPI
-    from haive.dataflow.api.routes.agent_discovery_routes_fixed import router
+Examples:
+            from fastapi import FastAPI
+            from haive.dataflow.api.routes.agent_discovery_routes_fixed import router
 
-    app = FastAPI()
-    app.include_router(router, prefix="/api/v1")
+            app = FastAPI()
+            app.include_router(router, prefix="/api/v1")
 
-    # Endpoints available:
-    # GET /api/v1/agents - List all agents
-    # GET /api/v1/agents/search - Search agents
-    # GET /api/v1/agents/{agent_name} - Get specific agent
-    # GET /api/v1/agents/stats - Get agent statistics
-    ```
+            # Endpoints available:
+            # GET /api/v1/agents - List all agents
+            # GET /api/v1/agents/search - Search agents
+            # GET /api/v1/agents/{agent_name} - Get specific agent
+            # GET /api/v1/agents/stats - Get agent statistics
 
 Note:
     This implementation fixes the circular import issue between component_registry
@@ -398,10 +396,8 @@ async def list_agents(
             - Count statistics (total, v1, v2)
             - Discovery method information
 
-    Example:
-        ```
-        GET /api/v1/agents?agent_type=v2&category=research
-        ```
+    Examples:
+                GET /api/v1/agents?agent_type=v2&category=research
     """
     try:
         components = discover_all_agents(force_refresh=force_refresh)
@@ -452,10 +448,8 @@ async def search_agents(
     Returns:
         AgentListResponse: Filtered list of agents matching the search criteria.
 
-    Example:
-        ```
-        GET /api/v1/agents/search?query=chat&agent_type=v2
-        ```
+    Examples:
+                GET /api/v1/agents/search?query=chat&agent_type=v2
     """
     try:
         components = discover_all_agents()
@@ -515,10 +509,8 @@ async def get_agent_details(agent_name: str) -> AgentDetailResponse:
     Raises:
         HTTPException: 404 if agent is not found.
 
-    Example:
-        ```
-        GET /api/v1/agents/SimpleAgent
-        ```
+    Examples:
+                GET /api/v1/agents/SimpleAgent
     """
     try:
         components = discover_all_agents()
@@ -585,22 +577,20 @@ async def get_agent_stats() -> dict[str, Any]:
             - discovery_method: Method used for discovery
             - last_updated: Timestamp of last discovery
 
-    Example:
-        ```
-        GET /api/v1/agents/stats
+    Examples:
+                GET /api/v1/agents/stats
 
-        Response:
-        {
-            "total_agents": 25,
-            "v1_agents": 10,
-            "v2_agents": 15,
-            "categories": {
-                "research": 5,
-                "chat": 8,
-                "task": 12
-            }
-        }
-        ```
+                Response:
+                {
+                    "total_agents": 25,
+                    "v1_agents": 10,
+                    "v2_agents": 15,
+                    "categories": {
+                        "research": 5,
+                        "chat": 8,
+                        "task": 12
+                    }
+                }
     """
     try:
         components = discover_all_agents()

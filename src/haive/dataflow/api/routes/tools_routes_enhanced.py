@@ -1,4 +1,4 @@
-"""Enhanced Tools Discovery API Routes using Haive Core's unified discovery
+"""Enhanced Tools Discovery API Routes using Haive Core's unified discovery.
 system.
 
 This module provides FastAPI routes for discovering, managing, and invoking tools
@@ -13,20 +13,18 @@ Key Features:
     - Category-based organization
     - Performance caching
 
-Example:
-    ```python
-    from fastapi import FastAPI
-    from haive.dataflow.api.routes.tools_routes_enhanced import router
+Examples:
+            from fastapi import FastAPI
+            from haive.dataflow.api.routes.tools_routes_enhanced import router
 
-    app = FastAPI()
-    app.include_router(router, prefix="/api/v1")
+            app = FastAPI()
+            app.include_router(router, prefix="/api/v1")
 
-    # Endpoints available:
-    # GET /api/v1/tools - List all tools
-    # GET /api/v1/tools/search - Search tools
-    # GET /api/v1/tools/{tool_name}/schema - Get tool schema
-    # POST /api/v1/tools/invoke - Invoke a tool
-    ```
+            # Endpoints available:
+            # GET /api/v1/tools - List all tools
+            # GET /api/v1/tools/search - Search tools
+            # GET /api/v1/tools/{tool_name}/schema - Get tool schema
+            # POST /api/v1/tools/invoke - Invoke a tool
 
 Note:
     This implementation uses the fixed circular import pattern from haive-core
@@ -312,10 +310,8 @@ async def list_tools(
             - Count statistics
             - Discovery method information
 
-    Example:
-        ```
-        GET /api/v1/tools?tool_type=toolkit&category=search
-        ```
+    Examples:
+                GET /api/v1/tools?tool_type=toolkit&category=search
     """
     try:
         components = discover_all_tools(force_refresh=force_refresh)
@@ -360,10 +356,8 @@ async def search_tools(
     Returns:
         ToolsListResponse: Filtered list of tools matching the search criteria.
 
-    Example:
-        ```
-        GET /api/v1/tools/search?query=google&tool_type=toolkit
-        ```
+    Examples:
+                GET /api/v1/tools/search?query=google&tool_type=toolkit
     """
     try:
         components = discover_all_tools()
@@ -418,10 +412,8 @@ async def get_tool_schema_endpoint(tool_name: str) -> ToolSchema:
     Raises:
         HTTPException: 404 if tool is not found.
 
-    Example:
-        ```
-        GET /api/v1/tools/GoogleSearchTool/schema
-        ```
+    Examples:
+                GET /api/v1/tools/GoogleSearchTool/schema
     """
     try:
         components = discover_all_tools()
@@ -476,17 +468,15 @@ async def get_tool_categories() -> dict[str, list[str]]:
         Dict[str, List[str]]: Dictionary mapping category names to
         sorted lists of tool names in each category.
 
-    Example:
-        ```
-        GET /api/v1/tools/categories
+    Examples:
+                GET /api/v1/tools/categories
 
-        Response:
-        {
-            "search": ["GoogleSearchTool", "BingSearchTool"],
-            "database": ["SQLDatabaseToolkit", "MongoDBToolkit"],
-            "development": ["GithubToolkit", "GitLabToolkit"]
-        }
-        ```
+                Response:
+                {
+                    "search": ["GoogleSearchTool", "BingSearchTool"],
+                    "database": ["SQLDatabaseToolkit", "MongoDBToolkit"],
+                    "development": ["GithubToolkit", "GitLabToolkit"]
+                }
     """
     try:
         components = discover_all_tools()
@@ -523,23 +513,21 @@ async def get_tool_stats() -> dict[str, Any]:
             - discovery_method: Method used
             - last_updated: Cache timestamp
 
-    Example:
-        ```
-        GET /api/v1/tools/stats
+    Examples:
+                GET /api/v1/tools/stats
 
-        Response:
-        {
-            "total_tools": 50,
-            "individual_tools": 35,
-            "toolkits": 15,
-            "categories": {
-                "search": 8,
-                "database": 10,
-                "development": 12
-            },
-            "with_schema": 45
-        }
-        ```
+                Response:
+                {
+                    "total_tools": 50,
+                    "individual_tools": 35,
+                    "toolkits": 15,
+                    "categories": {
+                        "search": 8,
+                        "database": 10,
+                        "development": 12
+                    },
+                    "with_schema": 45
+                }
     """
     try:
         components = discover_all_tools()

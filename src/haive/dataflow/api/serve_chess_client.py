@@ -53,6 +53,8 @@ class ChessClientHandler(http.server.SimpleHTTPRequestHandler):
     """Custom handler to serve files from the static directory."""
 
     def __init__(self, *args, **kwargs):
+        """  Init  .
+"""
         # Set the directory to the static directory
         static_dir = get_static_dir()
         super().__init__(*args, directory=str(static_dir), **kwargs)

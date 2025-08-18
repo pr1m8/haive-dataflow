@@ -9,24 +9,22 @@ header, which are validated against the Supabase authentication service.
 
 Typical usage example:
 
-    ```python
-    from fastapi import APIRouter, Depends
-    from haive.dataflow.auth.dependencies import require_auth, get_current_user
+            from fastapi import APIRouter, Depends
+            from haive.dataflow.auth.dependencies import require_auth, get_current_user
 
-    router = APIRouter()
+            router = APIRouter()
 
-    # Endpoint requiring authentication
-    @router.get("/secure")
-    async def secure_endpoint(user_id: str = Depends(require_auth)):
-        return {"message": f"Hello, {user_id}!"}
+            # Endpoint requiring authentication
+            @router.get("/secure")
+            async def secure_endpoint(user_id: str = Depends(require_auth)):
+                return {"message": f"Hello, {user_id}!"}
 
-    # Endpoint with optional authentication
-    @router.get("/public")
-    async def public_endpoint(user_id: Optional[str] = Depends(get_current_user)):
-        if user_id:
-            return {"message": f"Hello, {user_id}!"}
-        return {"message": "Hello, anonymous user!"}
-    ```
+            # Endpoint with optional authentication
+            @router.get("/public")
+            async def public_endpoint(user_id: Optional[str] = Depends(get_current_user)):
+                if user_id:
+                    return {"message": f"Hello, {user_id}!"}
+                return {"message": "Hello, anonymous user!"}
 """
 
 from fastapi import Depends, HTTPException
@@ -50,7 +48,7 @@ def get_auth_instance():
     Returns:
         SupabaseAuth: An initialized authentication service instance
 
-    Example:
+    Examples:
         >>> from fastapi import Depends
         >>> from haive.dataflow.auth.dependencies import get_auth_instance
         >>>
@@ -67,7 +65,7 @@ async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(security),
     auth: SupabaseAuth = Depends(get_auth_instance),
 ) -> str | None:
-    """Verify the token and return the user ID if valid (optional
+    """Verify the token and return the user ID if valid (optional.
     authentication).
 
     This dependency function provides optional authentication for routes.
@@ -83,7 +81,7 @@ async def get_current_user(
     Returns:
         Optional[str]: The authenticated user ID if valid, None otherwise
 
-    Example:
+    Examples:
         >>> @router.get("/profile")
         >>> async def get_profile(user_id: Optional[str] = Depends(get_current_user)):
         ...     if user_id:
@@ -116,7 +114,7 @@ async def require_auth(user_id: str | None = Depends(get_current_user)) -> str:
     Raises:
         HTTPException: 401 Unauthorized if no valid authentication is provided
 
-    Example:
+    Examples:
         >>> @router.post("/secure-endpoint")
         >>> async def secure_endpoint(user_id: str = Depends(require_auth)):
         ...     return {"message": f"Hello, {user_id}!", "status": "authenticated"}

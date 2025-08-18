@@ -273,7 +273,7 @@ def run_verify(args):
 
 
 def add_columns(args):
-    """Add the vault reference columns to the database tables using table()
+    """Add the vault reference columns to the database tables using table().
     helper.
     """
     logger.info("Adding vault reference columns to database tables...")
@@ -306,7 +306,7 @@ def add_columns(args):
     # Add the helper functions
     try:
         # Create get_vault_secret function
-        secret_func_sql = """  # nosec B105
+        secret_func_sql = """  # nosec B105.
         CREATE OR REPLACE FUNCTION get_vault_secret(secret_id UUID)
         RETURNS TEXT
         LANGUAGE plpgsql

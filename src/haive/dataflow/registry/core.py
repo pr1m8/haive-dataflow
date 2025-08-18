@@ -108,7 +108,7 @@ class RegistrySystem:
         _import_logs (list): List of import operation logs
         _supabase: Supabase client for database persistence (if available)
 
-    Example:
+    Examples:
         >>> from haive.dataflow.registry.core import registry_system
         >>> from haive.dataflow.registry.models import EntityType
         >>>
@@ -161,7 +161,7 @@ class RegistrySystem:
             logger.info("Registry system running in in-memory mode only")
 
     def _ensure_registry_schema(self):
-        """Ensure the registry schema is properly set up for backward
+        """Ensure the registry schema is properly set up for backward.
         compatibility.
         """
         try:
@@ -1032,7 +1032,7 @@ class RegistrySystem:
         return env_var_id
 
     def _ensure_registry_schema(self):
-        """Ensure the registry schema is properly set up for backward
+        """Ensure the registry schema is properly set up for backward.
         compatibility.
         """
         try:
@@ -1723,9 +1723,21 @@ def get_registry_system():
 # Create a lazy property descriptor
 class LazyRegistrySystem:
     def __get__(self, obj, objtype=None):
+        """  Get  .
+
+Args:
+    obj: [TODO: Add description]
+    objtype: [TODO: Add description]
+"""
         return get_registry_system()
 
     def __set__(self, obj, value):
+        """  Set  .
+
+Args:
+    obj: [TODO: Add description]
+    value: [TODO: Add description]
+"""
         global _registry_system
         _registry_system = value
 

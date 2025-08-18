@@ -97,6 +97,8 @@ app.add_middleware(
 # Root route redirects to Swagger UI
 @app.get("/", include_in_schema=False)
 async def root():
+    """Root.
+"""
     return RedirectResponse(url="/docs")
 
 

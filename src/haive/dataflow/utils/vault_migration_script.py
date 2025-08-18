@@ -559,6 +559,12 @@ def migrate_engine_api_keys() -> int:
 
                 # Recursively find API keys in the config
                 def find_api_keys(obj, prefix=""):
+                    """Find Api Keys.
+
+Args:
+    obj: [TODO: Add description]
+    prefix: [TODO: Add description]
+"""
                     if isinstance(obj, dict):
                         for key, value in obj.items():
                             # Check if this is an API key

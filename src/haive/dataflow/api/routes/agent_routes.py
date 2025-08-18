@@ -17,42 +17,40 @@ Key components:
 
 Typical usage example:
 
-    ```python
-    # Client-side WebSocket example
-    import websockets
-    import json
-    import asyncio
+            # Client-side WebSocket example
+            import websockets
+            import json
+            import asyncio
 
-    async def connect_to_agent():
-        uri = "ws://localhost:8000/api/ws/agent/chat?token=YOUR_AUTH_TOKEN"
-        async with websockets.connect(uri) as websocket:
-            # Send initial configuration
-            await websocket.send(json.dumps({
-                "type": "config",
-                "content": {
-                    "agent_name": "TextAnalyzer",
-                    "provider": "openai",
-                    "model": "gpt-4",
-                    "stream": True
-                }
-            }))
+            async def connect_to_agent():
+                uri = "ws://localhost:8000/api/ws/agent/chat?token=YOUR_AUTH_TOKEN"
+                async with websockets.connect(uri) as websocket:
+                    # Send initial configuration
+                    await websocket.send(json.dumps({
+                        "type": "config",
+                        "content": {
+                            "agent_name": "TextAnalyzer",
+                            "provider": "openai",
+                            "model": "gpt-4",
+                            "stream": True
+                        }
+                    }))
 
-            # Send a message to the agent
-            await websocket.send(json.dumps({
-                "type": "message",
-                "content": "Analyze this text for sentiment"
-            }))
+                    # Send a message to the agent
+                    await websocket.send(json.dumps({
+                        "type": "message",
+                        "content": "Analyze this text for sentiment"
+                    }))
 
-            # Receive streaming responses
-            while True:
-                response = json.loads(await websocket.recv())
-                if response["type"] == "response":
-                    print(response["content"])
-                elif response["type"] == "state_complete":
-                    break
+                    # Receive streaming responses
+                    while True:
+                        response = json.loads(await websocket.recv())
+                        if response["type"] == "response":
+                            print(response["content"])
+                        elif response["type"] == "state_complete":
+                            break
 
-    asyncio.run(connect_to_agent())
-    ```
+            asyncio.run(connect_to_agent())
 """
 
 import asyncio
@@ -145,7 +143,7 @@ class WSMessage(BaseModel):
         stream_index: Optional index for streaming response chunks
         timestamp: When the message was created (defaults to current time)
 
-    Example:
+    Examples:
         >>> message = WSMessage(
         ...     type=WSMessageType.MESSAGE,
         ...     content="Analyze this text",
@@ -183,7 +181,7 @@ class AgentChatConfig(BaseModel):
         stream: Whether to stream responses incrementally
         extra_params: Additional provider-specific parameters
 
-    Example:
+    Examples:
         >>> config = AgentChatConfig(
         ...     agent_name="TextAnalyzer",
         ...     provider=LLMProvider.OPENAI,
@@ -266,7 +264,7 @@ class ConnectionManager:
         Raises:
             WebSocketDisconnect: If the connection cannot be established
 
-        Example:
+        Examples:
             >>> manager = ConnectionManager()
             >>> success = await manager.connect(websocket, "thread-123", "user-456")
             >>> if success:

@@ -18,27 +18,25 @@ Key features:
 
 Typical usage example:
 
-    ```python
-    # Client-side code to generate text
-    import requests
+            # Client-side code to generate text
+            import requests
 
-    response = requests.post(
-        "http://localhost:8000/api/llm/generate",
-        json={
-            "provider": "openai",
-            "model": "gpt-4",
-            "messages": [
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Tell me about AI."}
-            ],
-            "temperature": 0.7,
-            "max_tokens": 500
-        },
-        headers={"Authorization": "Bearer YOUR_TOKEN"}
-    )
+            response = requests.post(
+                "http://localhost:8000/api/llm/generate",
+                json={
+                    "provider": "openai",
+                    "model": "gpt-4",
+                    "messages": [
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": "Tell me about AI."}
+                    ],
+                    "temperature": 0.7,
+                    "max_tokens": 500
+                },
+                headers={"Authorization": "Bearer YOUR_TOKEN"}
+            )
 
-    generated_text = response.json()["generated_text"]
-    ```
+            generated_text = response.json()["generated_text"]
 """
 
 import asyncio
@@ -388,6 +386,12 @@ async def batch_generate(request: Request, user_id: str = Depends(require_auth))
 
         # Process each configuration in parallel
         async def process_config(config_index, config):
+            """Process Config.
+
+Args:
+    config_index: [TODO: Add description]
+    config: [TODO: Add description]
+"""
             try:
                 # Setup the LLM (similar to single endpoint)
                 extra_params = config.extra_params or {}

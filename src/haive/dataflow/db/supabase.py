@@ -115,7 +115,7 @@ def get_supabase_client(schema: str | None = None) -> Client:
     Raises:
         EnvironmentError: If required environment variables are not set.
 
-    Example:
+    Examples:
         >>> # Get client with default schema
         >>> client = get_supabase_client()
         >>>
@@ -149,7 +149,7 @@ def parse_table_reference(table_ref: str) -> tuple[str, str | None]:
         Tuple[str, Optional[str]]: A tuple containing (table_name, schema_name),
             where schema_name may be None if not specified and not in DEFAULT_SCHEMA_MAP.
 
-    Example:
+    Examples:
         >>> parse_table_reference("items")
         ('items', 'registry')  # Uses default schema mapping
         >>> parse_table_reference("registry.items")
@@ -247,7 +247,7 @@ def fetch_foreign_key_relations(client: Client) -> list[dict]:
 
 
 def fetch_table_columns(client: Client) -> list[dict]:
-    """Get all columns, types, and constraints from
+    """Get all columns, types, and constraints from.
     information_schema.columns.
     """
     sql = """

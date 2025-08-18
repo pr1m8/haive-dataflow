@@ -103,13 +103,18 @@ class Registry(Generic[T]):
         Returns:
             Decorator function that registers the component
 
-        Example:
+        Examples:
             @registry.register(name="custom_name", author="John")
             class MyComponent:
                 ...
         """
 
         def decorator(cls: type[T]) -> type[T]:
+            """Decorator.
+
+Returns:
+    [TODO: Add return description]
+"""
             # Determine the name to use
             item_name = name or cls.__name__.lower()
 

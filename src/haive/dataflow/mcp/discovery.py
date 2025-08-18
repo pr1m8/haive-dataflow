@@ -45,16 +45,14 @@ class MCPDiscovery:
         registry_system: Reference to the dataflow registry system
         discovered_servers: Cache of discovered server configurations
 
-    Example:
+    Examples:
         Basic usage:
 
-        ```python
-        discovery = MCPDiscovery()
-        servers = await discovery.discover_all()
+                discovery = MCPDiscovery()
+                servers = await discovery.discover_all()
 
-        # Register with dataflow registry
-        await discovery.register_with_dataflow()
-        ```
+                # Register with dataflow registry
+                await discovery.register_with_dataflow()
     """
 
     def __init__(self, registry_system=None):
@@ -448,15 +446,13 @@ async def discover_mcp_servers(registry_system=None) -> list[RegistryItem]:
     Returns:
         List of RegistryItem objects for discovered MCP servers
 
-    Example:
-        ```python
-        from haive.dataflow.mcp.discovery import discover_mcp_servers
-        from haive.dataflow import registry_system
+    Examples:
+                from haive.dataflow.mcp.discovery import discover_mcp_servers
+                from haive.dataflow import registry_system
 
-        # Discover and register MCP servers
-        registry_items = await discover_mcp_servers(registry_system)
-        print(f"Discovered {len(registry_items)} MCP servers")
-        ```
+                # Discover and register MCP servers
+                registry_items = await discover_mcp_servers(registry_system)
+                print(f"Discovered {len(registry_items)} MCP servers")
     """
     discovery = MCPDiscovery(registry_system)
     servers = await discovery.discover_all()
