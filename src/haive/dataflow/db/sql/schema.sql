@@ -1,4 +1,4 @@
--- Haive Registry System Schema Definitions
+-- Haive Registry System Schema Definitions.
 -- For Supabase PostgreSQL Database
 
 -- Create schemas
