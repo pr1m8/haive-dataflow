@@ -12,18 +12,18 @@ import pytest
 from langchain_core.runnables import RunnableConfig
 from pydantic import Field
 
-from .engine.aug_llm import AugLLMConfig
-from .engine.base import (
+from haive.core.engine.aug_llm import AugLLMConfig
+from haive.core.engine.base import (
     Engine,
     EngineType,
     InvokableEngine,
     NonInvokableEngine,
 )
-from .engine.embeddings import EmbeddingsEngineConfig
-from .engine.retriever import BaseRetrieverConfig, RetrieverType
-from .engine.vectorstore import VectorStoreConfig, VectorStoreProvider
-from .models.embeddings.base import HuggingFaceEmbeddingConfig
-from .models.llm.base import AzureLLMConfig
+from haive.core.engine.embeddings import EmbeddingsEngineConfig
+from haive.core.engine.retriever import BaseRetrieverConfig, RetrieverType
+from haive.core.engine.vectorstore import VectorStoreConfig, VectorStoreProvider
+from haive.core.models.embeddings.base import HuggingFaceEmbeddingConfig
+from haive.core.models.llm.base import AzureLLMConfig
 
 
 # --------------------------------------------------------------------
