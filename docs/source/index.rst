@@ -7,16 +7,10 @@ Haive Dataflow Documentation
    :caption: Contents:
    :hidden:
 
-   getting_started
    registry_and_discovery
    streaming_intelligence
    mcp_integration
-   dataflow_architecture
-   persistence_layer
    api_reference
-   examples
-   autoapi/index
-   changelog
 
 Welcome to Haive Dataflow
 -------------------------
@@ -88,8 +82,6 @@ Core Platform Capabilities
 
    .. grid-item-card:: 💾 Persistence Layer
       :img-top: _static/persistence-icon.png
-      :link: persistence_layer
-      :link-type: doc
 
       **Intelligent Data Persistence**
 
@@ -101,8 +93,6 @@ Core Platform Capabilities
 
    .. grid-item-card:: 🔌 API Gateway
       :img-top: _static/api-gateway-icon.png
-      :link: api_reference
-      :link-type: doc
 
       **Universal LLM Gateway**
 
@@ -114,8 +104,6 @@ Core Platform Capabilities
 
    .. grid-item-card:: 🏗️ Architecture Patterns
       :img-top: _static/architecture-icon.png
-      :link: dataflow_architecture
-      :link-type: doc
 
       **Advanced Architectural Patterns**
 
@@ -144,8 +132,6 @@ Revolutionary Intelligence Layer
       **Real-time data flow pipelines** with WebSocket support, event routing, and intelligent transformation for live AI interactions.
 
    .. grid-item-card:: 📊 Observable Architecture
-      :link: dataflow_architecture
-      :link-type: doc
 
       **Event-driven reactive patterns** that enable observable data flows, intelligent routing, and adaptive system behavior.
 
@@ -322,8 +308,6 @@ Platform Architecture Innovation
    :gutter: 2
 
    .. grid-item-card:: 🏗️ Event-Driven Core
-      :link: dataflow_architecture
-      :link-type: doc
 
       **Reactive architecture** with event sourcing, CQRS patterns, and observable data streams for scalable AI systems.
 
@@ -367,13 +351,9 @@ Platform Capabilities Deep Dive
 Next Steps
 ~~~~~~~~~~
 
-- :doc:`getting_started` - Understand the dataflow architecture
 - :doc:`registry_and_discovery` - Master component discovery and registration
 - :doc:`streaming_intelligence` - Build real-time data pipelines
 - :doc:`mcp_integration` - Integrate Model Context Protocol
-- :doc:`persistence_layer` - Implement intelligent data persistence
-- :doc:`dataflow_architecture` - Design scalable AI architectures
-- :doc:`examples` - See complete implementation examples
 
 Research Applications
 ~~~~~~~~~~~~~~~~~~~~~

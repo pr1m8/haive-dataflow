@@ -859,5 +859,5 @@ See Also
 
 * :doc:`registry_and_discovery` - Discover MCP-enabled components
 * :doc:`streaming_intelligence` - Stream data through MCP
-* :doc:`dataflow_architecture` - MCP architectural patterns
-* :doc:`api_reference` - Complete MCP API reference
+* MCP architectural patterns
+* Complete MCP API reference

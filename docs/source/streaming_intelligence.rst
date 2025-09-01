@@ -819,5 +819,5 @@ See Also
 
 * :doc:`registry_and_discovery` - Discover streaming components
 * :doc:`mcp_integration` - Stream data via Model Context Protocol
-* :doc:`dataflow_architecture` - Streaming architectural patterns
-* :doc:`persistence_layer` - Persist streaming data and state
+* Streaming architectural patterns
+* Persist streaming data and state

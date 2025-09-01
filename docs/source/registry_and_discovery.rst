@@ -698,5 +698,5 @@ See Also
 
 * :doc:`streaming_intelligence` - Real-time data flow with discovered components
 * :doc:`mcp_integration` - MCP protocol component discovery
-* :doc:`dataflow_architecture` - Architectural patterns for discovery
-* :doc:`persistence_layer` - Persistent storage for registry data
+* Architectural patterns for discovery
+* Persistent storage for registry data
