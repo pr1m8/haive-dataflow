@@ -170,3 +170,9 @@ models--*/
 
 **/.claude/settings.local.json
 poetry.lock
+# Documentation builds
+docs/build/
+docs/source/_build/
+
+# Archives
+docs/archive/

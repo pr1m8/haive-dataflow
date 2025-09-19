@@ -380,7 +380,7 @@ Getting Help
 ~~~~~~~~~~~~
 
 * **Documentation**: Comprehensive guides and API references
-* **GitHub Issues**: https://github.com/haive-ai/haive-dataflow/issues
+* **GitHub Issues**: https://github.com/pr1m8/haive-dataflow/issues
 * **Community Forum**: Join our dataflow architecture discussions
 * **Enterprise Support**: Professional consulting for large-scale deployments
 
