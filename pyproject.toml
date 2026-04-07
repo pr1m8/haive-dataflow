@@ -1,11 +1,25 @@
 [tool.poetry]
 name = "haive-dataflow"
-version = "1.0.0"
+version = "1.0.1"
 description = "Data processing pipelines and ETL workflows for Haive agents"
 authors = ["pr1m8 <william.astley@algebraicwealth.com>"]
 license = "MIT"
 readme = "README.md"
 packages = [{ include = "haive", from = "src" }]
+homepage = "https://github.com/pr1m8/haive-dataflow"
+repository = "https://github.com/pr1m8/haive-dataflow"
+documentation = "https://pr1m8.github.io/haive-dataflow/"
+keywords = ["data-pipelines", "etl", "registry", "serialization", "postgres", "supabase", "fastapi"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Database",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+]
+
 [tool.poetry.dependencies]
 haive-core = "^1.0.0"
 haive-mcp = "^1.0.0"
