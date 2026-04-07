@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "haive-dataflow"
 version = "1.0.0"
-description = "haive-dataflow for Haive framework"
+description = "Data processing pipelines and ETL workflows for Haive agents"
 authors = ["pr1m8 <william.astley@algebraicwealth.com>"]
 license = "MIT"
 readme = "README.md"
